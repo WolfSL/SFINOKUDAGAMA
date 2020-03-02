@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/content_padding_normal"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayout_userName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:errorEnabled="true"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@color/x_ashText">
+
+        <EditText
+            android:id="@+id/alertDialogText"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:drawableEnd="@drawable/ic_lock_open_black_24dp"
+            android:drawableTint="@color/x_ashText"
+            android:hint="Settings Password"
+            android:inputType="numberPassword"
+            android:paddingStart="10dp"
+            android:textSize="22sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
+</FrameLayout>

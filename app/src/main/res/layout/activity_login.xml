@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:id="@+id/context_view"
+    android:focusableInTouchMode="true"
+    tools:context=".Login">
+
+
+    <androidx.core.widget.NestedScrollView
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@android:dimen/notification_large_icon_width">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp">
+
+            <ImageView
+                android:id="@+id/flex_logo"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="32dp"
+                android:transitionName="flex_logo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/logo_flexiv" />
+
+            <TextView
+                android:id="@+id/appname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:lineSpacingExtra="8sp"
+                android:text="@string/app_name_full"
+                android:textColor="@color/colorAccent"
+                android:textSize="18sp"
+                android:transitionName="appname"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/flex_logo" />
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputLayout_userName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginEnd="24dp"
+                app:errorEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/appname">
+
+                <EditText
+                    android:id="@+id/txtUserName"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:drawableEnd="@drawable/ic_person_black_24dp"
+                    android:foregroundTint="#CA0078"
+                    android:hint="Sales Rep Code"
+                    android:inputType="text"
+                    android:paddingStart="10dp"
+                    android:text="G001"
+                    android:textSize="22sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                app:errorEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputLayout_userName"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/x_ashText">
+
+                <EditText
+                    android:id="@+id/txtPwd"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:foregroundTint="#CA0078"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:paddingStart="10dp"
+                    android:text="123"
+                    android:textSize="22sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.agrawalsuneet.dotsloader.loaders.LazyLoader
+                android:id="@+id/lazyLoader"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_margin="20dp"
+                android:visibility="gone"
+                android:layout_marginTop="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputLayout"
+                app:lazyloader_animDur="800"
+                app:lazyloader_dotsDist="10dp"
+                app:lazyloader_dotsRadius="11dp"
+                app:lazyloader_firstDelayDur="50"
+                app:lazyloader_firstDotColor="@color/colorAccent"
+                app:lazyloader_interpolator="@android:anim/decelerate_interpolator"
+                app:lazyloader_secondDelayDur="300"
+                app:lazyloader_secondDotColor="@color/colorPrimaryDark"
+                app:lazyloader_thirdDotColor="@color/colorPrimary" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/botNaw"
+        style="@style/Widget.MaterialComponents.BottomAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:backgroundTint="@color/colorAccent"
+        android:theme="@style/AppTheme2"
+        app:fabCradleRoundedCornerRadius="16dp"
+        app:hideOnScroll="true"
+        app:menu="@menu/bottonactmenu"
+        app:navigationIcon="@drawable/ic_close_black_24dp"
+        tools:layout_editor_absoluteX="-2dp"
+        tools:layout_editor_absoluteY="675dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:backgroundTint="@color/colorPrimary"
+        app:tint="@color/x_white"
+        android:src="@drawable/ic_lock_open_black_24dp"
+        android:theme="@style/AppTheme2"
+        app:fabSize="normal"
+        app:layout_anchor="@+id/botNaw"
+        app:maxImageSize="35dp">
+
+    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

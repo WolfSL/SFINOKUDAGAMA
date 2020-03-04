@@ -150,6 +150,7 @@ public class Login extends AppCompatActivity {
                     startActivityForResult(i, 101);
                 }
                 return true;
+            case R.id.ba_sync:
 
             default:
                 // If we got here, the user's action was not recognized.
@@ -157,6 +158,14 @@ public class Login extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    private void download(){
+
+
+
+
+
     }
 
     public void MakeSnackBar(String msg, int Color) {
@@ -172,16 +181,22 @@ public class Login extends AppCompatActivity {
                 DBQ._TBL_REP_RepCode + " = ? AND " + DBQ._TBL_REP_Password + " = ? AND " + DBQ._TBL_REP_Status + "=?",
                 new String[]{repCode, password, "A"}, null, null, null)) {
             if (cursor.moveToNext()) {
+
                 rep.setAuth(cursor.getInt(cursor.getColumnIndex(DBQ._TBL_REP_Auth)));
+                rep.setRepName(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_RepName)));
+                rep.setDiscode(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_Discode)));
+
                 Log.i(TAG + " Auth ", String.valueOf(rep.getAuth()));
                 if (rep.getAuth() != 1) {
                     rep.setDeviceIMI(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_DeviceIMI)));
                     if (!rep.getDeviceIMI().equals(deviceIMI)) {
                         MakeSnackBar("Can not sign in using this device.\nPlease use the device provide by the Distributor", Color.RED);
                     }else{
+                        SharedPreference.COM_REP = rep;
                         this.startActivity(db);
                     }
                 } else {
+                    SharedPreference.COM_REP = rep;
                     this.startActivity(db);
                 }
                 rep.setRepCode(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_RepCode)));

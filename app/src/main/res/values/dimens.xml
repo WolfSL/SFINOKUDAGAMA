@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="content_padding_normal">20dp</dimen>
+    <dimen name="frame_padding">8dp</dimen>
+    <dimen name="casper_def_marg">8dp</dimen>
 </resources>

@@ -20,10 +20,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageView flex_logo;
     private TextView appname;
     public static Activity fa;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+
+
+
+
+    private void doAnimation(){
         fa= this;
 
         flex_logo = findViewById(R.id.flex_logo);
@@ -44,5 +46,12 @@ public class MainActivity extends AppCompatActivity {
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, pairs);
             startActivity(i,options.toBundle());
         }, splash_tine);
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        doAnimation();
     }
 }

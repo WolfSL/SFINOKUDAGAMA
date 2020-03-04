@@ -3,6 +3,8 @@ package com.flexiv.sfino.utill;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
+import com.flexiv.sfino.model.Modal_Rep;
+
 public class SharedPreference {
 
     public static String webapi;
@@ -13,6 +15,8 @@ public class SharedPreference {
     public static String printername;
     public static String settings_pin;
     public static String URL;
+
+    public static Modal_Rep COM_REP;
 
     public static void setSettings(Context context){
 

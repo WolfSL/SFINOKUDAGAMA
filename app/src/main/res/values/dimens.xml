@@ -3,4 +3,6 @@
     <dimen name="content_padding_normal">20dp</dimen>
     <dimen name="frame_padding">8dp</dimen>
     <dimen name="casper_def_marg">8dp</dimen>
+    <dimen name="card_img_size">70dp</dimen>
+    <dimen name="card_padding">4dp</dimen>
 </resources>

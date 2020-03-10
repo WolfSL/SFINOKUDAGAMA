@@ -3,6 +3,7 @@ package com.flexiv.sfino.utill;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
+import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.model.Modal_Rep;
 
 public class SharedPreference {
@@ -17,6 +18,10 @@ public class SharedPreference {
     public static String URL;
 
     public static Modal_Rep COM_REP;
+
+
+    public static Card_cus_area COM_CUSTOMER;
+    public static Card_cus_area COM_AREA;
 
     public static void setSettings(Context context){
 

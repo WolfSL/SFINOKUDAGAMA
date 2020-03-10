@@ -6,7 +6,11 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/card_padding"
     android:padding="@dimen/card_padding"
-    app:cardCornerRadius="4dp">
+    app:cardCornerRadius="4dp"
+    android:clickable="true"
+    android:id="@+id/cusareacard"
+    android:foreground="?android:selectableItemBackground"
+    >
 
 
     <androidx.constraintlayout.widget.ConstraintLayout

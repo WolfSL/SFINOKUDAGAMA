@@ -1,4 +1,4 @@
-package com.flexiv.sfino;
+package com.flexiv.sfino.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.flexiv.sfino.R;
 import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.utill.SharedPreference;
 

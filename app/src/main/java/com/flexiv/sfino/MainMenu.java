@@ -2,17 +2,24 @@ package com.flexiv.sfino;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.flexiv.sfino.adapter.Adapter_Cus_area;
 import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.utill.SharedPreference;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
@@ -22,22 +29,63 @@ public class MainMenu extends AppCompatActivity {
     private Adapter_Cus_area cusAdapter;
     private RecyclerView.LayoutManager cusLayoutManager;
     private TextView itemSelectTitle;
-
+    private View contextView;
     private TextView textViewCustomer;
     private TextView textViewArea;
+    //Card Button
+    private CardView cardView_Order;
 
     private void initComp() {
         //Components
         TextView textViewRep_name = findViewById(R.id.textViewRep_name);
+        TextView textViewDis_name = findViewById(R.id.textViewDist_name);
         textViewCustomer = findViewById(R.id.textViewCustomer);
         textViewArea = findViewById(R.id.textViewArea);
+        cardView_Order = findViewById(R.id.cardView_Order);
+        contextView = findViewById(R.id.context_view);
 
-        //Arr
+        //set Click
+        cardView_Order.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(SharedPreference.COM_AREA==null){
+                    Snackbar snackbar = Snackbar
+                            .make(contextView, "Area Can not be Empty!", Snackbar.LENGTH_LONG)
+                            .setActionTextColor(Color.RED)
+                            .setAction("Select", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    openAreaSelector(view);
+                                }
+                            });
 
+                    snackbar.show();
+                }
+                else if(SharedPreference.COM_CUSTOMER==null){
+                    Snackbar snackbar = Snackbar
+                            .make(contextView, "Customer Can not be Empty!", Snackbar.LENGTH_LONG)
+                            .setActionTextColor(Color.RED)
+                            .setAction("Select", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    openCusSelector(view);
+                                }
+                            });
+
+                    snackbar.show();
+                }else{
+                    Intent i = new Intent(MainMenu.this, Order.class);
+                    startActivity(i);
+                }
+            }
+        });
 
         //setArgs
-        textViewRep_name.setText(SharedPreference.COM_REP.getRepName());
+        textViewRep_name.setText(SharedPreference.COM_REP==null?"Hashan - Test":SharedPreference.COM_REP.getRepName());
+        textViewDis_name.setText(SharedPreference.COM_REP==null?"Flexiv MicroSystem":SharedPreference.COM_REP.getDisName());
     }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +145,7 @@ public class MainMenu extends AppCompatActivity {
     }
 
     private void openDialogAreaCusSelector(ArrayList<Card_cus_area> arr_cus, String title, int type) {
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this,R.style.mydialog);
 
         View row = getLayoutInflater().inflate(R.layout.item_selector, null);
         cusRecyclerView = row.findViewById(R.id.itemSelectorRecView);
@@ -131,6 +179,9 @@ public class MainMenu extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(true);
         dialog.setCancelable(true);
         dialog.show();
+
+        Window window = dialog.getWindow();
+        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override

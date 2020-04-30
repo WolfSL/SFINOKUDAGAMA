@@ -9,6 +9,7 @@ public class Modal_Rep implements Serializable {
     private String RepName;
     private String Discode;
     private String Status;
+    private String DisName;
     private String Password;
     private int Auth;
     private String DeviceIMI;
@@ -77,8 +78,15 @@ public class Modal_Rep implements Serializable {
         DeviceIMI = deviceIMI;
     }
 
+    public String getDisName() {
+        return DisName;
+    }
 
-//    public void getRepDetails(String deviceIMI, String repCode, String password, Login context) {
+    public void setDisName(String disName) {
+        DisName = disName;
+    }
+
+    //    public void getRepDetails(String deviceIMI, String repCode, String password, Login context) {
 //        this.Context = context;
 //        DBHelper dbHelper = new DBHelper(Context);
 //        SQLiteDatabase db = dbHelper.getReadableDatabase();

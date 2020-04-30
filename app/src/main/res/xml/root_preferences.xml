@@ -14,7 +14,8 @@
   ~ limitations under the License.
   -->
 
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="@string/messages_header">
 
@@ -31,21 +32,32 @@
             app:useSimpleSummaryProvider="true"
             />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Company Details">
+
+        <EditTextPreference
+            android:defaultValue="true"
+            android:icon="@android:drawable/ic_menu_myplaces"
+            android:key="disid"
+            android:title="Distributor ID"
+            app:useSimpleSummaryProvider="true"/>
+
         <ListPreference
+            android:icon="@android:drawable/ic_menu_sort_by_size"
             app:defaultValue="reply"
             app:entries="@array/reply_entries"
             app:entryValues="@array/reply_values"
             app:key="reply"
-            app:title="@string/reply_title"
+            app:title="Application Type"
             app:useSimpleSummaryProvider="true" />
-
     </PreferenceCategory>
-
     <PreferenceCategory app:title="Authentication">
 
         <SwitchPreferenceCompat
+            app:icon="@android:drawable/ic_menu_view"
             app:key="settings_auth"
-            app:title="Settings Authentication"/>
+            app:title="Settings Authentication" />
 
         <EditTextPreference
             app:dependency="settings_auth"

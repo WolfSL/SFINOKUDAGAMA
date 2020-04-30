@@ -55,7 +55,7 @@
                     android:hint="Sales Rep Code"
                     android:inputType="text"
                     android:paddingStart="10dp"
-                    android:text="G001"
+                    android:text="L01"
                     android:textSize="22sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -80,7 +80,7 @@
                     android:hint="Password"
                     android:inputType="textPassword"
                     android:paddingStart="10dp"
-                    android:text="1234"
+                    android:text="123"
                     android:textSize="22sp" />
             </com.google.android.material.textfield.TextInputLayout>
 

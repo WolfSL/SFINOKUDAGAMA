@@ -1,12 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#5CB3EA</color>
-    <color name="colorPrimaryDark">#0E6398</color>
-    <color name="colorAccent">#043757</color>
+<!--    <color name="colorPrimary">#5CB3EA</color>-->
+<!--    <color name="colorPrimaryDark">#0E6398</color>-->
+<!--    <color name="colorAccent">#043757</color>-->
+
+    <color name="colorPrimary">#60AEC2</color>
+    <color name="colorPrimaryDark">#638DBD</color>
+    <color name="colorAccent">#416997</color>
 
 
     <color name="x_ashText">#616161</color>
-    <color name="x_white">#fff
-    </color>
+    <color name="x_white">#fff</color>
+
+<!--    Rainbow colors-->
+    <color name="R_red1">#FF9AA2</color>
+    <color name="R_red2">#FFB7B2</color>
+    <color name="R_red3">#FFDAC1</color>
+    <color name="R_green1">#E2F0CB</color>
+    <color name="R_green2">#B5EAD7</color>
+    <color name="R_blue1">#C7CEEA</color>
+
+    <color name="L_red1">#FFDDE0</color>
+    <color name="L_red2">#FFE7E5</color>
+    <color name="L_red3">#FFF2EA</color>
+    <color name="L_green1">#F5FAED</color>
+    <color name="L_green2">#E6F8F1</color>
+    <color name="L_blue1">#ECEEF8</color>
 </resources>

@@ -1,61 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/x_white"
-    app:cardElevation="6dp">
+    android:layout_height="match_parent"
+    android:background="@color/x_white"
+    android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/frame_padding">
 
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@color/colorPrimaryDark"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="@dimen/frame_padding"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/itemselectTitale"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="SELECT ITEM"
-                android:textColor="@color/x_white"
-                android:textSize="18sp" />
-
-            <SearchView
-                android:id="@+id/searchview"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/button_boarder"
-                android:orientation="horizontal" />
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/itemSelectorRecView"
+        <TextView
+            android:id="@+id/itemselectTitale"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginBottom="2dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-            app:layout_constraintVertical_bias="0.0" />
+            android:layout_weight="1"
+            android:text="SELECT ITEM"
+            android:textColor="@color/x_white"
+            android:textSize="18sp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <SearchView
+            android:id="@+id/searchview"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_boarder"
+            android:orientation="horizontal" />
+    </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/itemSelectorRecView"
+        android:layout_width="match_parent"
+        android:scrollbars="vertical"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp"/>
+
+</LinearLayout>

@@ -22,6 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -35,5 +36,17 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onStop() {
         SharedPreference.setSettings(this);
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        SharedPreference.setSettings(this);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        SharedPreference.setSettings(this);
+        super.onPause();
     }
 }

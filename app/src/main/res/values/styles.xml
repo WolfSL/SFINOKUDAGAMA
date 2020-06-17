@@ -30,7 +30,7 @@
     </style>
 
     <style name="mydialog" parent="android:Theme.Holo.Dialog.NoActionBar.MinWidth">
-        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="android:windowBackground">@color/x_white</item>
     </style>
 
 <!--    <style name="mydialog" >-->

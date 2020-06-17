@@ -1,38 +1,54 @@
 package com.flexiv.sfino.model;
 
 public class Modal_Batch extends Modal_Item{
-    private String code;
-    private double sih;
-    private double price;
+    private String BatchNo;
+    private double SHI;
+    private double RetialPrice;
+    private String RepCode;
+    private String DisCode;
 
-    public Modal_Batch(String itemCode, double extra, String desc, String code, double sih, double price) {
-        super(itemCode, extra, desc);
-        this.code = code;
-        this.sih = sih;
-        this.price = price;
+    public Modal_Batch(){
+
     }
 
-    public String getCode() {
-        return code;
+
+    public String getBatchNo() {
+        return BatchNo;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setBatchNo(String batchNo) {
+        BatchNo = batchNo;
     }
 
-    public double getSih() {
-        return sih;
+    public double getSHI() {
+        return SHI;
     }
 
-    public void setSih(double sih) {
-        this.sih = sih;
+    public void setSHI(double SHI) {
+        this.SHI = SHI;
     }
 
-    public double getPrice() {
-        return price;
+    public double getRetialPrice() {
+        return RetialPrice;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setRetialPrice(double retialPrice) {
+        RetialPrice = retialPrice;
+    }
+
+    public String getRepCode() {
+        return RepCode;
+    }
+
+    public void setRepCode(String repCode) {
+        RepCode = repCode;
+    }
+
+    public String getDisCode() {
+        return DisCode;
+    }
+
+    public void setDisCode(String disCode) {
+        DisCode = disCode;
     }
 }

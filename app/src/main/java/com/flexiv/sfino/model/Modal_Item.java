@@ -2,13 +2,15 @@ package com.flexiv.sfino.model;
 
 public class Modal_Item {
     String ItemCode;
-    double Extra;
     String Desc;
 
 
-    public Modal_Item(String itemCode, double extra, String desc) {
+    public Modal_Item(){
+
+    }
+
+    public Modal_Item(String itemCode, String desc) {
         ItemCode = itemCode;
-        Extra = extra;
         Desc = desc;
     }
 
@@ -20,14 +22,6 @@ public class Modal_Item {
         ItemCode = itemCode;
     }
 
-
-    public double getExtra() {
-        return Extra;
-    }
-
-    public void setExtra(double extra) {
-        Extra = extra;
-    }
 
     public String getDesc() {
         return Desc;

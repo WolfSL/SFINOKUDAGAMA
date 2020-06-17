@@ -1,20 +1,25 @@
 package com.flexiv.sfino;
 
+import android.app.Activity;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
+import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.ImageButton;
-import android.widget.SearchView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.flexiv.sfino.adapter.Adapter_Batch;
 import com.flexiv.sfino.adapter.Adapter_Item;
@@ -22,6 +27,10 @@ import com.flexiv.sfino.fragment.Order_main;
 import com.flexiv.sfino.fragment.Order_sub;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
+import com.flexiv.sfino.model.TBLT_ORDDTL;
+import com.flexiv.sfino.model.TBLT_ORDERHED;
+import com.flexiv.sfino.utill.DBHelper;
+import com.flexiv.sfino.utill.DBQ;
 import com.flexiv.sfino.utill.SharedPreference;
 
 import java.util.ArrayList;
@@ -35,6 +44,15 @@ public class Order extends AppCompatActivity {
     TextView textView_cusName;
     TextView textView_Area;
 
+    private ArrayList<TBLT_ORDDTL> ItemList = new ArrayList<>();
+
+    public ArrayList<TBLT_ORDDTL> getItemList() {
+        return ItemList;
+    }
+
+    public void setItemList(TBLT_ORDDTL itemList) {
+        ItemList.add(itemList);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,62 +65,58 @@ public class Order extends AppCompatActivity {
         textView_cusName = findViewById(R.id.textView_cusName);
         textView_Area = findViewById(R.id.textView_Area);
 
-        if(SharedPreference.COM_AREA!=null && SharedPreference.COM_CUSTOMER!=null){
+        if (SharedPreference.COM_AREA != null && SharedPreference.COM_CUSTOMER != null) {
             textView_cusName.setText(SharedPreference.COM_CUSTOMER.getTxt_name());
             textView_Area.setText(SharedPreference.COM_AREA.getTxt_name());
-        }else{
-            Toast.makeText(this,"Customer or Area Cannot be Empty",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Customer or Area Cannot be Empty", Toast.LENGTH_LONG).show();
             onBackPressed();
         }
 
-        getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame,new Order_main(this)).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame, Order_main.getObj(this)).commit();
     }
 
-    public void changeNavButton(int type){
-        if(type==1){
+    public void changeNavButton(int type) {
+        if (type == 1) {
             imageButton_done.animate().alpha(1.0f);
             imageButton_back.setOnClickListener(v -> onBackPressed());
-        }else if(type==2){
+        } else if (type == 2) {
             imageButton_done.animate().alpha(0.0f);
             imageButton_back.setOnClickListener(v -> {
+                imageButton_done.animate().alpha(1.0f);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.animator.in, R.animator.out);
-                transaction.replace(R.id.OrderFrame, new Order_main(Order.this)).commit();
+                transaction.replace(R.id.OrderFrame, Order_main.getObj(this)).commit();
             });
         }
+    }
+
+    public void GoBackWithItems() {
+        imageButton_done.animate().alpha(1.0f);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.animator.in, R.animator.out);
+        transaction.replace(R.id.OrderFrame, Order_main.getObj(this)).commit();
     }
 
 
     public void LoadFragment_sub() {
 
-
-
-        ArrayList<Modal_Item> arr_item = new ArrayList<>();
-
-        arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));arr_item.add(new Modal_Item("FG001",234.12,"Test Item 1"));
-        arr_item.add(new Modal_Item("FG002",312.60,"Test Item 2"));
-        arr_item.add(new Modal_Item("FG001", 234.12, "Test Item 1"));
-        arr_item.add(new Modal_Item("FG002", 312.60, "Test Item 2"));
-
-        openDialogSelector_Items(arr_item, "SELECT ITEM", 0);
+        try {
+            DBHelper db = new DBHelper(this);
+            openDialogSelector_Items(db.getItems(), "SELECT ITEM", 0);
+            db.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     RecyclerView SelectorrecyclerView;
     private Adapter_Item adapter_item;
     private RecyclerView.LayoutManager cusLayoutManager;
     private TextView itemSelectTitle;
+
     private void openDialogSelector_Items(ArrayList<Modal_Item> arr_cus, String title, int type) {
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this,R.style.mydialog);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this, R.style.mydialog);
 
         View row = getLayoutInflater().inflate(R.layout.item_selector, null);
         SelectorrecyclerView = row.findViewById(R.id.itemSelectorRecView);
@@ -114,7 +128,7 @@ public class Order extends AppCompatActivity {
 
         // SelectorrecyclerView.setHasFixedSize(true);
         cusLayoutManager = new LinearLayoutManager(this);
-        adapter_item = new Adapter_Item(arr_cus,dialog,this);
+        adapter_item = new Adapter_Item(arr_cus, dialog, this);
         SelectorrecyclerView.setLayoutManager(cusLayoutManager);
         SelectorrecyclerView.setAdapter(adapter_item);
 
@@ -138,57 +152,30 @@ public class Order extends AppCompatActivity {
         dialog.show();
 
         Window window = dialog.getWindow();
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
 
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-
-            }
-        });
     }
 
 
     //Load Batchs
-    public void LoadFragment_sub_batchs() {
+    public void LoadFragment_sub_batchs(String itemCode) {
 
-        ArrayList<Modal_Batch> arr_batch = new ArrayList<>();
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G001",22545,410.23));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G002",45.23,44578.22));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G003",10,32535.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G004",356.50,5545.20));
-        arr_batch.add(new Modal_Batch("FG001",223.98,"Test item 1","G005",2445,120.32));
+        try {
+            DBHelper db = new DBHelper(this);
+            openDialogSelector_batchs(db.getBatchWiceStock(SharedPreference.disid, itemCode), "SELECT BATCH", 0);
+        } catch (Exception es) {
+            es.printStackTrace();
+        }
 
-        openDialogSelector_batchs(arr_batch, "SELECT BATCH", 0);
+
     }
 
     private Adapter_Batch adapter_batch;
+
     private void openDialogSelector_batchs(ArrayList<Modal_Batch> arr_cus, String title, int type) {
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this,R.style.mydialog);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this, R.style.mydialog);
 
         View row = getLayoutInflater().inflate(R.layout.item_selector, null);
         SelectorrecyclerView = row.findViewById(R.id.itemSelectorRecView);
@@ -200,7 +187,7 @@ public class Order extends AppCompatActivity {
 
         // SelectorrecyclerView.setHasFixedSize(true);
         cusLayoutManager = new LinearLayoutManager(this);
-        adapter_batch = new Adapter_Batch(arr_cus,dialog,this);
+        adapter_batch = new Adapter_Batch(arr_cus, dialog, this);
         SelectorrecyclerView.setLayoutManager(cusLayoutManager);
         SelectorrecyclerView.setAdapter(adapter_batch);
 
@@ -224,20 +211,16 @@ public class Order extends AppCompatActivity {
         dialog.show();
 
         Window window = dialog.getWindow();
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        if (window != null) {
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
 
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-
-            }
-        });
     }
 
-    public void LoadOrderSub(Modal_Batch item){
+    public void LoadOrderSub(Modal_Batch item) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.in, R.animator.out);
-        transaction.replace(R.id.OrderFrame, new Order_sub(this,item)).commit();
+        transaction.replace(R.id.OrderFrame, new Order_sub(this, item)).commit();
         //getSupportFragmentManager().beginTransaction().replace(R.id.OrderFrame,new Order_sub(this,item)).commit();
     }
 
@@ -245,4 +228,136 @@ public class Order extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
     }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = activity.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(activity);
+        }
+        assert imm != null;
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+
+    public String Save(TBLT_ORDERHED hed) {
+
+        DBHelper dbHelper = new DBHelper(this);
+
+        //Get Last Order No
+        SQLiteDatabase db ;
+        db = dbHelper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int maxNo = getMaxDocNo(db);
+            if (maxNo > 0) {
+                ContentValues cv = new ContentValues();
+                cv.put(DBQ._TBLT_ORDERHED_AreaCode, hed.getAreaCode());
+                cv.put(DBQ._TBLT_ORDERHED_CreateUser, hed.getCreateUser());
+                cv.put(DBQ._TBLT_ORDERHED_CusCode, hed.getCusCode());
+                cv.put(DBQ._TBLT_ORDERHED_Discode, hed.getDiscode());
+                cv.put(DBQ._TBLT_ORDERHED_Discount, hed.getDiscount());
+                cv.put(DBQ._TBLT_ORDERHED_DisPer, hed.getDisPer());
+                cv.put(DBQ._TBLT_ORDERHED_DocNo, maxNo);
+                cv.put(DBQ._TBLT_ORDERHED_GrossAmt, hed.getGrossAmt());
+                cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
+                cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
+                cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
+                cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
+                cv.put(DBQ._TBLT_ORDERHED_RefNo, hed.getRepCode().concat(String.valueOf(maxNo)));
+                cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
+                cv.put(DBQ._TBLT_ORDERHED_Status, "S");
+                cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
+
+                db.insert(DBQ._TBLT_ORDERHED, null, cv);
+
+                int recLine = 1;
+                for (TBLT_ORDDTL obj : ItemList) {
+                    cv.clear();
+                    cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
+                    cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
+                    cv.put(DBQ._TBLT_ORDDTL_CusCode, hed.getCusCode());
+                    cv.put(DBQ._TBLT_ORDDTL_Date, obj.getDate());
+                    cv.put(DBQ._TBLT_ORDDTL_DiscAmt, obj.getDiscAmt());
+                    cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
+                    cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
+                    cv.put(DBQ._TBLT_ORDDTL_DocNo, String.valueOf(maxNo));
+                    cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                    cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
+                    cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
+                    cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
+                    cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
+                    cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
+                    cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
+
+                    db.insert(DBQ._TBLT_ORDERHED, null, cv);
+                    recLine++;
+                }
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                db.close();
+                dbHelper.close();
+                return "Successfully Saved";
+            } else {
+                db.close();
+                dbHelper.close();
+                return "Can not Save Order!. Max Document number is Null";
+            }
+        } catch (Exception ex) {
+
+            ex.printStackTrace();
+            db.endTransaction();
+            db.close();
+            return ex.getMessage();
+        }
+
+
+    }
+
+    private int getMaxDocNo(SQLiteDatabase db) throws SQLiteException {
+
+        Cursor c = db.rawQuery("SELECT MAX(CAST(DocNo as Int)) from TBLT_ORDERHED " +
+                "WHERE RepCode = ? and Discode = ?", new String[]{String.valueOf(SharedPreference.refid), String.valueOf(SharedPreference.disid)});
+        if (c.moveToNext()) {
+            int res = c.getInt(0);
+            c.close();
+            return res+1;
+        } else {
+            c.close();
+            return -1;
+        }
+    }
+
+
+//    public void proccessOrder(String refNo){
+//        DBHelper dbHelper = new DBHelper(this);
+//        TBLT_ORDERHED order = dbHelper.getOrder(refNo,"S");
+//
+//
+//        String url = "https://www.youraddress.com/";
+//
+//
+//
+//        JSONObject parameters = new JSONObject(params);
+//
+//        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, url, parameters, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                //TODO: handle success
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                error.printStackTrace();
+//                //TODO: handle failure
+//            }
+//        });
+//
+//        Volley.newRequestQueue(this).add(jsonRequest);
+//    }
+
+
+
 }

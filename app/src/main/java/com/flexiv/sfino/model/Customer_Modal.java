@@ -8,6 +8,15 @@ public class Customer_Modal implements Serializable {
     private String CusName;
     private String AreaCode;
     private int VAT;
+    private  double CurBal;
+
+    public double getCurBal() {
+        return CurBal;
+    }
+
+    public void setCurBal(double curBal) {
+        CurBal = curBal;
+    }
 
     public String getCusCode() {
         return CusCode;

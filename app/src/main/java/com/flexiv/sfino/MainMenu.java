@@ -15,9 +15,11 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.flexiv.sfino.adapter.Adapter_Cus_area;
 import com.flexiv.sfino.model.Card_cus_area;
+import com.flexiv.sfino.utill.DBHelper;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -48,7 +50,7 @@ public class MainMenu extends AppCompatActivity {
         cardView_Order.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(SharedPreference.COM_AREA==null){
+                if (SharedPreference.COM_AREA == null) {
                     Snackbar snackbar = Snackbar
                             .make(contextView, "Area Can not be Empty!", Snackbar.LENGTH_LONG)
                             .setActionTextColor(Color.RED)
@@ -60,8 +62,7 @@ public class MainMenu extends AppCompatActivity {
                             });
 
                     snackbar.show();
-                }
-                else if(SharedPreference.COM_CUSTOMER==null){
+                } else if (SharedPreference.COM_CUSTOMER == null) {
                     Snackbar snackbar = Snackbar
                             .make(contextView, "Customer Can not be Empty!", Snackbar.LENGTH_LONG)
                             .setActionTextColor(Color.RED)
@@ -73,7 +74,7 @@ public class MainMenu extends AppCompatActivity {
                             });
 
                     snackbar.show();
-                }else{
+                } else {
                     Intent i = new Intent(MainMenu.this, Order.class);
                     startActivity(i);
                 }
@@ -81,10 +82,9 @@ public class MainMenu extends AppCompatActivity {
         });
 
         //setArgs
-        textViewRep_name.setText(SharedPreference.COM_REP==null?"Hashan - Test":SharedPreference.COM_REP.getRepName());
-        textViewDis_name.setText(SharedPreference.COM_REP==null?"Flexiv MicroSystem":SharedPreference.COM_REP.getDisName());
+        textViewRep_name.setText(SharedPreference.COM_REP == null ? "Dr.Wolf - Flexiv" : SharedPreference.COM_REP.getRepName());
+        textViewDis_name.setText(SharedPreference.COM_REP == null ? "Please Contact Flexiv MicroSystem" : SharedPreference.COM_REP.getDisName());
     }
-
 
 
     @Override
@@ -96,56 +96,38 @@ public class MainMenu extends AppCompatActivity {
 
     public void openAreaSelector(View v) {
 
-        SharedPreference.COM_CUSTOMER  = null;
-
-        ArrayList<Card_cus_area> arr_cus = new ArrayList<>();
-        arr_cus.add(new Card_cus_area("test Area", "Nawala"));
-        arr_cus.add(new Card_cus_area("test Area", "Kaduwela"));
-        arr_cus.add(new Card_cus_area("test Area", "Colombo"));
-        arr_cus.add(new Card_cus_area("test Area", "Rajagiriya"));
-        arr_cus.add(new Card_cus_area("test Area", "Nawala"));
-        arr_cus.add(new Card_cus_area("test Area", "Kaduwela"));
-        arr_cus.add(new Card_cus_area("test Area", "Colombo"));
-        arr_cus.add(new Card_cus_area("test Area", "Rajagiriya"));
-        arr_cus.add(new Card_cus_area("test Area", "Nawala"));
-        arr_cus.add(new Card_cus_area("test Area", "Kaduwela"));
-        arr_cus.add(new Card_cus_area("test Area", "Colombo"));
-        arr_cus.add(new Card_cus_area("test Area", "Rajagiriya"));
-        arr_cus.add(new Card_cus_area("test Area", "Nawala"));
-
-        openDialogAreaCusSelector(arr_cus, "SELECT AREA", 0);
+        SharedPreference.COM_CUSTOMER = null;
+        openDialogAreaCusSelector(new DBHelper(this).getAreas(SharedPreference.disid), "SELECT AREA", 0);
 
     }
 
     public void openCusSelector(View v) {
-        ArrayList<Card_cus_area> arr_cus = new ArrayList<>();
-        arr_cus.add(new Card_cus_area("test Pam", "Supun Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Alpha Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Beata Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Gunapala Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Naula Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Supun Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Alpha Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Beata Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Gunapala Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Naula Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Supun Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Alpha Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Beata Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Gunapala Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Naula Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Supun Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Alpha Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Beata Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Gunapala Pharmacy"));
-        arr_cus.add(new Card_cus_area("test Pam", "Naula Pharmacy"));
 
-        openDialogAreaCusSelector(arr_cus, "SELECT CUSTOMER", 1);
+        try {
+            ArrayList<Card_cus_area> card = new DBHelper(this).getCustomers(SharedPreference.disid, SharedPreference.COM_AREA.getTxt_code());
+            assert card != null;
+            if (!card.isEmpty()) {
+                openDialogAreaCusSelector(new DBHelper(this).getCustomers(SharedPreference.disid, SharedPreference.COM_AREA.getTxt_code()), "SELECT CUSTOMER", 1);
+            } else {
+                Snackbar snackbar = Snackbar
+                        .make(contextView, "There no Customers Available in this Area. Please Select another Area!", Snackbar.LENGTH_LONG)
+                        .setActionTextColor(Color.RED)
+                        .setAction("Select", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                openAreaSelector(view);
+                            }
+                        });
 
+                snackbar.show();
+            }
+        } catch (Exception ex) {
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void openDialogAreaCusSelector(ArrayList<Card_cus_area> arr_cus, String title, int type) {
-        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this,R.style.mydialog);
+        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this, R.style.mydialog);
 
         View row = getLayoutInflater().inflate(R.layout.item_selector, null);
         cusRecyclerView = row.findViewById(R.id.itemSelectorRecView);
@@ -188,12 +170,12 @@ public class MainMenu extends AppCompatActivity {
             public void onCancel(DialogInterface dialog) {
                 if (SharedPreference.COM_CUSTOMER != null) {
                     textViewCustomer.setText(SharedPreference.COM_CUSTOMER.getTxt_name());
-                }else{
+                } else {
                     textViewCustomer.setText("");
                 }
                 if (SharedPreference.COM_AREA != null) {
                     textViewArea.setText(SharedPreference.COM_AREA.getTxt_name());
-                }else{
+                } else {
                     textViewArea.setText("");
                 }
 

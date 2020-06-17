@@ -7,11 +7,18 @@ import androidx.preference.PreferenceManager;
 import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.model.Modal_Rep;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+
 
 public class SharedPreference {
 
     public static  DecimalFormat df = new DecimalFormat("0.00##");
+    public static String dateFormat_Format1 = "yyyy-MM-dd hh:mm:ss a";
+    public static DateFormat dateFormat = new SimpleDateFormat(dateFormat_Format1);
+
+
     public static String refid;
     public static String disid;
     public static String terminalid;

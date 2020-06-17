@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/orderItem_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/card_padding"
+    android:clickable="true"
+    android:foreground="?android:selectableItemBackground"
+    android:padding="@dimen/card_padding"
+    app:cardBackgroundColor="@color/L_blue1"
+    app:cardCornerRadius="4dp">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/card_padding">
+
+
+        <TextView
+            android:id="@+id/item_code"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:text="FG001"
+            android:textAlignment="textStart"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/item_retPrice"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_batch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="NONE 1"
+            android:textAlignment="textEnd"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_retPrice"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_retPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:text="460.50"
+            android:textAlignment="textEnd"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/item_batch"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_code"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_disVal"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:gravity="bottom|end"
+            android:text="800.00"
+            android:textColor="@color/R_red1"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/item_nfqty"
+            app:layout_constraintEnd_toStartOf="@+id/item_disVal2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_nfqty"
+            app:layout_constraintTop_toTopOf="@+id/item_nfqty" />
+
+        <TextView
+            android:id="@+id/item_total"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="bottom|end"
+            android:text="35680.00"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/item_disVal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_disVal"
+            app:layout_constraintTop_toBottomOf="@+id/item_name" />
+
+        <TextView
+            android:id="@+id/item_rqqty"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="4dp"
+            android:text="355.00"
+            android:textAlignment="textStart"
+            android:textColor="@color/R_red1"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/item_nfqty"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_name" />
+
+        <TextView
+            android:id="@+id/item_nfqty"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:gravity="bottom|end"
+            android:text="10.00"
+            android:textColor="@color/R_red1"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/item_rqqty"
+            app:layout_constraintEnd_toStartOf="@+id/item_disVal"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item_rqqty"
+            app:layout_constraintTop_toTopOf="@+id/item_rqqty" />
+
+        <TextView
+            android:id="@+id/item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Welding Rod MS12 570 2.6mm"
+            android:textAlignment="textStart"
+            android:textColor="@color/colorPrimary"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_code" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

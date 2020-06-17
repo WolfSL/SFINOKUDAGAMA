@@ -54,7 +54,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
             @Override
             public void onClick(View v) {
                 dialog.cancel();
-                context.LoadFragment_sub_batchs();
+                context.LoadFragment_sub_batchs(item.getItemCode());
             }
         });
     }
@@ -115,7 +115,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
         public ViewsHolder(@NonNull View itemView) {
             super(itemView);
             card_code = itemView.findViewById(R.id.card_code);
-            card_code2 = itemView.findViewById(R.id.card_code2);
+            card_code2 = itemView.findViewById(R.id.card_price);
             card_name = itemView.findViewById(R.id.card_name);
             card = itemView.findViewById(R.id.itembatch_card);
 

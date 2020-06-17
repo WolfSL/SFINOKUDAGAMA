@@ -48,6 +48,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
+import org.json.JSONException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +65,6 @@ public class Login extends AppCompatActivity {
     private final String TAG = "Login";
 
     @SuppressLint("HardwareIds")
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,13 +100,9 @@ public class Login extends AppCompatActivity {
             } else {
                 imei = telephonyManager.getDeviceId();
             }
-           // DBHelper dbHelper = new DBHelper(this);
-          //  SQLiteDatabase db = dbHelper.getReadableDatabase();
-           // getRepDetails(imei, txtUserName.getText().toString(), txtPwd.getText().toString(), db);
-            Intent intent = new Intent(this, MainMenu.class);
-            startActivity(intent);
-            // MainActivity.fa.finish();
-            this.finish();
+            DBHelper dbHelper = new DBHelper(this);
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            getRepDetails(imei, txtUserName.getText().toString(), txtPwd.getText().toString(), db);
 
             Log.i(TAG, imei);
 
@@ -169,7 +166,7 @@ public class Login extends AppCompatActivity {
     private void download(String repCode,String imei,String password,SQLiteDatabase db){
        // lazyLoader.setVisibility(View.VISIBLE);
         //progressDialog.setTitle("Downloading Master Data. Please Wait..");
-        String url = SharedPreference.URL + "Master?discode="+SharedPreference.disid+"&repcode="+repCode+"&functionid=3";
+        String url = SharedPreference.URL + "MasterData?discode="+SharedPreference.disid+"&repcode="+repCode+"&functionid=LM";
         System.out.println(url);
 
         RequestQueue rq = Volley.newRequestQueue(this);
@@ -177,7 +174,11 @@ public class Login extends AppCompatActivity {
         JsonObjectRequest jr = new JsonObjectRequest(
                 Request.Method.GET, url, null,
                 response -> {
-                    System.out.println("Rest Response :" + response.toString());
+                    try {
+                        System.out.println("Rest Response :" + response.getJSONArray("modal_Batches_Stock").toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     Gson gson = new Gson();
                     MasterDataModal master = gson.fromJson(response.toString(), MasterDataModal.class);
 
@@ -255,7 +256,7 @@ public class Login extends AppCompatActivity {
                 }else{
                     MakeSnackBar("Invalid Distributor ID", Color.RED);
                 }
-               lazyLoader.setVisibility(View.GONE);
+             //  lazyLoader.setVisibility(View.GONE);
                // progressDialog.dismiss();
             } else {
 //                MakeSnackBar("Invalid RepCode Or Password");

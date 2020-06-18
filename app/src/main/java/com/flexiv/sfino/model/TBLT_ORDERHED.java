@@ -1,8 +1,9 @@
 package com.flexiv.sfino.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class TBLT_ORDERHED {
+public class TBLT_ORDERHED implements Serializable {
     private String DocNo;
     private String Discode;
     private String AreaCode;
@@ -165,5 +166,30 @@ public class TBLT_ORDERHED {
 
     public void setISUSED(boolean ISUSED) {
         this.ISUSED = ISUSED;
+    }
+
+
+    @Override
+    public String toString() {
+        return "TBLT_ORDERHED{" +
+                "DocNo='" + DocNo + '\'' +
+                ", Discode='" + Discode + '\'' +
+                ", AreaCode='" + AreaCode + '\'' +
+                ", LocCode='" + LocCode + '\'' +
+                ", SalesDate='" + SalesDate + '\'' +
+                ", CusCode='" + CusCode + '\'' +
+                ", RepCode='" + RepCode + '\'' +
+                ", RefNo='" + RefNo + '\'' +
+                ", GrossAmt=" + GrossAmt +
+                ", NetAmt=" + NetAmt +
+                ", DisPer=" + DisPer +
+                ", Discount=" + Discount +
+                ", VatAmt=" + VatAmt +
+                ", PayType='" + PayType + '\'' +
+                ", CreateUser='" + CreateUser + '\'' +
+                ", Status='" + Status + '\'' +
+                ", ISUSED=" + ISUSED +
+                ", ItemList=" + ItemList +
+                '}';
     }
 }

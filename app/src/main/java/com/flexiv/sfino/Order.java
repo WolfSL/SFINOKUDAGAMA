@@ -2,10 +2,13 @@ package com.flexiv.sfino;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -43,6 +46,11 @@ public class Order extends AppCompatActivity {
 
     TextView textView_cusName;
     TextView textView_Area;
+    private TextView textView_InvNo;
+
+    public TextView getTextView_InvNo(){
+        return textView_InvNo;
+    }
 
     private ArrayList<TBLT_ORDDTL> ItemList = new ArrayList<>();
 
@@ -64,6 +72,7 @@ public class Order extends AppCompatActivity {
 
         textView_cusName = findViewById(R.id.textView_cusName);
         textView_Area = findViewById(R.id.textView_Area);
+        textView_InvNo = findViewById(R.id.textView_InvNo);
 
         if (SharedPreference.COM_AREA != null && SharedPreference.COM_CUSTOMER != null) {
             textView_cusName.setText(SharedPreference.COM_CUSTOMER.getTxt_name());
@@ -73,7 +82,19 @@ public class Order extends AppCompatActivity {
             onBackPressed();
         }
 
-        getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame, Order_main.getObj(this)).commit();
+
+
+        Intent intent = getIntent();
+        TBLT_ORDERHED obj = (TBLT_ORDERHED) intent.getSerializableExtra("hed");
+        Order_main main;
+        if(obj!=null){
+            textView_InvNo.setText(obj.getRefNo());
+             main = new Order_main(this,obj);
+        }else{
+             main = new Order_main(this);
+        }
+        getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame, main).commit();
+
     }
 
     public void changeNavButton(int type) {
@@ -164,7 +185,7 @@ public class Order extends AppCompatActivity {
 
         try {
             DBHelper db = new DBHelper(this);
-            openDialogSelector_batchs(db.getBatchWiceStock(SharedPreference.disid, itemCode), "SELECT BATCH", 0);
+            openDialogSelector_batchs(db.getBatchWiceStock(SharedPreference.COM_REP.getDiscode(), itemCode), "SELECT BATCH", 0);
         } catch (Exception es) {
             es.printStackTrace();
         }
@@ -227,6 +248,7 @@ public class Order extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        Order_main.Distoy();
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -243,14 +265,16 @@ public class Order extends AppCompatActivity {
 
 
     public String Save(TBLT_ORDERHED hed) {
-
+        String msg;
         DBHelper dbHelper = new DBHelper(this);
 
         //Get Last Order No
-        SQLiteDatabase db ;
+        SQLiteDatabase db = null;
         db = dbHelper.getWritableDatabase();
         db.beginTransaction();
-        try {
+        try
+        {
+
             int maxNo = getMaxDocNo(db);
             if (maxNo > 0) {
                 ContentValues cv = new ContentValues();
@@ -270,8 +294,9 @@ public class Order extends AppCompatActivity {
                 cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
                 cv.put(DBQ._TBLT_ORDERHED_Status, "S");
                 cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
+                cv.put(DBQ._TBLT_ORDERHED_RepCode,hed.getRepCode());
 
-                db.insert(DBQ._TBLT_ORDERHED, null, cv);
+                db.insertOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
                 int recLine = 1;
                 for (TBLT_ORDDTL obj : ItemList) {
@@ -292,38 +317,45 @@ public class Order extends AppCompatActivity {
                     cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
                     cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
 
-                    db.insert(DBQ._TBLT_ORDERHED, null, cv);
+
+                    db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
                     recLine++;
                 }
                 db.setTransactionSuccessful();
                 db.endTransaction();
                 db.close();
                 dbHelper.close();
-                return "Successfully Saved";
+                msg = "INV Ref No. " + hed.getRepCode().concat(String.valueOf(maxNo));
+                textView_InvNo.setText(msg);
             } else {
                 db.close();
                 dbHelper.close();
-                return "Can not Save Order!. Max Document number is Null";
+                msg = "Error : Can not Save Order!. Max Document number is Null";
             }
         } catch (Exception ex) {
-
             ex.printStackTrace();
             db.endTransaction();
             db.close();
-            return ex.getMessage();
+            msg = "Error : " + ex.getMessage();
+            System.out.println(msg);
         }
-
-
+        return msg;
     }
 
+    String TAG = "ORDER";
     private int getMaxDocNo(SQLiteDatabase db) throws SQLiteException {
 
-        Cursor c = db.rawQuery("SELECT MAX(CAST(DocNo as Int)) from TBLT_ORDERHED " +
-                "WHERE RepCode = ? and Discode = ?", new String[]{String.valueOf(SharedPreference.refid), String.valueOf(SharedPreference.disid)});
+        Cursor c = db.rawQuery("SELECT MAX(CAST(DocNo as Int)) as a from TBLT_ORDERHED " +
+                "WHERE RepCode = ? and Discode = ?", new String[]{String.valueOf(SharedPreference.COM_REP.getRepCode()), String.valueOf(SharedPreference.COM_REP.getDiscode())});
+
+        Log.e(TAG+" Ref ID",SharedPreference.COM_REP.getRepCode());
+        Log.e(TAG+" DIS ID",SharedPreference.COM_REP.getDiscode());
+
         if (c.moveToNext()) {
-            int res = c.getInt(0);
+            int res = c.getInt(c.getColumnIndex("a"));
+            Log.e(TAG+" MAX No. ",String.valueOf(res));
             c.close();
-            return res+1;
+            return res + 1;
         } else {
             c.close();
             return -1;
@@ -331,33 +363,16 @@ public class Order extends AppCompatActivity {
     }
 
 
-//    public void proccessOrder(String refNo){
-//        DBHelper dbHelper = new DBHelper(this);
-//        TBLT_ORDERHED order = dbHelper.getOrder(refNo,"S");
-//
-//
-//        String url = "https://www.youraddress.com/";
-//
-//
-//
-//        JSONObject parameters = new JSONObject(params);
-//
-//        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, url, parameters, new Response.Listener<JSONObject>() {
-//            @Override
-//            public void onResponse(JSONObject response) {
-//                //TODO: handle success
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
-//                //TODO: handle failure
-//            }
-//        });
-//
-//        Volley.newRequestQueue(this).add(jsonRequest);
-//    }
+    private void LoadItemsFromDB(String docNo){
+        DBHelper dbHelper = new DBHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
+        Cursor c = db.rawQuery("SELECT * FROM "+DBQ._TBLT_ORDDTL+" WHERE "+DBQ._TBLT_ORDDTL_DocNo+" = ?",new String[]{String.valueOf(docNo)});
+        TBLT_ORDDTL dtl;
+        while(c.moveToNext()){
+            dtl = new TBLT_ORDDTL();
+        }
+    }
 
 
 }

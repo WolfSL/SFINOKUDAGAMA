@@ -75,7 +75,7 @@ public class MainMenu extends AppCompatActivity {
 
                     snackbar.show();
                 } else {
-                    Intent i = new Intent(MainMenu.this, Order.class);
+                    Intent i = new Intent(MainMenu.this, OrderList.class);
                     startActivity(i);
                 }
             }
@@ -97,17 +97,17 @@ public class MainMenu extends AppCompatActivity {
     public void openAreaSelector(View v) {
 
         SharedPreference.COM_CUSTOMER = null;
-        openDialogAreaCusSelector(new DBHelper(this).getAreas(SharedPreference.disid), "SELECT AREA", 0);
+        openDialogAreaCusSelector(new DBHelper(this).getAreas(SharedPreference.COM_REP.getDiscode()), "SELECT AREA", 0);
 
     }
 
     public void openCusSelector(View v) {
 
         try {
-            ArrayList<Card_cus_area> card = new DBHelper(this).getCustomers(SharedPreference.disid, SharedPreference.COM_AREA.getTxt_code());
+            ArrayList<Card_cus_area> card = new DBHelper(this).getCustomers(SharedPreference.COM_REP.getDiscode(), SharedPreference.COM_AREA.getTxt_code());
             assert card != null;
             if (!card.isEmpty()) {
-                openDialogAreaCusSelector(new DBHelper(this).getCustomers(SharedPreference.disid, SharedPreference.COM_AREA.getTxt_code()), "SELECT CUSTOMER", 1);
+                openDialogAreaCusSelector(new DBHelper(this).getCustomers(SharedPreference.COM_REP.getDiscode(), SharedPreference.COM_AREA.getTxt_code()), "SELECT CUSTOMER", 1);
             } else {
                 Snackbar snackbar = Snackbar
                         .make(contextView, "There no Customers Available in this Area. Please Select another Area!", Snackbar.LENGTH_LONG)

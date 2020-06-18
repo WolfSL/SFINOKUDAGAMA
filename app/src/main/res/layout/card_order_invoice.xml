@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/itembatch_card"
+    android:id="@+id/orderInvo_Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/card_padding"
@@ -15,53 +15,55 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="@dimen/card_padding">
-
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginTop="4dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card_price"
-            app:srcCompat="@drawable/ic_up_edit" />
 
         <TextView
             android:id="@+id/card_code"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="0011410"
+            android:textAlignment="textStart"
+            android:textColor="@color/design_default_color_secondary_variant"
+            android:textSize="24sp"
+            app:layout_constraintStart_toEndOf="@+id/imageView_status"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/OI_Date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="0011410"
+            android:textAlignment="textStart"
+            android:textColor="@color/R_red1"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView_status"
+            app:layout_constraintTop_toBottomOf="@+id/card_code"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <TextView
+            android:id="@+id/OI_Rs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="0011410"
             android:textAlignment="textStart"
             android:textColor="@color/design_default_color_secondary_variant"
             android:textSize="18sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/card_price"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Rs. 493394.00"
-            android:textAlignment="textEnd"
-            android:textColor="@color/design_default_color_secondary_variant"
             app:layout_constraintBottom_toBottomOf="@+id/card_code"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/card_code" />
 
-        <TextView
-            android:id="@+id/card_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="TextView"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/imageView3"
+        <ImageView
+            android:id="@+id/imageView_status"
+            android:layout_width="40dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card_code" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_sync_disabled_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

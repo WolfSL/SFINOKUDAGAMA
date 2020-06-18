@@ -51,6 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:drawableEnd="@drawable/ic_person_black_24dp"
+                    android:drawableTint="@color/x_ashText"
                     android:foregroundTint="#CA0078"
                     android:hint="Sales Rep Code"
                     android:inputType="text"

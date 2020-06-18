@@ -19,8 +19,8 @@ public class SharedPreference {
     public static DateFormat dateFormat = new SimpleDateFormat(dateFormat_Format1);
 
 
-    public static String refid;
-    public static String disid;
+//    public static String refid;
+//    public static String disid;
     public static String terminalid;
     public static String printername;
     public static String settings_pin;
@@ -40,7 +40,7 @@ public class SharedPreference {
         hostname =  PreferenceManager.getDefaultSharedPreferences(context).getString("hostname",null);
         settings_pin =  PreferenceManager.getDefaultSharedPreferences(context).getString("settings_pin",null);
 
-        disid =  PreferenceManager.getDefaultSharedPreferences(context).getString("disid",null);
+//        disid =  PreferenceManager.getDefaultSharedPreferences(context).getString("disid",null);
 
 
 

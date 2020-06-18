@@ -352,38 +352,43 @@
         android:id="@+id/linearLayout2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/card_padding"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawableLeft="@drawable/ic_sync_black_24dp"
-            android:drawableTint="@color/colorPrimary"
-            android:paddingEnd="10dp"
-            android:text="Process"
-            android:textColor="@color/colorPrimary"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <Button
             android:id="@+id/button_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/casper_def_marg"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawableLeft="@drawable/ic_baseline_save_24"
-            android:drawableTint="@color/R_red1"
+            android:backgroundTint="@color/R_red1"
+            android:drawableLeft="@android:drawable/stat_sys_download"
+            android:drawablePadding="3dp"
+            android:drawableTint="@color/x_white"
             android:text="Save"
-            android:textColor="@color/R_red1"
+            android:textColor="@color/x_white"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/card_padding"
+            android:alpha=".6"
+            android:backgroundTint="@color/colorPrimary"
+            android:drawableLeft="@android:drawable/stat_notify_sync"
+            android:drawablePadding="3dp"
+            android:drawableTint="@color/x_white"
+            android:enabled="false"
+            android:paddingEnd="10dp"
+            android:text="Process"
+            android:textColor="@color/x_white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="visible" />
 
     </LinearLayout>
 

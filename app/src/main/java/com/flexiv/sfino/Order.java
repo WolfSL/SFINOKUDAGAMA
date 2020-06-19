@@ -2,12 +2,13 @@ package com.flexiv.sfino;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,12 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.flexiv.sfino.adapter.Adapter_Batch;
 import com.flexiv.sfino.adapter.Adapter_Item;
 import com.flexiv.sfino.fragment.Order_main;
@@ -35,11 +42,16 @@ import com.flexiv.sfino.model.TBLT_ORDERHED;
 import com.flexiv.sfino.utill.DBHelper;
 import com.flexiv.sfino.utill.DBQ;
 import com.flexiv.sfino.utill.SharedPreference;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 public class Order extends AppCompatActivity {
-
+    String TAG = "ORDER";
     //Components
     ImageButton imageButton_done;
     ImageButton imageButton_back;
@@ -48,7 +60,17 @@ public class Order extends AppCompatActivity {
     TextView textView_Area;
     private TextView textView_InvNo;
 
-    public TextView getTextView_InvNo(){
+    private TBLT_ORDERHED obj = null;
+
+    public TBLT_ORDERHED getObj() {
+        return obj;
+    }
+
+    public void setObj(TBLT_ORDERHED obj) {
+        this.obj = obj;
+    }
+
+    public TextView getTextView_InvNo() {
         return textView_InvNo;
     }
 
@@ -79,44 +101,47 @@ public class Order extends AppCompatActivity {
             textView_Area.setText(SharedPreference.COM_AREA.getTxt_name());
         } else {
             Toast.makeText(this, "Customer or Area Cannot be Empty", Toast.LENGTH_LONG).show();
-            onBackPressed();
+            super.onBackPressed();
         }
-
 
 
         Intent intent = getIntent();
-        TBLT_ORDERHED obj = (TBLT_ORDERHED) intent.getSerializableExtra("hed");
-        Order_main main;
-        if(obj!=null){
-            textView_InvNo.setText(obj.getRefNo());
-             main = new Order_main(this,obj);
-        }else{
-             main = new Order_main(this);
+        obj = (TBLT_ORDERHED) intent.getSerializableExtra("hed");
+
+        if (obj != null) {
+            String msg = "INV Ref No. " + obj.getRefNo();
+            textView_InvNo.setText(msg);
+            LoadItemsFromDB(obj.getDocNo());
         }
-        getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame, main).commit();
+
+        getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame, new Order_main(this)).commit();
 
     }
 
     public void changeNavButton(int type) {
         if (type == 1) {
             imageButton_done.animate().alpha(1.0f);
-            imageButton_back.setOnClickListener(v -> onBackPressed());
+            imageButton_back.setOnClickListener(v -> mainBackPress());
         } else if (type == 2) {
             imageButton_done.animate().alpha(0.0f);
             imageButton_back.setOnClickListener(v -> {
                 imageButton_done.animate().alpha(1.0f);
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.setCustomAnimations(R.animator.in, R.animator.out);
-                transaction.replace(R.id.OrderFrame, Order_main.getObj(this)).commit();
+                transaction.replace(R.id.OrderFrame, new Order_main(this)).commit();
             });
         }
+    }
+
+    private void mainBackPress() {
+        onBackPressed();
     }
 
     public void GoBackWithItems() {
         imageButton_done.animate().alpha(1.0f);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.in, R.animator.out);
-        transaction.replace(R.id.OrderFrame, Order_main.getObj(this)).commit();
+        transaction.replace(R.id.OrderFrame, new Order_main(this)).commit();
     }
 
 
@@ -247,8 +272,25 @@ public class Order extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (!ItemList.isEmpty()) {
+            new AlertDialog.Builder(this).setTitle("Confirm Exit!")
+                    .setMessage("Are you sure you want to close this Order with out Saving?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Order.super.onBackPressed();
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void onBackPressed2() {
         super.onBackPressed();
-        Order_main.Distoy();
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -266,72 +308,145 @@ public class Order extends AppCompatActivity {
 
     public String Save(TBLT_ORDERHED hed) {
         String msg;
+        if (!ItemList.isEmpty()) {
+            DBHelper dbHelper = new DBHelper(this);
+
+            //Get Last Order No
+            SQLiteDatabase db;
+            db = dbHelper.getWritableDatabase();
+            db.beginTransaction();
+            try {
+                String maxNo = getMaxDocNo(db);
+                if (Integer.parseInt(maxNo) > 0) {
+                    ContentValues cv = new ContentValues();
+                    cv.put(DBQ._TBLT_ORDERHED_AreaCode, hed.getAreaCode());
+                    cv.put(DBQ._TBLT_ORDERHED_CreateUser, hed.getCreateUser());
+                    cv.put(DBQ._TBLT_ORDERHED_CusCode, hed.getCusCode());
+                    cv.put(DBQ._TBLT_ORDERHED_Discode, hed.getDiscode());
+                    cv.put(DBQ._TBLT_ORDERHED_Discount, hed.getDiscount());
+                    cv.put(DBQ._TBLT_ORDERHED_DisPer, hed.getDisPer());
+                    cv.put(DBQ._TBLT_ORDERHED_DocNo, maxNo);
+                    cv.put(DBQ._TBLT_ORDERHED_GrossAmt, hed.getGrossAmt());
+                    cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
+                    cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
+                    cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
+                    cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
+                    cv.put(DBQ._TBLT_ORDERHED_RefNo, maxNo);
+                    cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
+                    cv.put(DBQ._TBLT_ORDERHED_Status, hed.getStatus());
+                    cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
+                    cv.put(DBQ._TBLT_ORDERHED_RepCode, hed.getRepCode());
+
+                    db.insertOrThrow(DBQ._TBLT_ORDERHED, null, cv);
+
+                    int recLine = 1;
+                    for (TBLT_ORDDTL obj : ItemList) {
+                        cv.clear();
+                        cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
+                        cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
+                        cv.put(DBQ._TBLT_ORDDTL_CusCode, hed.getCusCode());
+                        cv.put(DBQ._TBLT_ORDDTL_Date, obj.getDate());
+                        cv.put(DBQ._TBLT_ORDDTL_DiscAmt, obj.getDiscAmt());
+                        cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
+                        cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
+                        cv.put(DBQ._TBLT_ORDDTL_DocNo, maxNo);
+                        cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                        cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
+                        cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
+                        cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
+                        cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
+                        cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
+                        cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
+
+
+                        db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
+                        recLine++;
+                    }
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                    db.close();
+                    dbHelper.close();
+                    msg = "INV Ref No. " + hed.getRepCode().concat(maxNo);
+                    textView_InvNo.setText(msg);
+                } else {
+                    db.close();
+                    dbHelper.close();
+                    msg = "Error : Can not Save Order!. Max Document number is Null";
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                db.endTransaction();
+                db.close();
+                msg = "Error : " + ex.getMessage();
+                System.out.println(msg);
+            }
+        }else{
+            msg = "Error : Can not Save Order Without Items!";
+        }
+        return msg;
+    }
+
+    public String SaveUpdate(TBLT_ORDERHED hed) {
+        String msg;
         DBHelper dbHelper = new DBHelper(this);
 
         //Get Last Order No
         SQLiteDatabase db = null;
         db = dbHelper.getWritableDatabase();
         db.beginTransaction();
-        try
-        {
+        try {
 
-            int maxNo = getMaxDocNo(db);
-            if (maxNo > 0) {
-                ContentValues cv = new ContentValues();
-                cv.put(DBQ._TBLT_ORDERHED_AreaCode, hed.getAreaCode());
-                cv.put(DBQ._TBLT_ORDERHED_CreateUser, hed.getCreateUser());
-                cv.put(DBQ._TBLT_ORDERHED_CusCode, hed.getCusCode());
-                cv.put(DBQ._TBLT_ORDERHED_Discode, hed.getDiscode());
-                cv.put(DBQ._TBLT_ORDERHED_Discount, hed.getDiscount());
-                cv.put(DBQ._TBLT_ORDERHED_DisPer, hed.getDisPer());
-                cv.put(DBQ._TBLT_ORDERHED_DocNo, maxNo);
-                cv.put(DBQ._TBLT_ORDERHED_GrossAmt, hed.getGrossAmt());
-                cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
-                cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
-                cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
-                cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
-                cv.put(DBQ._TBLT_ORDERHED_RefNo, hed.getRepCode().concat(String.valueOf(maxNo)));
-                cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
-                cv.put(DBQ._TBLT_ORDERHED_Status, "S");
-                cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
-                cv.put(DBQ._TBLT_ORDERHED_RepCode,hed.getRepCode());
+            ContentValues cv = new ContentValues();
+            cv.put(DBQ._TBLT_ORDERHED_AreaCode, hed.getAreaCode());
+            cv.put(DBQ._TBLT_ORDERHED_CreateUser, hed.getCreateUser());
+            cv.put(DBQ._TBLT_ORDERHED_CusCode, hed.getCusCode());
+            cv.put(DBQ._TBLT_ORDERHED_Discode, hed.getDiscode());
+            cv.put(DBQ._TBLT_ORDERHED_Discount, hed.getDiscount());
+            cv.put(DBQ._TBLT_ORDERHED_DisPer, hed.getDisPer());
+            cv.put(DBQ._TBLT_ORDERHED_DocNo, hed.getDocNo());
+            cv.put(DBQ._TBLT_ORDERHED_GrossAmt, hed.getGrossAmt());
+            cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
+            cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
+            cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
+            cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
+            cv.put(DBQ._TBLT_ORDERHED_RefNo, hed.getRefNo());
+            cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
+            cv.put(DBQ._TBLT_ORDERHED_Status, hed.getStatus());
+            cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
+            cv.put(DBQ._TBLT_ORDERHED_RepCode, hed.getRepCode());
 
-                db.insertOrThrow(DBQ._TBLT_ORDERHED, null, cv);
+            db.replaceOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
-                int recLine = 1;
-                for (TBLT_ORDDTL obj : ItemList) {
-                    cv.clear();
-                    cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
-                    cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
-                    cv.put(DBQ._TBLT_ORDDTL_CusCode, hed.getCusCode());
-                    cv.put(DBQ._TBLT_ORDDTL_Date, obj.getDate());
-                    cv.put(DBQ._TBLT_ORDDTL_DiscAmt, obj.getDiscAmt());
-                    cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
-                    cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
-                    cv.put(DBQ._TBLT_ORDDTL_DocNo, String.valueOf(maxNo));
-                    cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
-                    cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
-                    cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
-                    cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
-                    cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
-                    cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
-                    cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
+            int recLine = 1;
+            for (TBLT_ORDDTL obj : ItemList) {
+                cv.clear();
+                cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
+                cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
+                cv.put(DBQ._TBLT_ORDDTL_CusCode, hed.getCusCode());
+                cv.put(DBQ._TBLT_ORDDTL_Date, obj.getDate());
+                cv.put(DBQ._TBLT_ORDDTL_DiscAmt, obj.getDiscAmt());
+                cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
+                cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
+                cv.put(DBQ._TBLT_ORDDTL_DocNo, hed.getDocNo());
+                cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
+                cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
+                cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
+                cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
+                cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
+                cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
 
 
-                    db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
-                    recLine++;
-                }
-                db.setTransactionSuccessful();
-                db.endTransaction();
-                db.close();
-                dbHelper.close();
-                msg = "INV Ref No. " + hed.getRepCode().concat(String.valueOf(maxNo));
-                textView_InvNo.setText(msg);
-            } else {
-                db.close();
-                dbHelper.close();
-                msg = "Error : Can not Save Order!. Max Document number is Null";
+                db.replaceOrThrow(DBQ._TBLT_ORDDTL, null, cv);
+                recLine++;
             }
+            db.setTransactionSuccessful();
+            db.endTransaction();
+            db.close();
+            dbHelper.close();
+            msg = "INV Ref No. " + hed.getRefNo();
+            textView_InvNo.setText(msg);
+
         } catch (Exception ex) {
             ex.printStackTrace();
             db.endTransaction();
@@ -342,37 +457,108 @@ public class Order extends AppCompatActivity {
         return msg;
     }
 
-    String TAG = "ORDER";
-    private int getMaxDocNo(SQLiteDatabase db) throws SQLiteException {
+    private String getMaxDocNo(SQLiteDatabase db) throws SQLiteException {
 
-        Cursor c = db.rawQuery("SELECT MAX(CAST(DocNo as Int)) as a from TBLT_ORDERHED " +
+        Cursor c = db.rawQuery("SELECT MAX(DocNo) as a from TBLT_ORDERHED " +
                 "WHERE RepCode = ? and Discode = ?", new String[]{String.valueOf(SharedPreference.COM_REP.getRepCode()), String.valueOf(SharedPreference.COM_REP.getDiscode())});
 
-        Log.e(TAG+" Ref ID",SharedPreference.COM_REP.getRepCode());
-        Log.e(TAG+" DIS ID",SharedPreference.COM_REP.getDiscode());
+        Log.e(TAG + " Ref ID", SharedPreference.COM_REP.getRepCode());
+        Log.e(TAG + " DIS ID", SharedPreference.COM_REP.getDiscode());
 
         if (c.moveToNext()) {
-            int res = c.getInt(c.getColumnIndex("a"));
-            Log.e(TAG+" MAX No. ",String.valueOf(res));
+            String res = c.getString(c.getColumnIndex("a"));
+            if(res.length()>3){
+                res = res.substring(3);
+            }
+            Log.e(TAG + " MAX No. ",(res));
             c.close();
-            return res + 1;
+            return String.valueOf(SharedPreference.COM_REP.getRepID()).concat(String.valueOf(Integer.parseInt(res) + 1));
         } else {
             c.close();
-            return -1;
+            return "-1";
         }
     }
 
 
-    private void LoadItemsFromDB(String docNo){
+    private void LoadItemsFromDB(String docNo) {
         DBHelper dbHelper = new DBHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM "+DBQ._TBLT_ORDDTL+" WHERE "+DBQ._TBLT_ORDDTL_DocNo+" = ?",new String[]{String.valueOf(docNo)});
+        Cursor c = db.rawQuery("SELECT * FROM " + DBQ._TBLT_ORDDTL + " WHERE " + DBQ._TBLT_ORDDTL_DocNo + " = ?", new String[]{String.valueOf(docNo)});
         TBLT_ORDDTL dtl;
-        while(c.moveToNext()){
+        while (c.moveToNext()) {
             dtl = new TBLT_ORDDTL();
+            dtl.setItemCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_ItemCode)));
+            dtl.setBATCH(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_BATCH)));
+            dtl.setUnitPrice(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_UnitPrice)));
+            dtl.setDiscPer(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_DiscPer)));
+            dtl.setDiscAmt(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_DiscAmt)));
+            dtl.setItQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_ItQty)));
+            dtl.setUsedQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_UsedQty)));
+            dtl.setDate(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_Date)));
+            dtl.setCusCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_CusCode)));
+            dtl.setFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_FQTY)));
+            dtl.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
+            dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
+
+            ItemList.add(dtl);
         }
+        c.close();
+        db.close();
     }
+
+
+    private TBLT_ORDERHED GetFullOrderForSync(){
+        if(obj!=null){
+            obj.setItemList(ItemList);
+        }
+        return obj;
+    }
+
+    public boolean UploadOrder() throws JSONException {
+
+        Gson gson = new Gson();
+
+
+        JSONObject obj = new JSONObject(gson.toJson(GetFullOrderForSync()));
+
+
+        Log.i(TAG, obj.toString());
+        RequestQueue rq = Volley.newRequestQueue(this);
+
+        String url = SharedPreference.URL + "Order/upload";
+
+
+        JsonObjectRequest jr = new JsonObjectRequest(
+                Request.Method.POST, url, obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println("Rest Response :" + response.toString());
+
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println("Rest Errr :" + error.toString());
+
+                    }
+                }
+        ) { //no semicolon or coma
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+        };
+
+        rq.add(jr);
+
+
+        return true;
+    }
+
 
 
 }

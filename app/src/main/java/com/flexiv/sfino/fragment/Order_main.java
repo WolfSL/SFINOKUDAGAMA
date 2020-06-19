@@ -28,6 +28,8 @@ import com.flexiv.sfino.model.TBLT_ORDERHED;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.json.JSONException;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -40,37 +42,21 @@ public class Order_main extends Fragment {
         return inflater.inflate(R.layout.fragment_order_main, container, false);
     }
 
-    TextView textView_total;
-    TextView textView_Nettotal;
-    TextView textView_tax;
-
-    EditText DisPre, DisAmt;
-
-    Button button_save;
-    Button button_process;
+    private TextView textView_total;
+    private TextView textView_Nettotal;
+    private TextView textView_tax;
+    private EditText DisPre, DisAmt;
+    private Button button_save;
+    private Button button_process;
 
     private RecyclerView Order_recView;
     private Adapter_Oeder_Item adaper;
     private RecyclerView.LayoutManager layoutManager;
+    private FloatingActionButton floatingActionButton_OM;
 
     //Components
     private Order context;
 
-    private FloatingActionButton floatingActionButton_OM;
-
-    private static Order_main order_main;
-
-    public static Order_main getObj(Order context) {
-        if (order_main == null) {
-            order_main = new Order_main(context);
-        }
-        return order_main;
-
-    }
-
-    public static void Distoy(){
-        order_main = null;
-    }
 
     public Order_main(Order context) {
         this.context = context;
@@ -78,14 +64,6 @@ public class Order_main extends Fragment {
     }
 
 
-    TBLT_ORDERHED hed = null;
-    public Order_main(Order context,TBLT_ORDERHED hed){
-        this.context = context;
-        context.changeNavButton(1);
-        this.hed = hed;
-
-        System.out.println(hed.toString());
-    }
 
 
 
@@ -94,7 +72,6 @@ public class Order_main extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         constraintLayout3 = view.findViewById(R.id.constraintLayout3);
-
         textView_total = view.findViewById(R.id.textView10);
         textView_Nettotal = view.findViewById(R.id.textView19);
         textView_tax = view.findViewById(R.id.textView17);
@@ -106,17 +83,22 @@ public class Order_main extends Fragment {
         //TODO-----------------------------------
         //SAVE...................................
         button_save.setOnClickListener(view1 -> {
-            if (!button_process.isEnabled()) {
+            if (context.getTextView_InvNo().getText().toString().contains("Processing")) {
                 String msg = context.Save(CreateORDERHED());
                 if (msg.contains("Error")) {
                     Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
                 } else {
-                    button_process.setEnabled(true);
-                    button_process.setAlpha(1);
+                    context.onBackPressed2();
                     Toast.makeText(context, "Successfully Saved!", Toast.LENGTH_LONG).show();
                 }
             }else{
-                Toast.makeText(context, "Updated!", Toast.LENGTH_LONG).show();
+                String msg = context.SaveUpdate(CreateORDERHED_ForUpdate());
+                if (msg.contains("Error")) {
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+                } else {
+                    context.onBackPressed2();
+                    Toast.makeText(context, "Successfully Updated!", Toast.LENGTH_LONG).show();
+                }
             }
 
         });
@@ -127,40 +109,35 @@ public class Order_main extends Fragment {
         adaper = new Adapter_Oeder_Item(context.getItemList(), context);
         Order_recView.setLayoutManager(layoutManager);
         Order_recView.setAdapter(adaper);
+
         //FAB Action
-        view.findViewById(R.id.floatingActionButton_OM).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "FAB Onclic");
-                context.LoadFragment_sub();
-                //context.getSupportFragmentManager().beginTransaction().replace(R.id.OrderFrame,new Order_sub(context)).commit();
-            }
-        });
+        view.findViewById(R.id.floatingActionButton_OM).setOnClickListener(v -> context.LoadFragment_sub());
+         TextWatcher tw = new TextWatcher() {
+             @Override
+             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-        DisPre.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+             }
 
-            }
+             @Override
+             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                 disTextChange = 1;
+                 if (charSequence.length() > 0) {
+                     DisAmt.setText(SharedPreference.df.format(GenDisVal(charSequence)));
+                     //textView_Nettotal.setText(SharedPreference.df.format(total - GenDisVal(charSequence)));
+                 } else {
+                     DisAmt.getText().clear();
+                     textView_Nettotal.setText(SharedPreference.df.format(total));
+                 }
+             }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0) {
-                    DisAmt.setText(SharedPreference.df.format(GenDisVal(charSequence)));
-                    textView_Nettotal.setText(SharedPreference.df.format(total - GenDisVal(charSequence)));
-                } else {
-                    DisAmt.getText().clear();
-                    textView_Nettotal.setText(SharedPreference.df.format(total));
-                }
-            }
+             @Override
+             public void afterTextChanged(Editable editable) {
 
-            @Override
-            public void afterTextChanged(Editable editable) {
+             }
+         };
+        DisPre.addTextChangedListener(tw);
 
-            }
-        });
-
-        DisAmt.setOnFocusChangeListener((view1, b) -> DisPre.getText().clear());
+//        DisAmt.setOnFocusChangeListener((view1, b) -> DisPre.getText().clear());
         DisAmt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -170,22 +147,50 @@ public class Order_main extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() > 0) {
-                    textView_Nettotal.setText(SharedPreference.df.format(total - Double.parseDouble(DisAmt.getText().toString())));
+                    double net = total - Double.parseDouble(DisAmt.getText().toString());
+                    double disprt = 100/total*( Double.parseDouble(DisAmt.getText().toString()));
+                    if(disTextChange!=1) {
+                        DisPre.removeTextChangedListener(tw);
+                        DisPre.setText(SharedPreference.df.format(disprt));
+                        DisPre.addTextChangedListener(tw);
+                    }
+                    textView_Nettotal.setText(SharedPreference.df.format(net));
                 } else {
+                    if(disTextChange!=1) {
+                        DisPre.removeTextChangedListener(tw);
+                        DisPre.getText().clear();
+                        DisPre.addTextChangedListener(tw);
+                    }
                     textView_Nettotal.setText(SharedPreference.df.format(total));
                 }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                disTextChange = 0;
+                button_process.setAlpha(Float.parseFloat("0.3"));
+                button_process.setEnabled(false);
             }
         });
 
-        if(hed!=null) {
-            setDetailsFromIntent(hed);
+        if(context.getObj()!=null) {
+            setDetailsFromIntent(context.getObj());
         }
+
+
+
+        //Proccess Order
+        button_process.setOnClickListener(view1 -> {
+            try {
+                context.UploadOrder();
+            } catch (JSONException e) {
+                Toast.makeText(context,e.toString(),Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+
+        });
     }
+    int disTextChange = 0;
 
     double total = 0;
 
@@ -196,9 +201,16 @@ public class Order_main extends Fragment {
         }
         textView_total.setText(SharedPreference.df.format(total));
         double netTotal = total - Double.parseDouble(textView_tax.getText().toString());
-        textView_Nettotal.setText(SharedPreference.df.format(netTotal));
-        DisPre.getText().clear();
-        DisAmt.getText().clear();
+
+
+        //TODO.....
+        if (DisPre.getText().length() > 0) {
+            DisAmt.setText(SharedPreference.df.format(GenDisVal(DisPre.getText().toString())));
+            textView_Nettotal.setText(SharedPreference.df.format(total - GenDisVal(DisPre.getText().toString())));
+        } else {
+            DisAmt.getText().clear();
+            textView_Nettotal.setText(SharedPreference.df.format(total));
+        }
         adaper.notifyDataSetChanged();
     }
 
@@ -212,6 +224,8 @@ public class Order_main extends Fragment {
 
     private double GenDisVal(CharSequence s) {
         if (DisPre.getText().length() > 0) {
+            System.out.println("--------------" +s.toString() );
+            System.out.println("--------------" +Double.parseDouble(s.toString()));
             return total * (Double.parseDouble(s.toString()) / 100);
         }
         return 0;
@@ -223,20 +237,53 @@ public class Order_main extends Fragment {
 
         String strDate = SharedPreference.dateFormat.format(date);
         TBLT_ORDERHED obj = new TBLT_ORDERHED();
-        obj.setAreaCode(SharedPreference.COM_AREA.getTxt_code());
-        obj.setCreateUser(SharedPreference.COM_REP.getRepName());
-        obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
+
+        obj.setDocNo("");
+        obj.setRepCode(SharedPreference.COM_REP.getRepCode());
         obj.setDiscode(SharedPreference.COM_REP.getDiscode());
-        obj.setDiscount(Double.parseDouble(DisAmt.getText().length() <= 0 ? "0" : DisAmt.getText().toString()));
-        obj.setDisPer(Double.parseDouble(DisPre.getText().length() <= 0 ? "0" : DisPre.getText().toString()));
-        obj.setDocNo("0");
-        obj.setGrossAmt(Double.parseDouble(textView_total.getText().toString()));
-        obj.setNetAmt(Double.parseDouble(textView_Nettotal.getText().toString()));
+        obj.setRefNo("");
+        obj.setAreaCode(SharedPreference.COM_AREA.getTxt_code());
+        obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
+        obj.setCreateUser(SharedPreference.COM_REP.getRepName());
+        obj.setSalesDate(strDate);
+        obj.setPayType("CASH");
         obj.setISUSED(false);
         obj.setLocCode("");
-        obj.setPayType("CASH");
-        obj.setRepCode(SharedPreference.COM_REP.getRepCode());
-        obj.setSalesDate(strDate);
+        obj.setVatAmt(0);
+        obj.setStatus("S");
+
+        obj.setGrossAmt(Double.parseDouble(textView_total.getText().toString()));
+        obj.setDiscount(Double.parseDouble(DisAmt.getText().length() <= 0 ? "0" : DisAmt.getText().toString()));
+        obj.setDisPer(Double.parseDouble(DisPre.getText().length() <= 0 ? "0" : DisPre.getText().toString()));
+        obj.setNetAmt(Double.parseDouble(textView_Nettotal.getText().toString()));
+
+
+
+        return obj;
+    }
+    private TBLT_ORDERHED CreateORDERHED_ForUpdate() {
+
+        TBLT_ORDERHED obj = new TBLT_ORDERHED();
+        obj.setDocNo(context.getObj().getDocNo());
+        obj.setRepCode(context.getObj().getRepCode());
+        obj.setDiscode(context.getObj().getDiscode());
+        obj.setRefNo(context.getObj().getRefNo());
+        obj.setAreaCode(context.getObj().getAreaCode());
+        obj.setCusCode(context.getObj().getCusCode());
+        obj.setCreateUser(context.getObj().getCreateUser());
+        obj.setSalesDate(context.getObj().getSalesDate());
+        obj.setPayType(context.getObj().getPayType());
+        obj.setISUSED(false);
+        obj.setLocCode(context.getObj().getLocCode());
+        obj.setVatAmt(context.getObj().getVatAmt());
+        obj.setStatus("S");
+
+        obj.setGrossAmt(Double.parseDouble(textView_total.getText().toString()));
+        obj.setDiscount(Double.parseDouble(DisAmt.getText().length() <= 0 ? "0" : DisAmt.getText().toString()));
+        obj.setDisPer(Double.parseDouble(DisPre.getText().length() <= 0 ? "0" : DisPre.getText().toString()));
+        obj.setNetAmt(Double.parseDouble(textView_Nettotal.getText().toString()));
+
+
         return obj;
     }
 
@@ -245,8 +292,10 @@ public class Order_main extends Fragment {
         System.out.println("--------------------------------------");
         textView_total.setText(SharedPreference.df.format(hed.getGrossAmt()));
         DisPre.setText(SharedPreference.df.format(hed.getDisPer()));
-        DisAmt.setText(SharedPreference.df.format(hed.getDisPer()));
+        //DisAmt.setText(SharedPreference.df.format(hed.getDisPer()));
         textView_Nettotal.setText(SharedPreference.df.format(hed.getNetAmt()));
+        button_process.setAlpha(1);
+        button_process.setEnabled(true);
 
     }
 }

@@ -91,7 +91,6 @@ public class OrderList extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Order_main.Distoy();
         System.out.println("Distoy Object");
 
     }
@@ -104,7 +103,7 @@ public class OrderList extends AppCompatActivity {
         DBHelper dbHelper = new DBHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM "+ DBQ._TBLT_ORDERHED+" WHERE "+DBQ._TBLT_ORDERHED_Discode+ " = ? AND "+DBQ._TBLT_ORDERHED_RepCode + " = ? AND "+DBQ._TBLT_ORDERHED_CusCode+ " = ?" ,
+        Cursor c = db.rawQuery("SELECT * FROM "+ DBQ._TBLT_ORDERHED+" WHERE "+DBQ._TBLT_ORDERHED_Discode+ " = ? AND "+DBQ._TBLT_ORDERHED_RepCode + " = ? AND "+DBQ._TBLT_ORDERHED_CusCode+ " = ? order by "+DBQ._TBLT_ORDERHED_DocNo+" DESC" ,
                 new String[]{String.valueOf(SharedPreference.COM_REP.getDiscode()),
                         String.valueOf(SharedPreference.COM_REP.getRepCode()),
                         String.valueOf(SharedPreference.COM_CUSTOMER.getTxt_code())});

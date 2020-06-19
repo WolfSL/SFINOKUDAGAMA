@@ -4,6 +4,7 @@ public class DBQ {
     /*Rep Table*/
     public static final String CREATE_TBL_REP = "CREATE TABLE [TBL_REP] (\n" +
             "[RepCode] TEXT  NOT NULL PRIMARY KEY,\n" +
+            "[RepID] NUMERIC  NOT NULL,\n" +
             "[RepName] TEXT  NOT NULL,\n" +
             "[Discode] TEXT  NOT NULL,\n" +
             "[DisName] TEXT  NOT NULL,\n" +
@@ -13,6 +14,7 @@ public class DBQ {
             "[DeviceIMI] TEXT  NULL\n" +
             ")";
     public static final String _TBL_REP = "TBL_REP";
+    public static final String _TBL_REP_RepID = "RepID";
     public static final String _TBL_REP_RepCode = "RepCode";
     public static final String _TBL_REP_RepName = "RepName";
     public static final String _TBL_REP_Discode = "Discode";

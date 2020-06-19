@@ -6,6 +6,7 @@ public class Modal_Rep implements Serializable {
 
     private String TBL_REP;
     private String RepCode;
+    private int RepID;
     private String RepName;
     private String Discode;
     private String Status;
@@ -13,6 +14,14 @@ public class Modal_Rep implements Serializable {
     private String Password;
     private int Auth;
     private String DeviceIMI;
+
+    public int getRepID() {
+        return RepID;
+    }
+
+    public void setRepID(int repID) {
+        RepID = repID;
+    }
 
     public String getTBL_REP() {
         return TBL_REP;

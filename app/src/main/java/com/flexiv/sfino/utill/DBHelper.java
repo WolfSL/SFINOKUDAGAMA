@@ -24,7 +24,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "SFINO.db";
-    private static final int DATABASE_VERSION = 43;
+    private static final int DATABASE_VERSION = 46;
 
 
     public DBHelper(@Nullable Context context) {

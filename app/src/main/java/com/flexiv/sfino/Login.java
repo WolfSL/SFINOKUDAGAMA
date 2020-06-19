@@ -227,13 +227,14 @@ public class Login extends AppCompatActivity {
 
         Modal_Rep rep = new Modal_Rep();
         try (Cursor cursor = db.query(DBQ._TBL_REP,
-                new String[]{DBQ._TBL_REP_RepCode, DBQ._TBL_REP_Auth, DBQ._TBL_REP_DeviceIMI, DBQ._TBL_REP_Discode, DBQ._TBL_REP_RepName,DBQ._TBL_REP_DisName},
+                new String[]{DBQ._TBL_REP_RepCode, DBQ._TBL_REP_Auth, DBQ._TBL_REP_DeviceIMI, DBQ._TBL_REP_Discode, DBQ._TBL_REP_RepName,DBQ._TBL_REP_DisName,DBQ._TBL_REP_RepID},
                 DBQ._TBL_REP_RepCode + " = ? AND " + DBQ._TBL_REP_Password + " = ? AND " + DBQ._TBL_REP_Status + "=?",
                 new String[]{repCode, password, "A"}, null, null, null)) {
             if (cursor.moveToNext()) {
 
                 rep.setAuth(cursor.getInt(cursor.getColumnIndex(DBQ._TBL_REP_Auth)));
                 rep.setRepName(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_RepName)));
+                rep.setRepID(cursor.getInt(cursor.getColumnIndex(DBQ._TBL_REP_RepID)));
                 rep.setDiscode(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_Discode)));
                 rep.setRepCode(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_RepCode)));
                 rep.setDisName(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_DisName)));
@@ -338,6 +339,7 @@ public class Login extends AppCompatActivity {
             c.put(DBQ._TBL_REP_Discode, rep.getDiscode());
             c.put(DBQ._TBL_REP_Password, rep.getPassword());
             c.put(DBQ._TBL_REP_RepCode, rep.getRepCode());
+            c.put(DBQ._TBL_REP_RepID, rep.getRepID());
             c.put(DBQ._TBL_REP_RepName, rep.getRepName());
             c.put(DBQ._TBL_REP_Status, rep.getStatus());
             c.put(DBQ._TBL_REP_DisName, rep.getDisName());

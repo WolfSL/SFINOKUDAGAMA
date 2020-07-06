@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
+import com.flexiv.sfino.utill.Fragment_sub_batching;
 import com.flexiv.sfino.utill.SharedPreference;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class Adapter_Oeder_Item extends RecyclerView.Adapter<Adapter_Oeder_Item.
 
     private ArrayList<TBLT_ORDDTL> arr;
     private ArrayList<TBLT_ORDDTL> arr_full;
-    private Order context;
+    private Fragment_sub_batching context;
 
     @NonNull
     @Override
@@ -31,7 +32,7 @@ public class Adapter_Oeder_Item extends RecyclerView.Adapter<Adapter_Oeder_Item.
         return mvh;
     }
 
-    public Adapter_Oeder_Item(ArrayList<TBLT_ORDDTL> arr, Order context) {
+    public Adapter_Oeder_Item(ArrayList<TBLT_ORDDTL> arr, Fragment_sub_batching context) {
         this.arr = arr;
         this.arr_full = new ArrayList<>(arr);
         this.context = context;

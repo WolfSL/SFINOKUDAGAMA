@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +75,20 @@ public class OrderList extends AppCompatActivity {
             startActivity(i);
         }
 
+        SearchView sv = findViewById(R.id.searchview);
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+
 
     }
 
@@ -82,7 +97,9 @@ public class OrderList extends AppCompatActivity {
         super.onPostResume();
         hedList.clear();
         hedList.addAll(LocatOrderList());
-        adapter.notifyDataSetChanged();
+        adapter = new Adapter_Order_list(hedList,1,this);
+        OrderSelectorRecView.setLayoutManager(layoutManager);
+        OrderSelectorRecView.setAdapter(adapter);
 
         System.out.println(hedList.size());
         System.out.println("onPostResume");
@@ -103,7 +120,7 @@ public class OrderList extends AppCompatActivity {
         DBHelper dbHelper = new DBHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM "+ DBQ._TBLT_ORDERHED+" WHERE "+DBQ._TBLT_ORDERHED_Discode+ " = ? AND "+DBQ._TBLT_ORDERHED_RepCode + " = ? AND "+DBQ._TBLT_ORDERHED_CusCode+ " = ? order by "+DBQ._TBLT_ORDERHED_DocNo+" DESC" ,
+        Cursor c = db.rawQuery("SELECT * FROM "+ DBQ._TBLT_ORDERHED+" WHERE "+DBQ._TBLT_ORDERHED_Discode+ " = ? AND "+DBQ._TBLT_ORDERHED_RepCode + " = ? AND "+DBQ._TBLT_ORDERHED_CusCode+ " = ? order by Status desc, CAST(DocNo as INt) DESC" ,
                 new String[]{String.valueOf(SharedPreference.COM_REP.getDiscode()),
                         String.valueOf(SharedPreference.COM_REP.getRepCode()),
                         String.valueOf(SharedPreference.COM_CUSTOMER.getTxt_code())});

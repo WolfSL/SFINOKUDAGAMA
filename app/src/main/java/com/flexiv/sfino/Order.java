@@ -1,18 +1,25 @@
 package com.flexiv.sfino;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.SearchView;
@@ -35,22 +42,32 @@ import com.flexiv.sfino.adapter.Adapter_Batch;
 import com.flexiv.sfino.adapter.Adapter_Item;
 import com.flexiv.sfino.fragment.Order_main;
 import com.flexiv.sfino.fragment.Order_sub;
+import com.flexiv.sfino.model.DefModal;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
 import com.flexiv.sfino.utill.DBHelper;
 import com.flexiv.sfino.utill.DBQ;
+import com.flexiv.sfino.utill.Fragment_sub_batching;
+import com.flexiv.sfino.utill.PrinterCommands;
 import com.flexiv.sfino.utill.SharedPreference;
+import com.flexiv.sfino.utill.UnicodeFormatter;
 import com.google.gson.Gson;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.UUID;
 
-public class Order extends AppCompatActivity {
+import me.anwarshahriar.calligrapher.Calligrapher;
+
+public class Order extends AppCompatActivity implements Fragment_sub_batching {
     String TAG = "ORDER";
     //Components
     ImageButton imageButton_done;
@@ -84,6 +101,7 @@ public class Order extends AppCompatActivity {
         ItemList.add(itemList);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +133,23 @@ public class Order extends AppCompatActivity {
         }
 
         getSupportFragmentManager().beginTransaction().add(R.id.OrderFrame, new Order_main(this)).commit();
+
+        //TODO
+        //PRINTER
+        //printerInit();
+        TextView tv = findViewById(R.id.textViewPS);
+        if (MainMenu.mBluetoothSocket != null)
+            if (MainMenu.mBluetoothSocket.isConnected()) {
+
+                tv.setText("Connected");
+            }
+
+        imageButton_done.setOnClickListener(view -> {
+            if (tv.getText().equals("Connected"))
+                p2();
+            else
+                Toast.makeText(Order.this,"Please Connet the printer",Toast.LENGTH_LONG).show();
+        });
 
     }
 
@@ -206,11 +241,13 @@ public class Order extends AppCompatActivity {
 
 
     //Load Batchs
+    @Override
     public void LoadFragment_sub_batchs(String itemCode) {
 
         try {
             DBHelper db = new DBHelper(this);
             openDialogSelector_batchs(db.getBatchWiceStock(SharedPreference.COM_REP.getDiscode(), itemCode), "SELECT BATCH", 0);
+            db.close();
         } catch (Exception es) {
             es.printStackTrace();
         }
@@ -380,7 +417,7 @@ public class Order extends AppCompatActivity {
                 msg = "Error : " + ex.getMessage();
                 System.out.println(msg);
             }
-        }else{
+        } else {
             msg = "Error : Can not Save Order Without Items!";
         }
         return msg;
@@ -459,7 +496,7 @@ public class Order extends AppCompatActivity {
 
     private String getMaxDocNo(SQLiteDatabase db) throws SQLiteException {
 
-        Cursor c = db.rawQuery("SELECT MAX(DocNo) as a from TBLT_ORDERHED " +
+        Cursor c = db.rawQuery("SELECT MAX(CAST(DocNo as INt)) as a from TBLT_ORDERHED " +
                 "WHERE RepCode = ? and Discode = ?", new String[]{String.valueOf(SharedPreference.COM_REP.getRepCode()), String.valueOf(SharedPreference.COM_REP.getDiscode())});
 
         Log.e(TAG + " Ref ID", SharedPreference.COM_REP.getRepCode());
@@ -467,10 +504,10 @@ public class Order extends AppCompatActivity {
 
         if (c.moveToNext()) {
             String res = c.getString(c.getColumnIndex("a"));
-            if(res.length()>3){
+            if (res.length() > 3) {
                 res = res.substring(3);
             }
-            Log.e(TAG + " MAX No. ",(res));
+            Log.e(TAG + " MAX No. ", (res));
             c.close();
             return String.valueOf(SharedPreference.COM_REP.getRepID()).concat(String.valueOf(Integer.parseInt(res) + 1));
         } else {
@@ -484,8 +521,9 @@ public class Order extends AppCompatActivity {
         DBHelper dbHelper = new DBHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM " + DBQ._TBLT_ORDDTL + " WHERE " + DBQ._TBLT_ORDDTL_DocNo + " = ?", new String[]{String.valueOf(docNo)});
+        Cursor c = db.rawQuery("select a.*, b.ItemDes from TBLT_ORDDTL as a left outer join TBLM_ITEM as b on a.ItemCode = b.ItemCode WHERE " + DBQ._TBLT_ORDDTL_DocNo + " = ?", new String[]{String.valueOf(docNo)});
         TBLT_ORDDTL dtl;
+        ItemList.clear();
         while (c.moveToNext()) {
             dtl = new TBLT_ORDDTL();
             dtl.setItemCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_ItemCode)));
@@ -500,27 +538,34 @@ public class Order extends AppCompatActivity {
             dtl.setFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_FQTY)));
             dtl.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
             dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
+            dtl.setItemName(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)));
 
             ItemList.add(dtl);
         }
         c.close();
         db.close();
+        dbHelper.close();
     }
 
 
-    private TBLT_ORDERHED GetFullOrderForSync(){
-        if(obj!=null){
+    private TBLT_ORDERHED GetFullOrderForSync() {
+        if (obj != null) {
+            obj.setStatus("A");
             obj.setItemList(ItemList);
         }
         return obj;
     }
 
-    public boolean UploadOrder() throws JSONException {
+    ProgressDialog pd;
 
+    public void UploadOrder() throws JSONException {
+        pd = new ProgressDialog(this);
+        pd.setMessage("Processing..");
+        pd.show();
         Gson gson = new Gson();
 
-
-        JSONObject obj = new JSONObject(gson.toJson(GetFullOrderForSync()));
+        TBLT_ORDERHED orderhed = GetFullOrderForSync();
+        JSONObject obj = new JSONObject(gson.toJson(orderhed));
 
 
         Log.i(TAG, obj.toString());
@@ -536,14 +581,28 @@ public class Order extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         System.out.println("Rest Response :" + response.toString());
 
+                        DefModal defModal = gson.fromJson(response.toString(), DefModal.class);
+                        if (defModal.getVal1().equals("S")) {
+                            updateOrderFlag(defModal, "A");
 
+                        } else if (defModal.getVal1().equals("E")) {
+                            Toast.makeText(Order.this, defModal.getVal2(), Toast.LENGTH_LONG).show();
+                            updateOrderFlag(defModal, "E");
+                        }
+
+                        pd.dismiss();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         System.out.println("Rest Errr :" + error.toString());
-
+                        Toast.makeText(Order.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                        pd.dismiss();
+                        DefModal defModal = new DefModal();
+                        defModal.setVal2(orderhed.getDocNo());
+                        defModal.setVal3(orderhed.getDiscode());
+                        updateOrderFlag(defModal, "E");
                     }
                 }
         ) { //no semicolon or coma
@@ -554,11 +613,451 @@ public class Order extends AppCompatActivity {
         };
 
         rq.add(jr);
+        System.out.println("------------------------------------------------------------------------");
+
+    }
+
+    private void updateOrderFlag(DefModal modal, String flag) {
+        DBHelper dbHelper = new DBHelper(this);
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        cv.put(DBQ._TBLT_ORDERHED_Status, flag);
+
+        db.update(DBQ._TBLT_ORDERHED, cv, DBQ._TBLT_ORDERHED_DocNo + " = ? AND " +
+                DBQ._TBLT_ORDERHED_Discode + " = ?", new String[]{String.valueOf(modal.getVal2()), String.valueOf(modal.getVal3())});
+
+        db.close();
+
+        Toast.makeText(this, "Successfully Processed", Toast.LENGTH_LONG).show();
+        onBackPressed2();
+
+    }
 
 
+    //Remove Item
+    public boolean removeItem(int pos) {
+        ItemList.remove(pos);
         return true;
     }
 
 
+    public void p2() {
+
+        Thread t = new Thread() {
+            public void run() {
+                try {
+                    OutputStream os = MainMenu.mBluetoothSocket
+                            .getOutputStream();
+
+                    String freeSp = "  ";
+                    String lbreak = "\n";
+                    String line = "\n" + freeSp + "-----------------------------------------------\n";
+
+                    printConfig(SharedPreference.COM_REP.getDisName(), 1, 2, 1, os, true);
+                    //printConfig("--------------------------------------------------------------", 3, 1, 1, os,true);
+                    printConfig(SharedPreference.address, 3, 1, 1, os, true);
+                    printConfig("Tel : ".concat(SharedPreference.tp), 3, 1, 1, os, true);
+                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+                    printConfig("------ ORDER ------", 2, 2, 1, os, true);
+                    printConfig("Order No. ".concat(obj.getDocNo()), 2, 1, 0, os, true);
+                    printConfig(obj.getSalesDate().concat(" | Rep : ").concat(SharedPreference.COM_REP.getRepCode()), 2, 1, 0, os, true);
+                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+                    printConfig("LN   Item       Price        QTY      Amount", 2, 2, 0, os, true);
+                    printConfig("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", 3, 1, 1, os, true);
+                    int i = 1;
+                    String s;
+                    double linedis = 0;
+                    for (TBLT_ORDDTL o : ItemList) {
+
+                        s = i + "  " + o.getItemName() + " (" + o.getItemCode() + ")";
+                        printConfig(s, 2, 1, 0, os, true);
+                        printConfig(SharedPreference.ds_formatter.format(o.getUnitPrice()) + "  x  ", 2, 1, 1, os, false);
+                        printConfig(SharedPreference.ds_formatter.format(o.getItQty()) + "  ", 2, 1, 1, os, false);
+                        printConfig(SharedPreference.ds_formatter.format(o.getAmount()) + "  ", 2, 1, 2, os, true);
+                        // printConfig("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", 3, 1, 1, os,true);
+                        linedis = linedis + o.getDiscAmt();
+                        i++;
+
+                    }
+                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+
+                    printConfig("Gross Amount :    ".concat(SharedPreference.ds_formatter.format(obj.getGrossAmt())) + "  ", 2, 1, 2, os, true);
+                    //printNewLine(os);
+                    printConfig("Total Bill Discount :    ".concat(SharedPreference.ds_formatter.format(obj.getDiscount())) + "  ", 2, 1, 2, os, true);
+                    printConfig("Line Discount :    ".concat(SharedPreference.ds_formatter.format(linedis)) + "  ", 2, 1, 2, os, true);
+                    printNewLine(os);
+                    printConfig("Net Amount :    ".concat(SharedPreference.ds_formatter.format(obj.getNetAmt())) + "  ", 1, 1, 2, os, true);
+                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+                    printNewLine(os);
+
+                    printConfig("Software - Flexiv.lk | Salesforce Android", 3, 1, 1, os, true);
+                    printNewLine(os);
+                    printNewLine(os);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        t.start();
+    }
+
+
+    //    //BlueTooth Settings..
+//    private static final int REQUEST_CONNECT_DEVICE = 1;
+//    private static final int REQUEST_ENABLE_BT = 2;
+//
+//    private UUID applicationUUID = UUID
+//            .fromString("00001101-0000-1000-8000-00805F9B34FB");
+//    private ProgressDialog mBluetoothConnectProgressDialog;
+//    private BluetoothSocket mBluetoothSocket;
+//
+//
+//    TextView textViewPS;
+//    int printstat;
+//
+//    private ProgressDialog loading;
+//    AlertDialog.Builder builder;
+//
+//    private void printerInit() {
+//
+//
+//        System.out.println("-----------------------------------1");
+//        Calligrapher calligrapher = new Calligrapher(this);
+//        calligrapher.setFont(this, "fonts/abel-regular.ttf", true);
+//        textViewPS = (TextView) findViewById(R.id.textViewPS);
+//
+//        if (MainMenu.mBluetoothDevice != null) {
+//            // textViewPS.setText(MainMenu.mBluetoothDevice.getName());
+//            run();
+//        }
+//
+//        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+//
+//
+//        imageButton_done.setOnClickListener(view -> {
+//            Log.e(TAG, "Enter Print Test");
+//            if (textViewPS.getText().equals("Disconnected")) {
+//                MainMenu.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//                if (MainMenu.mBluetoothAdapter == null) {
+//                    Toast.makeText(Order.this, "Message1", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    if (!MainMenu.mBluetoothAdapter.isEnabled()) {
+//                        Intent enableBtIntent = new Intent(
+//                                BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//                        startActivityForResult(enableBtIntent,
+//                                REQUEST_ENABLE_BT);
+//                    } else if (MainMenu.mBluetoothDevice == null) {
+//                        ListPairedDevices();
+//                        Intent connectIntent = new Intent(Order.this,
+//                                DeviceList.class);
+//                        startActivityForResult(connectIntent,
+//                                REQUEST_CONNECT_DEVICE);
+//
+//                    }
+//                }
+//
+//            } else {
+//                //Print
+//                p2();
+//
+//                int TIME = 10000; //5000 ms (5 Seconds)
+//
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        //  p2(); //call function!
+//
+//                        printstat = 1;
+//                    }
+//                }, TIME);
+//            }
+//        });
+//    }
+//
+//    private void ListPairedDevices() {
+//        Set<BluetoothDevice> mPairedDevices = MainMenu.mBluetoothAdapter
+//                .getBondedDevices();
+//        if (mPairedDevices.size() > 0) {
+//            for (BluetoothDevice mDevice : mPairedDevices) {
+//                Log.v(TAG, "PairedDevices: " + mDevice.getName() + "  "
+//                        + mDevice.getAddress());
+//            }
+//        }
+//    }
+//
+//    public void onActivityResult(int mRequestCode, int mResultCode,
+//                                 Intent mDataIntent) {
+//        super.onActivityResult(mRequestCode, mResultCode, mDataIntent);
+//
+//        switch (mRequestCode) {
+//            case REQUEST_CONNECT_DEVICE:
+//                if (mResultCode == Activity.RESULT_OK) {
+//                    Bundle mExtra = mDataIntent.getExtras();
+//                    String mDeviceAddress = mExtra.getString("DeviceAddress");
+//                    Log.v(TAG, "Coming incoming address " + mDeviceAddress);
+//                    MainMenu.mBluetoothDevice = MainMenu.mBluetoothAdapter
+//                            .getRemoteDevice(mDeviceAddress);
+//                    mBluetoothConnectProgressDialog = ProgressDialog.show(this,
+//                            "Connecting...", MainMenu.mBluetoothDevice.getName() + " : "
+//                                    + MainMenu.mBluetoothDevice.getAddress(), true, false);
+//                    Thread mBlutoothConnectThread = new Thread(this);
+//                    mBlutoothConnectThread.start();
+//                    // pairToDevice(mBluetoothDevice); This method is replaced by
+//                    // progress dialog with thread
+//                }
+//                break;
+//
+//            case REQUEST_ENABLE_BT:
+//                if (mResultCode == Activity.RESULT_OK) {
+//                    ListPairedDevices();
+//                    Intent connectIntent = new Intent(Order.this,
+//                            DeviceList.class);
+//                    startActivityForResult(connectIntent, REQUEST_CONNECT_DEVICE);
+//                } else {
+//                    Toast.makeText(Order.this, "Message", Toast.LENGTH_SHORT).show();
+//                }
+//                break;
+//        }
+//    }
+//
+//    public void run() {
+//        System.out.println("----------------------2");
+//        try {
+//
+//            mBluetoothSocket = MainMenu.mBluetoothDevice
+//                    .createRfcommSocketToServiceRecord(applicationUUID);
+//            MainMenu.mBluetoothAdapter.cancelDiscovery();
+//            if (!mBluetoothSocket.isConnected()) {
+//                mBluetoothSocket.connect();
+//                mHandler.sendEmptyMessage(0);
+//            }
+//        } catch (IOException eConnectException) {
+//            Log.d(TAG, "CouldNotConnectToSocket", eConnectException);
+//            closeSocket(mBluetoothSocket);
+//            return;
+//        }
+//    }
+//
+//    private Handler mHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            if (mBluetoothConnectProgressDialog != null) {
+//                mBluetoothConnectProgressDialog.dismiss();
+//            }
+//
+//
+//            textViewPS.setText("");
+//            textViewPS.setText("Connected");
+//            //textViewPS.setTextColor(Color.rgb(97, 170, 74));
+//            //mPrint.setEnabled(true);
+//            // .setText("Disconnect");
+//
+//        }
+//    };
+//
+//    private void closeSocket(BluetoothSocket nOpenSocket) {
+//        try {
+//            nOpenSocket.close();
+//            Log.d(TAG, "SocketClosed");
+//        } catch (IOException ex) {
+//            Log.d(TAG, "CouldNotCloseSocket");
+//        }
+//    }
+//
+//    public void p2() {
+//
+//        Thread t = new Thread() {
+//            public void run() {
+//                try {
+//                    OutputStream os = mBluetoothSocket
+//                            .getOutputStream();
+//
+//                    String freeSp = "  ";
+//                    String lbreak = "\n";
+//                    String line = "\n" + freeSp + "-----------------------------------------------\n";
+//
+//                    printConfig(SharedPreference.COM_REP.getDisName(), 1, 2, 1, os, true);
+//                    //printConfig("--------------------------------------------------------------", 3, 1, 1, os,true);
+//                    printConfig(SharedPreference.address, 3, 1, 1, os, true);
+//                    printConfig("Tel : ".concat(SharedPreference.tp), 3, 1, 1, os, true);
+//                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+//                    printConfig("------ ORDER ------", 2, 2, 1, os, true);
+//                    printConfig("Order No. ".concat(obj.getDocNo()), 2, 1, 0, os, true);
+//                    printConfig(obj.getSalesDate().concat(" | Rep : ").concat(SharedPreference.COM_REP.getRepCode()), 2, 1, 0, os, true);
+//                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+//                    printConfig("LN   Item       Price        QTY      Amount", 2, 2, 0, os, true);
+//                    printConfig("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", 3, 1, 1, os, true);
+//                    int i = 1;
+//                    String s;
+//                    double linedis = 0;
+//                    for (TBLT_ORDDTL o : ItemList) {
+//
+//                        s = i + "  " + o.getItemName() + " (" + o.getItemCode() + ")";
+//                        printConfig(s, 2, 1, 0, os, true);
+//                        printConfig(SharedPreference.df.format(o.getUnitPrice()) + "  x  ", 2, 1, 1, os, false);
+//                        printConfig(SharedPreference.df.format(o.getItQty()) + "  ", 2, 1, 1, os, false);
+//                        printConfig(SharedPreference.df.format(o.getAmount()) + "  ", 2, 1, 2, os, true);
+//                        // printConfig("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", 3, 1, 1, os,true);
+//                        linedis = linedis + o.getDiscAmt();
+//                        i++;
+//
+//                    }
+//                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+//
+//                    printConfig("Gross Amount :    ".concat(SharedPreference.df.format(obj.getGrossAmt())) + "  ", 2, 1, 2, os, true);
+//                    //printNewLine(os);
+//                    printConfig("Total Bill Discount :    ".concat(SharedPreference.df.format(obj.getDiscount())) + "  ", 2, 1, 2, os, true);
+//                    printConfig("Line Discount :    ".concat(SharedPreference.df.format(linedis)) + "  ", 2, 1, 2, os, true);
+//                    printNewLine(os);
+//                    printConfig("Net Amount :    ".concat(SharedPreference.df.format(obj.getNetAmt())) + "  ", 1, 1, 2, os, true);
+//                    printConfig("--------------------------------------------------------------", 3, 1, 1, os, true);
+//                    printNewLine(os);
+//
+//                    printConfig("Software - Flexiv.lk | Salesforce Android", 3, 1, 1, os, true);
+//                    printNewLine(os);
+//
+//
+////                    StringBuilder com = new StringBuilder();
+//
+////
+////                    //Header
+////                    com.append(freeSp).append(SharedPreference.COM_REP.getDisName());
+////                    com.append(line);
+////                    String[] adress = SharedPreference.address.split(",");
+////                    com.append(freeSp).append(adress[0].trim()).append(", ").append(adress[1].trim());
+////                    com.append(lbreak);
+////                    com.append(freeSp).append(adress[2].trim());
+////                    com.append(lbreak);
+////                    com.append(freeSp).append("Tel : ").append(SharedPreference.tp);
+////                    com.append(line);
+////                    com.append("Order No. ").append(obj.getDocNo());
+////                    com.append(lbreak);
+////                    com.append(freeSp).append(obj.getSalesDate()).append(" | Rep : ").append(SharedPreference.COM_REP.getRepCode());
+////                    com.append(line2);
+////                    com.append(freeSp).append("LN   Item        QTY               Amount");
+////                    com.append(line);
+////
+////                    os.write(com.toString().getBytes());
+////
+////                    int i = 1;
+////                    //order DTL
+////                    for(TBLT_ORDDTL o : ItemList){
+////                        com.setLength(0);
+////
+////                        com.append(freeSp).append(i).append(freeSp).append(o.getItemCode()).append(" - ").append(o.getItemName());
+////                        com.append(lbreak);
+////                        com.append("               ").append(SharedPreference.df.format(o.getItQty())).append("   ").append(o.getAmount());
+////                        com.append(line);
+////                        os.write(com.toString().getBytes());
+////                    }
+////
+////                    os.write(line.getBytes());
+//
+//
+//                } catch (Exception ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
+//        };
+//        t.start();
+//    }
+//
+//
+    protected void printConfig(String bill, int size, int style, int align, OutputStream outputStream, boolean LF) {
+        //size 1 = large, size 2 = medium, size 3 = small
+        //style 1 = Regular, style 2 = Bold
+        //align 0 = left, align 1 = center, align 2 = right
+
+
+        try {
+
+            byte[] format = new byte[]{27, 33, 0};
+            byte[] change = new byte[]{27, 33, 0};
+
+            outputStream.write(format);
+
+            //different sizes, same style Regular
+            if (size == 1 && style == 1)  //large
+            {
+                change[2] = (byte) (0x10); //large
+                outputStream.write(change);
+            } else if (size == 2 && style == 1) //medium
+            {
+                //nothing to change, uses the default settings
+            } else if (size == 3 && style == 1) //small
+            {
+                change[2] = (byte) (0x3); //small
+                outputStream.write(change);
+            }
+
+            //different sizes, same style Bold
+            if (size == 1 && style == 2)  //large
+            {
+                change[2] = (byte) (0x10 | 0x8); //large
+                outputStream.write(change);
+            } else if (size == 2 && style == 2) //medium
+            {
+                change[2] = (byte) (0x8);
+                outputStream.write(change);
+            } else if (size == 3 && style == 2) //small
+            {
+                change[2] = (byte) (0x3 | 0x8); //small
+                outputStream.write(change);
+            }
+
+
+            switch (align) {
+                case 0:
+                    //left align
+                    outputStream.write(PrinterCommands.ESC_ALIGN_LEFT);
+                    break;
+                case 1:
+                    //center align
+                    outputStream.write(PrinterCommands.ESC_ALIGN_CENTER);
+                    break;
+                case 2:
+                    //right align
+                    outputStream.write(PrinterCommands.ESC_ALIGN_RIGHT);
+                    break;
+            }
+            bill = "  " + bill;
+            outputStream.write(bill.getBytes());
+            if (LF)
+                outputStream.write(PrinterCommands.LF);
+        } catch (Exception ex) {
+            Log.e("error", ex.toString());
+        }
+    }
+
+    protected void printNewLine(OutputStream outputStream) {
+        try {
+            outputStream.write(PrinterCommands.FEED_LINE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+//
+//    public static byte intToByteArray(int value) {
+//        byte[] b = ByteBuffer.allocate(4).putInt(value).array();
+//
+//        for (int k = 0; k < b.length; k++) {
+//            System.out.println("Selva  [" + k + "] = " + "0x"
+//                    + UnicodeFormatter.byteToHex(b[k]));
+//        }
+//
+//        return b[3];
+//    }
+//
+//    public byte[] sel(int val) {
+//        ByteBuffer buffer = ByteBuffer.allocate(2);
+//        buffer.putInt(val);
+//        buffer.flip();
+//        return buffer.array();
+//    }
 
 }

@@ -81,14 +81,14 @@ public class Login extends AppCompatActivity {
         botNaw.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // MainActivity.fa.finish();
+                // MainActivity.fa.finish();
                 finish();
             }
         });
 
         fab.setOnClickListener(v -> {
             //progressDialog = ProgressDialog.show(this, "","Please Wait...", true);
-             lazyLoader.setVisibility(View.VISIBLE);
+            lazyLoader.setVisibility(View.VISIBLE);
             TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             String imei;
             if (android.os.Build.VERSION.SDK_INT >= 26) {
@@ -150,6 +150,8 @@ public class Login extends AppCompatActivity {
                 }
                 return true;
             case R.id.ba_sync:
+                downloadMasterManual();
+                return true;
 
             default:
                 // If we got here, the user's action was not recognized.
@@ -161,13 +163,19 @@ public class Login extends AppCompatActivity {
 
     /**
      * function id {1=area only, 2=customer only, 3 = area and customer}
+     *
      * @param repCode
      */
-    private void download(String repCode,String imei,String password,SQLiteDatabase db){
-       // lazyLoader.setVisibility(View.VISIBLE);
+    private ProgressDialog dialog;
+    private void download(String repCode, String imei, String password, SQLiteDatabase db, boolean login) {
+        // lazyLoader.setVisibility(View.VISIBLE);
         //progressDialog.setTitle("Downloading Master Data. Please Wait..");
-        String url = SharedPreference.URL + "MasterData?discode="+PreferenceManager.getDefaultSharedPreferences(this).getString("disid",null)+"&repcode="+repCode+"&functionid=LM";
+        String url = SharedPreference.URL + "MasterData?discode=" + PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null) + "&repcode=" + repCode + "&functionid=LM" + SharedPreference.SFTYPE;
         System.out.println(url);
+
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Downloading Master Data. Please Wait!");
+        dialog.show();
 
         RequestQueue rq = Volley.newRequestQueue(this);
 
@@ -186,7 +194,13 @@ public class Login extends AppCompatActivity {
                         @Override
                         public void run() {
                             new DBHelper(Login.this).insertMasterData(master);
-                            getRepDetails(imei, repCode, password, db);
+                            if (login)
+                                getRepDetails(imei, repCode, password, db);
+                            else {
+                                lazyLoader.setVisibility(View.VISIBLE);
+                                MakeSnackBar("Download Complete!",Color.GREEN);
+                            }
+                            dialog.dismiss();
                         }
                     });
                     t.start();
@@ -200,7 +214,8 @@ public class Login extends AppCompatActivity {
                     } else {
                         MakeSnackBar(error.toString(), Color.YELLOW);
                     }
-                  lazyLoader.setVisibility(View.GONE);
+                    lazyLoader.setVisibility(View.GONE);
+                    dialog.dismiss();
                     //progressDialog.dismiss();
 
                 }
@@ -213,7 +228,7 @@ public class Login extends AppCompatActivity {
             }
         };
 
-    rq.add(jr);
+        rq.add(jr);
 
 
     }
@@ -227,7 +242,7 @@ public class Login extends AppCompatActivity {
 
         Modal_Rep rep = new Modal_Rep();
         try (Cursor cursor = db.query(DBQ._TBL_REP,
-                new String[]{DBQ._TBL_REP_RepCode, DBQ._TBL_REP_Auth, DBQ._TBL_REP_DeviceIMI, DBQ._TBL_REP_Discode, DBQ._TBL_REP_RepName,DBQ._TBL_REP_DisName,DBQ._TBL_REP_RepID},
+                new String[]{DBQ._TBL_REP_RepCode, DBQ._TBL_REP_Auth, DBQ._TBL_REP_DeviceIMI, DBQ._TBL_REP_Discode, DBQ._TBL_REP_RepName, DBQ._TBL_REP_DisName, DBQ._TBL_REP_RepID},
                 DBQ._TBL_REP_RepCode + " = ? AND " + DBQ._TBL_REP_Password + " = ? AND " + DBQ._TBL_REP_Status + "=?",
                 new String[]{repCode, password, "A"}, null, null, null)) {
             if (cursor.moveToNext()) {
@@ -242,7 +257,7 @@ public class Login extends AppCompatActivity {
                 SharedPreference.COM_REP = rep;
 
                 Log.i(TAG + " Auth ", String.valueOf(rep.getAuth()));
-                if(rep.getDiscode().equals(androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid",null))) {
+                if (rep.getDiscode().equals(androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null))) {
                     if (rep.getAuth() != 1) {
                         rep.setDeviceIMI(cursor.getString(cursor.getColumnIndex(DBQ._TBL_REP_DeviceIMI)));
                         if (!rep.getDeviceIMI().equals(deviceIMI)) {
@@ -254,16 +269,33 @@ public class Login extends AppCompatActivity {
                         this.startActivity(db);
                     }
 
-                }else{
+                } else {
                     MakeSnackBar("Invalid Distributor ID", Color.RED);
                 }
-             //  lazyLoader.setVisibility(View.GONE);
-               // progressDialog.dismiss();
+                //  lazyLoader.setVisibility(View.GONE);
+                // progressDialog.dismiss();
             } else {
 //                MakeSnackBar("Invalid RepCode Or Password");
                 getRepFromAPI(deviceIMI, repCode, password, db);
             }
         }
+    }
+
+    public void downloadMasterManual() {
+        lazyLoader.setVisibility(View.VISIBLE);
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        String imei;
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+
+                return;
+            }
+            imei = telephonyManager.getImei();
+        } else {
+            imei = telephonyManager.getDeviceId();
+        }
+        DBHelper dbHelper = new DBHelper(this);
+        download(txtUserName.getText().toString(), imei, "password", dbHelper.getWritableDatabase(),false);
     }
 
     public boolean getRepFromAPI(String imei, String repCode, String password, SQLiteDatabase db) {
@@ -281,11 +313,11 @@ public class Login extends AppCompatActivity {
                     if (!modal_rep.getRepName().contains("Err")) {
 
                         //CHeck rep distributor
-                        if(modal_rep.getDiscode().equals(androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid",null))){
+                        if (modal_rep.getDiscode().equals(androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null))) {
                             if (SaveRepToDB(db, modal_rep))
-                                download(repCode,imei,password,db);
-                               // getRepDetails(imei, repCode, password, db);
-                        }else {
+                                download(repCode, imei, password, db,true);
+                            // getRepDetails(imei, repCode, password, db);
+                        } else {
 //                            if (SaveRepToDB(db, modal_rep))
 //                                download(repCode,imei,password,db);
                             MakeSnackBar("Invalid Distributor ID", Color.YELLOW);
@@ -295,7 +327,7 @@ public class Login extends AppCompatActivity {
                     } else {
                         MakeSnackBar(modal_rep.getRepCode(), Color.RED);
                         lazyLoader.setVisibility(View.GONE);
-                    //    progressDialog.dismiss();
+                        //    progressDialog.dismiss();
                         db.close();
                     }
                 },
@@ -306,8 +338,8 @@ public class Login extends AppCompatActivity {
                     } else {
                         MakeSnackBar(error.toString(), Color.YELLOW);
                     }
-                   lazyLoader.setVisibility(View.GONE);
-                   // progressDialog.dismiss();
+                    lazyLoader.setVisibility(View.GONE);
+                    // progressDialog.dismiss();
                     db.close();
                 }
         ) {
@@ -323,11 +355,11 @@ public class Login extends AppCompatActivity {
         return false;
     }
 
-    private void startActivity(SQLiteDatabase db){
+    private void startActivity(SQLiteDatabase db) {
         db.close();
         Intent intent = new Intent(this, MainMenu.class);
         startActivity(intent);
-       // MainActivity.fa.finish();
+        // MainActivity.fa.finish();
         this.finish();
     }
 

@@ -9,7 +9,16 @@ public class MasterDataModal implements Serializable {
     private ArrayList<Customer_Modal> Customer_Modal;
     private ArrayList<Modal_Item> Modal_Items;
     private ArrayList<Modal_Batch> modal_Batches_Stock;
+    private ArrayList<Modal_RepStock> modal_Rep_Stock;
     private TBLT_ORDERHED MaxOrder;
+
+    public ArrayList<Modal_RepStock> getModal_Rep_Stock() {
+        return modal_Rep_Stock;
+    }
+
+    public void setModal_Rep_Stock(ArrayList<Modal_RepStock> modal_Rep_Stock) {
+        this.modal_Rep_Stock = modal_Rep_Stock;
+    }
 
     public TBLT_ORDERHED getDefModal() {
         return MaxOrder;

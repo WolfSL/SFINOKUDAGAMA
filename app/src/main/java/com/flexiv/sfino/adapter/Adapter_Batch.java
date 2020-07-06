@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
 import com.flexiv.sfino.model.Modal_Batch;
+import com.flexiv.sfino.utill.Fragment_sub_batching;
 import com.flexiv.sfino.utill.SharedPreference;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class Adapter_Batch extends RecyclerView.Adapter<Adapter_Batch.ViewsHolde
     private ArrayList<Modal_Batch> arr;
     private ArrayList<Modal_Batch> arr_full;
     private AlertDialog dialog;
-    private Order context;
+    private Fragment_sub_batching context;
 
     @NonNull
     @Override
@@ -35,7 +36,7 @@ public class Adapter_Batch extends RecyclerView.Adapter<Adapter_Batch.ViewsHolde
         return mvh;
     }
 
-    public Adapter_Batch(ArrayList<Modal_Batch> arr, AlertDialog dialog, Order context) {
+    public Adapter_Batch(ArrayList<Modal_Batch> arr, AlertDialog dialog, Fragment_sub_batching context) {
         this.arr = arr;
         this.arr_full = new ArrayList<>(arr);
         this.dialog = dialog;

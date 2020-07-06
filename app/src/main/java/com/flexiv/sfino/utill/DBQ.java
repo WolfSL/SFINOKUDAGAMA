@@ -86,6 +86,29 @@ public class DBQ {
     public static final String _TBLM_BATCHWISESTOCK_RetialPrice = "RetialPrice";
 
 
+    public static final String CREATE_TABLE_TBLM_REPSTOCK = "CREATE TABLE [TBLM_REPSTOCK] (\n" +
+            "[RepCode] TEXT  NOT NULL,\n" +
+            "[DisCode] TEXT  NOT NULL,\n" +
+            "[BatchNo] TEXT  NOT NULL,\n" +
+            "[ItemCode] TEXT  NOT NULL,\n" +
+            "[SIH] NUMERIC  NOT NULL,\n" +
+            "[FreeQty] NUMERIC  NOT NULL,\n" +
+            "[Status] TEXT  NOT NULL,\n" +
+            "[RetialPrice] NUMERIC  NOT NULL,\n" +
+            "PRIMARY KEY ([RepCode],[DisCode],[BatchNo],[ItemCode])\n" +
+            ")";
+    public static final String _TBLM_REPSTOCK = "TBLM_REPSTOCK";
+    public static final String _TBLM_REPSTOCK_RepCode = "RepCode";
+    public static final String _TBLM_REPSTOCK_DisCode = "DisCode";
+    public static final String _TBLM_REPSTOCK_BatchNo = "BatchNo";
+    public static final String _TBLM_REPSTOCK_ItemCode = "ItemCode";
+    public static final String _TBLM_REPSTOCK_SIH = "SIH";
+    public static final String _TBLM_REPSTOCK_FreeQty = "FreeQty";
+    public static final String _TBLM_REPSTOCK_Status = "Status";
+    public static final String _TBLM_REPSTOCK_RetialPrice = "RetialPrice";
+
+
+
     public static final String CREATE_TABLE_TBLT_ORDERHED = "CREATE TABLE [TBLT_ORDERHED] (\n" +
             "[DocNo] TEXT  NOT NULL,\n" +
             "[Discode] TEXT  NOT NULL,\n" +
@@ -162,4 +185,134 @@ public class DBQ {
     public static final String _TBLT_ORDDTL_UsedQty = "UsedQty";
     public static final String _TBLT_ORDDTL_FQTY = "FQTY";
     public static final String _TBLT_ORDDTL_BATCH = "BATCH";
+
+
+    /*
+    INVOICE TABLES
+     */
+    public static final String CREATE_TBLT_SALINVHED = "CREATE TABLE [TBLT_SALINVHED] (\n" +
+            "[DocNo] teXT  NULL,\n" +
+            "[Discode] texT  NULL,\n" +
+            "[DocType] INTEGER  NULL,\n" +
+            "[SalesDate] TEXT  NULL,\n" +
+            "[SupCode] TEXT  NULL,\n" +
+            "[CusCode] TEXT  NULL,\n" +
+            "[RepCode] TEXT  NULL,\n" +
+            "[RefNo] TEXT  NULL,\n" +
+            "[InvType] INTEGER  NULL,\n" +
+            "[LocCode] TEXT  NULL,\n" +
+            "[CrDrType] TEXT  NULL,\n" +
+            "[DueDate] TEXT  NULL,\n" +
+            "[DueAmount] NUMERIC  NULL,\n" +
+            "[GrossAmt] NUMERIC  NULL,\n" +
+            "[AddTax1] NUMERIC  NULL,\n" +
+            "[AddTax2] NUMERIC  NULL,\n" +
+            "[AddTax3] NUMERIC  NULL,\n" +
+            "[DedAmt1] NUMERIC  NULL,\n" +
+            "[DedAmt2] NUMERIC  NULL,\n" +
+            "[DedAmt3] NUMERIC  NULL,\n" +
+            "[NetAmt] NUMERIC  NULL,\n" +
+            "[RefDueAmt] NUMERIC  NULL,\n" +
+            "[OrdRefNo] TEXT  NULL,\n" +
+            "[Discount] REAL  NULL,\n" +
+            "[VatAmt] NUMERIC  NULL,\n" +
+            "[PayType] TEXT  NULL,\n" +
+            "[CreateUser] TEXT  NULL,\n" +
+            "[GLTransfer] BOOLEAN  NULL,\n" +
+            "[Status] TEXT  NULL,\n" +
+            "[DisPer] REAL  NULL,\n" +
+            "[trType] INTEGER  NULL,\n" +
+            "[AreaCode] TEXT  NULL,\n" +
+            "[ISPRINT] BOOLEAN  NULL,\n" +
+            "[DamageQty] NUMERIC  NULL,\n" +
+            "[IncreaseAmt] NUMERIC  NULL,\n" +
+            "[DamageDue] NUMERIC  NULL,\n" +
+            "[SalesRep] TEXT  NULL,\n" +
+            "PRIMARY KEY ([DocNo],[Discode],[DocType])\n" +
+            ")";
+
+    public static final String _TBLT_SALINVHED = "TBLT_SALINVHED";
+    public static final String _TBLT_INVHED_DocNo = "DocNo";
+    public static final String _TBLT_INVHED_Discode = "Discode";
+    public static final String _TBLT_INVHED_DocType = "DocType";
+    public static final String _TBLT_INVHED_SalesDate = "SalesDate";
+    public static final String _TBLT_INVHED_SupCode = "SupCode";
+    public static final String _TBLT_INVHED_CusCode = "CusCode";
+    public static final String _TBLT_INVHED_RepCode = "RepCode";
+    public static final String _TBLT_INVHED_RefNo = "RefNo";
+    public static final String _TBLT_INVHED_InvType = "InvType";
+    public static final String _TBLT_INVHED_LocCode = "LocCode";
+    public static final String _TBLT_INVHED_CrDrType = "CrDrType";
+    public static final String _TBLT_INVHED_DueDate = "DueDate";
+    public static final String _TBLT_INVHED_DueAmount = "DueAmount";
+    public static final String _TBLT_INVHED_GrossAmt = "GrossAmt";
+    public static final String _TBLT_INVHED_AddTax1 = "AddTax1";
+    public static final String _TBLT_INVHED_AddTax2 = "AddTax2";
+    public static final String _TBLT_INVHED_AddTax3 = "AddTax3";
+    public static final String _TBLT_INVHED_DedAmt1 = "DedAmt1";
+    public static final String _TBLT_INVHED_DedAmt2 = "DedAmt2";
+    public static final String _TBLT_INVHED_DedAmt3 = "DedAmt3";
+    public static final String _TBLT_INVHED_NetAmt = "NetAmt";
+    public static final String _TBLT_INVHED_RefDueAmt = "RefDueAmt";
+    public static final String _TBLT_INVHED_OrdRefNo = "OrdRefNo";
+    public static final String _TBLT_INVHED_Discount = "Discount";
+    public static final String _TBLT_INVHED_VatAmt = "VatAmt";
+    public static final String _TBLT_INVHED_PayType = "PayType";
+    public static final String _TBLT_INVHED_CreateUser = "CreateUser";
+    public static final String _TBLT_INVHED_GLTransfer = "GLTransfer";
+    public static final String _TBLT_INVHED_Status = "Status";
+    public static final String _TBLT_INVHED_DisPer = "DisPer";
+    public static final String _TBLT_INVHED_trType = "trType";
+    public static final String _TBLT_INVHED_AreaCode = "AreaCode";
+    public static final String _TBLT_INVHED_ISPRINT = "ISPRINT";
+    public static final String _TBLT_INVHED_DamageQty = "DamageQty";
+    public static final String _TBLT_INVHED_IncreaseAmt = "IncreaseAmt";
+    public static final String _TBLT_INVHED_DamageDue = "DamageDue";
+    public static final String _TBLT_INVHED_SalesRep = "SalesRep";
+
+    public static final String CREATE_TBLT_SALINVDET = "CREATE TABLE [TBLT_SALINVDET] (\n" +
+            "[DocNo] TEXT  NULL,\n" +
+            "[Discode] TEXT  NULL,\n" +
+            "[DocType] INTEGER  NULL,\n" +
+            "[ItemCode] TEXT  NULL,\n" +
+            "[ItQty] REAL  NULL,\n" +
+            "[UnitPrice] NUMERIC  NULL,\n" +
+            "[DiscPer] REAL  NULL,\n" +
+            "[DiscAmt] NUMERIC  NULL,\n" +
+            "[Amount] NUMERIC  NULL,\n" +
+            "[Crep] TEXT  NULL,\n" +
+            "[CusCode] TEXT  NULL,\n" +
+            "[ExpiryDate] TEXT  NULL,\n" +
+            "[Date] TEXT  NULL,\n" +
+            "[LocCode] TEXT  NULL,\n" +
+            "[ExpDate] TEXT  NULL,\n" +
+            "[FQTY] TEXT  NULL,\n" +
+            "[Is_Damage] BOOLEAN  NULL,\n" +
+            "[IncreaseAmt] NUMERIC  NULL,\n" +
+            "[LineID] INTEGER  NULL,\n" +
+            "PRIMARY KEY ([DocNo],[Discode],[DocType],[ItemCode],[ExpiryDate])\n" +
+            ")";
+    public static final String _TBLT_SALINVDET = "TBLT_SALINVDET";
+    public static final String _TBLT_SALINVDET_DocNo = "DocNo";
+    public static final String _TBLT_SALINVDET_Discode = "Discode";
+    public static final String _TBLT_SALINVDET_DocType = "DocType";
+    public static final String _TBLT_SALINVDET_ItemCode = "ItemCode";
+    public static final String _TBLT_SALINVDET_ItQty = "ItQty";
+    public static final String _TBLT_SALINVDET_UnitPrice = "UnitPrice";
+    public static final String _TBLT_SALINVDET_DiscPer = "DiscPer";
+    public static final String _TBLT_SALINVDET_DiscAmt = "DiscAmt";
+    public static final String _TBLT_SALINVDET_Amount = "Amount";
+    public static final String _TBLT_SALINVDET_Crep = "Crep";
+    public static final String _TBLT_SALINVDET_CusCode = "CusCode";
+    public static final String _TBLT_SALINVDET_ExpiryDate = "ExpiryDate";
+    public static final String _TBLT_SALINVDET_Date = "Date";
+    public static final String _TBLT_SALINVDET_LocCode = "LocCode";
+    public static final String _TBLT_SALINVDET_ExpDate = "ExpDate";
+    public static final String _TBLT_SALINVDET_FQTY = "FQTY";
+    public static final String _TBLT_SALINVDET_Is_Damage = "Is_Damage";
+    public static final String _TBLT_SALINVDET_IncreaseAmt = "IncreaseAmt";
+    public static final String _TBLT_SALINVDET_LineID = "LineID";
+
+
+
 }

@@ -16,6 +16,7 @@ import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
 import com.flexiv.sfino.model.Modal_Item;
 import com.flexiv.sfino.model.Modal_Item;
+import com.flexiv.sfino.utill.Fragment_sub_batching;
 import com.flexiv.sfino.utill.SharedPreference;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
     private ArrayList<Modal_Item> arr;
     private ArrayList<Modal_Item> arr_full;
     private AlertDialog dialog;
-    private Order context;
+    private Fragment_sub_batching context;
 
     @NonNull
     @Override
@@ -36,7 +37,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
         return mvh;
     }
 
-    public Adapter_Item(ArrayList<Modal_Item> arr, AlertDialog dialog,Order context) {
+    public Adapter_Item(ArrayList<Modal_Item> arr, AlertDialog dialog,Fragment_sub_batching context) {
         this.arr = arr;
         this.arr_full = new ArrayList<>(arr);
         this.dialog = dialog;
@@ -48,7 +49,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
         Modal_Item item = arr.get(position);
         holder.card_name.setText(item.getDesc());
         holder.card_code.setText(item.getItemCode());
-        holder.card_code2.setText("");
+        holder.card_code2.setText(item.getSih());
 
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override

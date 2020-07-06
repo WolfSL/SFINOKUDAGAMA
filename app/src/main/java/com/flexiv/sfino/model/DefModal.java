@@ -4,6 +4,7 @@ public class DefModal {
     private String val1;
     private String val2;
     private String val3;
+    private String val4;
 
     public String getVal1() {
         return val1;
@@ -27,5 +28,13 @@ public class DefModal {
 
     public void setVal3(String val3) {
         this.val3 = val3;
+    }
+
+    public String getVal4() {
+        return val4;
+    }
+
+    public void setVal4(String val4) {
+        this.val4 = val4;
     }
 }

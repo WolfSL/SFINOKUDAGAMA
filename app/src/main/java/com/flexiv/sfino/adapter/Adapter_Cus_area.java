@@ -85,7 +85,7 @@ public class Adapter_Cus_area extends RecyclerView.Adapter<Adapter_Cus_area.View
                 String filterPattern = constraint.toString().toLowerCase().trim();
                 for (Card_cus_area c : arr_full
                 ) {
-                    if(c.getTxt_name().toLowerCase().contains(filterPattern)){
+                    if(c.getTxt_name().toLowerCase().contains(filterPattern)||c.getTxt_code().toLowerCase().contains(filterPattern)){
                         filteredList.add(c);
                     }
                 }

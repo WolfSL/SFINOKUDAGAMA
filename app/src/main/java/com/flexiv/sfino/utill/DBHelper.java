@@ -1,5 +1,7 @@
 package com.flexiv.sfino.utill;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -14,6 +16,7 @@ import com.flexiv.sfino.model.Customer_Modal;
 import com.flexiv.sfino.model.MasterDataModal;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
+import com.flexiv.sfino.model.Modal_RepStock;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
 
@@ -24,7 +27,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "SFINO.db";
-    private static final int DATABASE_VERSION = 46;
+    private static final int DATABASE_VERSION = 51;
 
 
     public DBHelper(@Nullable Context context) {
@@ -45,6 +48,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DBQ.CREATE_TBLM_TBLM_BATCHWISESTOCK);
         db.execSQL(DBQ.CREATE_TABLE_TBLT_ORDERHED);
         db.execSQL(DBQ.CREATE_TABLE_TBLT_ORDDTL);
+        db.execSQL(DBQ.CREATE_TABLE_TBLM_REPSTOCK);
+        db.execSQL(DBQ.CREATE_TBLT_SALINVDET);
+        db.execSQL(DBQ.CREATE_TBLT_SALINVHED);
     }
 
     @Override
@@ -57,6 +63,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DELETE + DBQ._TBLM_BATCHWISESTOCK);
         db.execSQL(DELETE + DBQ._TBLT_ORDERHED);
         db.execSQL(DELETE + DBQ._TBLT_ORDDTL);
+        db.execSQL(DELETE + DBQ._TBLM_REPSTOCK);
+        db.execSQL(DELETE + DBQ._TBLT_SALINVHED);
+        db.execSQL(DELETE + DBQ._TBLT_SALINVDET);
 
         onCreate(db);
     }
@@ -65,11 +74,17 @@ public class DBHelper extends SQLiteOpenHelper {
     /*
      * Master Data Insertion
      */
-    public void insertMasterData(MasterDataModal data) {
+    public boolean insertMasterData(MasterDataModal data) {
         SQLiteDatabase db = null;
         db = this.getWritableDatabase();
         db.beginTransaction();
         try {
+
+//            db.delete(DBQ._TBLM_REPSTOCK,null,null);
+//            db.delete(DBQ._TBLM_AREA,null,null);
+//            db.delete(DBQ._TBLM_ITEM,null,null);
+//            db.delete(DBQ._TBLM_CUSTOMER,null,null);
+//            db.delete(DBQ._TBLM_BATCHWISESTOCK,null,null);
 
 
             ContentValues c = new ContentValues();
@@ -116,6 +131,21 @@ public class DBHelper extends SQLiteOpenHelper {
                 c.clear();
             }
 
+            if(data.getModal_Rep_Stock()!=null) {
+                for (Modal_RepStock batch : data.getModal_Rep_Stock()) {
+                    c.put(DBQ._TBLM_REPSTOCK_DisCode, batch.getDisCode());
+                    c.put(DBQ._TBLM_REPSTOCK_BatchNo, batch.getBatchNo());
+                    c.put(DBQ._TBLM_REPSTOCK_ItemCode, batch.getItemCode());
+                    c.put(DBQ._TBLM_REPSTOCK_RetialPrice, batch.getRetialPrice());
+                    c.put(DBQ._TBLM_REPSTOCK_FreeQty, batch.getFreeQty());
+                    c.put(DBQ._TBLM_REPSTOCK_RepCode, batch.getRepCode());
+                    c.put(DBQ._TBLM_REPSTOCK_Status, batch.getStatus());
+                    c.put(DBQ._TBLM_REPSTOCK_SIH, batch.getSIH());
+                    db.replace(DBQ._TBLM_REPSTOCK, null, c);
+                    c.clear();
+                }
+            }
+
             if (data.getDefModal() != null) {
 
                 c.put(DBQ._TBLT_ORDERHED_VatAmt, data.getDefModal().getVatAmt());
@@ -145,11 +175,13 @@ public class DBHelper extends SQLiteOpenHelper {
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         } finally {
             if (db != null) {
                 db.close();
             }
         }
+        return true;
 
     }
 
@@ -211,19 +243,47 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    public ArrayList<Modal_Item> getItems(String discode,String repcode) throws Exception {
+        SQLiteDatabase db = null;
+        ArrayList<Modal_Item> item_modals = null;
+        try {
+
+            db = this.getReadableDatabase();
+            String sql = "select i.ItemCode,i.ItemDes,s.sih from "+DBQ._TBLM_ITEM+" as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '"+discode+"' and RepCode = '"+repcode+"'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null";
+            Cursor c = db.rawQuery(sql,null);
+
+            item_modals = new ArrayList<>();
+            Modal_Item item;
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes))
+                         , SharedPreference.ds_formatter.format(c.getDouble(2)));
+                item_modals.add(item);
+            }
+            c.close();
+            return item_modals;
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
     public ArrayList<Modal_Item> getItems() throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Modal_Item> item_modals = null;
         try {
 
             db = this.getReadableDatabase();
+           // String sql = "select i.*,s.sih from TBLM_ITEMMASTER as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '"+discode+"' and RepCode = '"+repcode+"'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null order by s.SIH";
             Cursor c = db.query(DBQ._TBLM_ITEM, new String[]{DBQ._TBLM_ITEM_ItemCode, DBQ._TBLM_ITEM_ItemDes}, null
                     , null, null, null, null);
 
             item_modals = new ArrayList<>();
             Modal_Item item;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)));
+                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)),"");
                 item_modals.add(item);
             }
             c.close();
@@ -245,6 +305,40 @@ public class DBHelper extends SQLiteOpenHelper {
 
             db = this.getReadableDatabase();
             Cursor c = db.rawQuery("SELECT st.*, item.ItemDes FROM TBLM_BATCHWISESTOCK as st left join " + DBQ._TBLM_ITEM + " as item on st.ItemCode = item.ItemCode where st.DisCode = '" + disCode + "' and st.ItemCode = '" + itemcode + "'",
+                    null);
+
+            item_modals = new ArrayList<>();
+            Modal_Batch batch;
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                batch = new Modal_Batch();
+                batch.setDesc(c.getString(c.getColumnIndex("ItemDes")));
+                batch.setItemCode(c.getString(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_ItemCode)));
+                batch.setBatchNo(c.getString(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_BatchNo)));
+                batch.setRetialPrice(c.getDouble(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_RetialPrice)));
+                batch.setSHI(c.getDouble(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_SIH)));
+                item_modals.add(batch);
+            }
+            c.close();
+            return item_modals;
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+    public ArrayList<Modal_Batch> getRepStock(String disCode, String itemcode,String repcode) throws Exception {
+        SQLiteDatabase db = null;
+        ArrayList<Modal_Batch> item_modals = null;
+        try {
+
+            db = this.getReadableDatabase();
+            String sql = "SELECT st.*, item.ItemDes FROM TBLM_REPSTOCK as st left join " + DBQ._TBLM_ITEM + " as item on st.ItemCode = item.ItemCode where st.DisCode = '" + disCode + "' and st.ItemCode = '" + itemcode + "' and st.RepCode = '"+repcode+"'";
+
+            System.out.println(sql);
+            Cursor c = db.rawQuery(sql,
                     null);
 
             item_modals = new ArrayList<>();

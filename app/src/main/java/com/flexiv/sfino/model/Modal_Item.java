@@ -3,15 +3,24 @@ package com.flexiv.sfino.model;
 public class Modal_Item {
     String ItemCode;
     String Desc;
+    String sih;
 
+    public String getSih() {
+        return sih;
+    }
+
+    public void setSih(String sih) {
+        this.sih = sih;
+    }
 
     public Modal_Item(){
 
     }
 
-    public Modal_Item(String itemCode, String desc) {
+    public Modal_Item(String itemCode, String desc, String sih) {
         ItemCode = itemCode;
         Desc = desc;
+        this.sih = sih;
     }
 
     public String getItemCode() {

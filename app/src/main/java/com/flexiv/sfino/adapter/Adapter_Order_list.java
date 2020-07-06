@@ -2,6 +2,7 @@ package com.flexiv.sfino.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -49,16 +51,43 @@ public class Adapter_Order_list extends RecyclerView.Adapter<Adapter_Order_list.
         TBLT_ORDERHED orderhed = arr.get(position);
         holder.OI_DocNo.setText(orderhed.getRefNo());
         holder.OI_Date.setText(orderhed.getSalesDate());
-        String price = "Rs "+ SharedPreference.df.format(orderhed.getNetAmt());
+        String price = "Rs " + SharedPreference.df.format(orderhed.getNetAmt());
         holder.OI_Rs.setText(price);
-        holder.orderInvo_Card.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(con, Order.class);
-                i.putExtra("hed",orderhed);
-                con.startActivity(i);
-            }
-        });
+
+        if (orderhed.getStatus().equals("A")) {
+            holder.imageView_status.setImageResource(R.drawable.ic_up_done);
+            holder.orderInvo_Card.setCardBackgroundColor(Color.LTGRAY);
+            holder.orderInvo_Card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(con, Order.class);
+                    i.putExtra("hed", orderhed);
+                    con.startActivity(i);
+                    Toast.makeText(con, "Can not Edit this Order", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else if (orderhed.getStatus().equals("E")) {
+            holder.imageView_status.setImageResource(R.drawable.ic_baseline_sync_disabled_24);
+            holder.orderInvo_Card.setCardBackgroundColor(Color.LTGRAY);
+            holder.orderInvo_Card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(con, Order.class);
+                    i.putExtra("hed", orderhed);
+                    con.startActivity(i);
+                    Toast.makeText(con, "Can not Edit this Order", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            holder.orderInvo_Card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(con, Order.class);
+                    i.putExtra("hed", orderhed);
+                    con.startActivity(i);
+                }
+            });
+        }
     }
 
     @Override
@@ -71,7 +100,7 @@ public class Adapter_Order_list extends RecyclerView.Adapter<Adapter_Order_list.
         return filter;
     }
 
-    public Filter getXfilset(){
+    public Filter getXfilset() {
         return filter;
     }
 
@@ -86,7 +115,7 @@ public class Adapter_Order_list extends RecyclerView.Adapter<Adapter_Order_list.
                 String filterPattern = constraint.toString().toLowerCase().trim();
                 for (TBLT_ORDERHED c : arr_full
                 ) {
-                    if(c.getDocNo().toLowerCase().contains(filterPattern)){
+                    if (c.getDocNo().toLowerCase().contains(filterPattern)||c.getSalesDate().toLowerCase().contains(filterPattern)) {
                         filteredList.add(c);
                     }
                 }
@@ -100,9 +129,9 @@ public class Adapter_Order_list extends RecyclerView.Adapter<Adapter_Order_list.
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-                arr.clear();
-                arr.addAll((List)results.values);
-                notifyDataSetChanged();
+            arr.clear();
+            arr.addAll((List) results.values);
+            notifyDataSetChanged();
 
 
         }

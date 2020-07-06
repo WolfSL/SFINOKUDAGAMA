@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Visibility;
@@ -45,6 +46,7 @@ public class Order_main extends Fragment {
     private TextView textView_total;
     private TextView textView_Nettotal;
     private TextView textView_tax;
+    private TextView textView_readOnly_oreder;
     private EditText DisPre, DisAmt;
     private Button button_save;
     private Button button_process;
@@ -64,9 +66,6 @@ public class Order_main extends Fragment {
     }
 
 
-
-
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -79,6 +78,9 @@ public class Order_main extends Fragment {
         DisAmt = view.findViewById(R.id.editText3);
         button_save = view.findViewById(R.id.button_save);
         button_process = view.findViewById(R.id.button2);
+        floatingActionButton_OM = view.findViewById(R.id.floatingActionButton_OM);
+
+        textView_readOnly_oreder = view.findViewById(R.id.textView_readOnly_oreder);
 
         //TODO-----------------------------------
         //SAVE...................................
@@ -91,7 +93,7 @@ public class Order_main extends Fragment {
                     context.onBackPressed2();
                     Toast.makeText(context, "Successfully Saved!", Toast.LENGTH_LONG).show();
                 }
-            }else{
+            } else {
                 String msg = context.SaveUpdate(CreateORDERHED_ForUpdate());
                 if (msg.contains("Error")) {
                     Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
@@ -107,34 +109,35 @@ public class Order_main extends Fragment {
         Order_recView = view.findViewById(R.id.Order_recView);
         layoutManager = new LinearLayoutManager(context);
         adaper = new Adapter_Oeder_Item(context.getItemList(), context);
+        new ItemTouchHelper(simpleCallback).attachToRecyclerView(Order_recView);
         Order_recView.setLayoutManager(layoutManager);
         Order_recView.setAdapter(adaper);
 
         //FAB Action
-        view.findViewById(R.id.floatingActionButton_OM).setOnClickListener(v -> context.LoadFragment_sub());
-         TextWatcher tw = new TextWatcher() {
-             @Override
-             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        floatingActionButton_OM.setOnClickListener(v -> context.LoadFragment_sub());
+        TextWatcher tw = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-             }
+            }
 
-             @Override
-             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                 disTextChange = 1;
-                 if (charSequence.length() > 0) {
-                     DisAmt.setText(SharedPreference.df.format(GenDisVal(charSequence)));
-                     //textView_Nettotal.setText(SharedPreference.df.format(total - GenDisVal(charSequence)));
-                 } else {
-                     DisAmt.getText().clear();
-                     textView_Nettotal.setText(SharedPreference.df.format(total));
-                 }
-             }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                disTextChange = 1;
+                if (charSequence.length() > 0) {
+                    DisAmt.setText(SharedPreference.df.format(GenDisVal(charSequence)));
+                    //textView_Nettotal.setText(SharedPreference.df.format(total - GenDisVal(charSequence)));
+                } else {
+                    DisAmt.getText().clear();
+                    textView_Nettotal.setText(SharedPreference.df.format(total));
+                }
+            }
 
-             @Override
-             public void afterTextChanged(Editable editable) {
+            @Override
+            public void afterTextChanged(Editable editable) {
 
-             }
-         };
+            }
+        };
         DisPre.addTextChangedListener(tw);
 
 //        DisAmt.setOnFocusChangeListener((view1, b) -> DisPre.getText().clear());
@@ -148,15 +151,15 @@ public class Order_main extends Fragment {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() > 0) {
                     double net = total - Double.parseDouble(DisAmt.getText().toString());
-                    double disprt = 100/total*( Double.parseDouble(DisAmt.getText().toString()));
-                    if(disTextChange!=1) {
+                    double disprt = 100 / total * (Double.parseDouble(DisAmt.getText().toString()));
+                    if (disTextChange != 1) {
                         DisPre.removeTextChangedListener(tw);
                         DisPre.setText(SharedPreference.df.format(disprt));
                         DisPre.addTextChangedListener(tw);
                     }
                     textView_Nettotal.setText(SharedPreference.df.format(net));
                 } else {
-                    if(disTextChange!=1) {
+                    if (disTextChange != 1) {
                         DisPre.removeTextChangedListener(tw);
                         DisPre.getText().clear();
                         DisPre.addTextChangedListener(tw);
@@ -168,28 +171,30 @@ public class Order_main extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 disTextChange = 0;
-                button_process.setAlpha(Float.parseFloat("0.3"));
-                button_process.setEnabled(false);
+                //FIXME
+                //button_process.setAlpha(Float.parseFloat("0.3"));
+                //button_process.setEnabled(false);
             }
         });
 
-        if(context.getObj()!=null) {
+        if (context.getObj() != null) {
             setDetailsFromIntent(context.getObj());
         }
 
 
-
         //Proccess Order
         button_process.setOnClickListener(view1 -> {
+            button_process.setEnabled(false);
             try {
                 context.UploadOrder();
             } catch (JSONException e) {
-                Toast.makeText(context,e.toString(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
 
         });
     }
+
     int disTextChange = 0;
 
     double total = 0;
@@ -200,16 +205,17 @@ public class Order_main extends Fragment {
             total = total + obj.getAmount();
         }
         textView_total.setText(SharedPreference.df.format(total));
-        double netTotal = total - Double.parseDouble(textView_tax.getText().toString());
+        double netTotal = total + Double.parseDouble(textView_tax.getText().toString());
 
 
         //TODO.....
-        if (DisPre.getText().length() > 0) {
+        if (DisPre.getText().length() > 0 && total > 0) {
             DisAmt.setText(SharedPreference.df.format(GenDisVal(DisPre.getText().toString())));
-            textView_Nettotal.setText(SharedPreference.df.format(total - GenDisVal(DisPre.getText().toString())));
+            textView_Nettotal.setText(SharedPreference.df.format(netTotal - GenDisVal(DisPre.getText().toString())));
+
         } else {
             DisAmt.getText().clear();
-            textView_Nettotal.setText(SharedPreference.df.format(total));
+            textView_Nettotal.setText(SharedPreference.df.format(netTotal));
         }
         adaper.notifyDataSetChanged();
     }
@@ -224,8 +230,8 @@ public class Order_main extends Fragment {
 
     private double GenDisVal(CharSequence s) {
         if (DisPre.getText().length() > 0) {
-            System.out.println("--------------" +s.toString() );
-            System.out.println("--------------" +Double.parseDouble(s.toString()));
+            System.out.println("--------------" + s.toString());
+            System.out.println("--------------" + Double.parseDouble(s.toString()));
             return total * (Double.parseDouble(s.toString()) / 100);
         }
         return 0;
@@ -258,9 +264,9 @@ public class Order_main extends Fragment {
         obj.setNetAmt(Double.parseDouble(textView_Nettotal.getText().toString()));
 
 
-
         return obj;
     }
+
     private TBLT_ORDERHED CreateORDERHED_ForUpdate() {
 
         TBLT_ORDERHED obj = new TBLT_ORDERHED();
@@ -287,15 +293,48 @@ public class Order_main extends Fragment {
         return obj;
     }
 
-    public void setDetailsFromIntent(TBLT_ORDERHED hed){
+    public void setDetailsFromIntent(TBLT_ORDERHED hed) {
 
         System.out.println("--------------------------------------");
         textView_total.setText(SharedPreference.df.format(hed.getGrossAmt()));
         DisPre.setText(SharedPreference.df.format(hed.getDisPer()));
         //DisAmt.setText(SharedPreference.df.format(hed.getDisPer()));
         textView_Nettotal.setText(SharedPreference.df.format(hed.getNetAmt()));
-        button_process.setAlpha(1);
-        button_process.setEnabled(true);
+
+
+        if (hed.getStatus().equals("A")) {
+            textView_readOnly_oreder.setVisibility(View.VISIBLE);
+            button_save.setVisibility(View.GONE);
+            button_process.setVisibility(View.GONE);
+            floatingActionButton_OM.setVisibility(View.GONE);
+        }else if (hed.getStatus().equals("E")) {
+            textView_readOnly_oreder.setVisibility(View.VISIBLE);
+            button_save.setVisibility(View.GONE);
+            button_process.setAlpha(1);
+            button_process.setEnabled(true);
+            floatingActionButton_OM.setVisibility(View.GONE);
+        } else {
+            button_process.setAlpha(1);
+            button_process.setEnabled(true);
+        }
 
     }
+
+
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+            context.removeItem(viewHolder.getAdapterPosition());
+            adaper.notifyDataSetChanged();
+            refreshItems();
+
+        }
+    };
+
 }

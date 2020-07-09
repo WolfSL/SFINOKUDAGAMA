@@ -18,7 +18,7 @@
         <ImageView
             android:id="@+id/imageView4"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
+            android:layout_height="70dp"
             android:layout_marginBottom="8dp"
             android:tint="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -153,6 +153,7 @@
                         android:layout_marginTop="8dp"
                         android:clickable="true"
                         android:foreground="?android:selectableItemBackground"
+                        android:onClick="Stock"
                         app:cardCornerRadius="3dp"
                         app:cardElevation="3dp"
                         app:cardUseCompatPadding="true"
@@ -189,6 +190,7 @@
                         android:layout_height="wrap_content"
                         android:clickable="true"
                         android:foreground="?android:selectableItemBackground"
+                        android:onClick="LogOut"
                         app:cardCornerRadius="3dp"
                         app:cardElevation="3dp"
                         app:cardUseCompatPadding="true"
@@ -207,13 +209,14 @@
                                 android:id="@+id/imageViewRecipt"
                                 android:layout_width="@dimen/card_img_size"
                                 android:layout_height="@dimen/card_img_size"
-                                app:srcCompat="@drawable/receipt" />
+                                android:tint="@color/colorPrimary"
+                                app:srcCompat="@drawable/ic_baseline_reply_24" />
 
                             <TextView
                                 android:id="@+id/textViewRecipt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="RECEIPT"
+                                android:text="LOG OUT"
                                 android:textAlignment="center" />
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>

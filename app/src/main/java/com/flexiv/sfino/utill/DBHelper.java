@@ -7,10 +7,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import com.flexiv.sfino.model.Area_Modal;
+import com.flexiv.sfino.model.Bean_PromotionDetails;
+import com.flexiv.sfino.model.Bean_PromotionMaster;
+import com.flexiv.sfino.model.Bean_RepDeals;
 import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.model.Customer_Modal;
 import com.flexiv.sfino.model.MasterDataModal;
@@ -20,6 +24,7 @@ import com.flexiv.sfino.model.Modal_RepStock;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +32,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "SFINO.db";
-    private static final int DATABASE_VERSION = 51;
+    private static final int DATABASE_VERSION = 1;
 
 
     public DBHelper(@Nullable Context context) {
@@ -51,6 +56,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DBQ.CREATE_TABLE_TBLM_REPSTOCK);
         db.execSQL(DBQ.CREATE_TBLT_SALINVDET);
         db.execSQL(DBQ.CREATE_TBLT_SALINVHED);
+
+        //PROMO
+        db.execSQL(DBQ.CREATE_TABLE_PROMOMASTER);
+        db.execSQL(DBQ.CREATE_TABLE_PROMODETAILS);
+        db.execSQL(DBQ.CREATE_TBLT_ORDERPROMOTION);
+        db.execSQL(DBQ.CREATE_TABLE_TBLM_PROMO_DEALS);
+        db.execSQL(DBQ.CREATE_TABLE_Shop_Stock_Counter);
     }
 
     @Override
@@ -67,6 +79,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DELETE + DBQ._TBLT_SALINVHED);
         db.execSQL(DELETE + DBQ._TBLT_SALINVDET);
 
+        //PROMO
+        db.execSQL(DELETE + DBQ._PROMOMASTER);
+        db.execSQL(DELETE + DBQ._PROMODETAILS);
+        db.execSQL(DELETE + DBQ._TBLM_PROMO_DEALS);
+        db.execSQL(DELETE + DBQ.TBLT_ORDERPROMOTION);
+        db.execSQL(DELETE + DBQ._Shop_Stock_Counter);
+
         onCreate(db);
     }
 
@@ -80,11 +99,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
 
-//            db.delete(DBQ._TBLM_REPSTOCK,null,null);
-//            db.delete(DBQ._TBLM_AREA,null,null);
-//            db.delete(DBQ._TBLM_ITEM,null,null);
-//            db.delete(DBQ._TBLM_CUSTOMER,null,null);
-//            db.delete(DBQ._TBLM_BATCHWISESTOCK,null,null);
+            db.delete(DBQ._TBLM_REPSTOCK,null,null);
+            db.delete(DBQ._TBLM_AREA,null,null);
+            db.delete(DBQ._TBLM_ITEM,null,null);
+            db.delete(DBQ._TBLM_CUSTOMER,null,null);
+            db.delete(DBQ._TBLM_BATCHWISESTOCK,null,null);
 
 
             ContentValues c = new ContentValues();
@@ -148,6 +167,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             if (data.getDefModal() != null) {
 
+                System.out.println(data.getDefModal());
                 c.put(DBQ._TBLT_ORDERHED_VatAmt, data.getDefModal().getVatAmt());
                 c.put(DBQ._TBLT_ORDERHED_Status, data.getDefModal().getStatus());
                 c.put(DBQ._TBLT_ORDERHED_SalesDate, data.getDefModal().getSalesDate());
@@ -276,7 +296,6 @@ public class DBHelper extends SQLiteOpenHelper {
         try {
 
             db = this.getReadableDatabase();
-           // String sql = "select i.*,s.sih from TBLM_ITEMMASTER as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '"+discode+"' and RepCode = '"+repcode+"'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null order by s.SIH";
             Cursor c = db.query(DBQ._TBLM_ITEM, new String[]{DBQ._TBLM_ITEM_ItemCode, DBQ._TBLM_ITEM_ItemDes}, null
                     , null, null, null, null);
 
@@ -403,7 +422,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
                     item.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
                     item.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
-                    item.setFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_FQTY)));
+                    item.setSysFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_SysFQTY)));
+                    item.setTradeFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TradeFQTY)));
+                    item.setTotalQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TotalQty)));
                     item.setCusCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_CusCode)));
                     item.setDate(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_Date)));
                     item.setUsedQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_UsedQty)));
@@ -416,6 +437,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
                     items.add(item);
                 }
+                c.close();
 
                 hed.setItemList(items);
                 return hed;
@@ -427,4 +449,143 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return null;
     }
+
+    //PROMOTIONS
+    //TODO
+    public long Insert_TBLM_PROMO(SQLiteDatabase db, Bean_PromotionDetails bean) {
+        ContentValues values = new ContentValues();
+        values.put(DBQ._PROMODETAILS_FQTY, bean.getFQTY().doubleValue());
+        values.put(DBQ._PROMODETAILS_ItemCode, bean.getItemCode());
+        values.put(DBQ._PROMODETAILS_PromoNo, bean.getPromoNo());
+        values.put(DBQ._PROMODETAILS_PTCode, bean.getPTCode());
+        values.put(DBQ._PROMODETAILS_QtyFrom, bean.getQtyFrom().doubleValue());
+        values.put(DBQ._PROMODETAILS_QtyTo, bean.getQtyTo().doubleValue());
+        values.put(DBQ._PROMODETAILS_RecLine, bean.getRecLine());
+//        values.put(_PROMODETAILS_RecLine, bean.getRecLine());
+        Log.d("DB Details", values.toString());
+        return db.replace(DBQ._PROMODETAILS, null, values);
+    }
+    public long Insert_TBLM_PROMO(SQLiteDatabase db, Bean_PromotionMaster bean) {
+        ContentValues cv = new ContentValues();
+
+
+        try {
+            cv.put(DBQ._PROMOMASTER_PromoNo, bean.getPromoNo());
+            cv.put(DBQ._PROMOMASTER_PromoCode, bean.getPromoCode());
+            cv.put(DBQ._PROMOMASTER_PromoType, bean.getPromoType());
+            cv.put(DBQ._PROMOMASTER_PromoDesc, bean.getPromoDesc());
+            cv.put(DBQ._PROMOMASTER_DateFrom, SharedPreference.Date_App_Format.format(SharedPreference.Date_serverFormat.parse(bean.getDateFrom())));
+            cv.put(DBQ._PROMOMASTER_DateTo, SharedPreference.Date_App_Format.format(SharedPreference.Date_serverFormat.parse(bean.getDateTo())));
+            cv.put(DBQ._PROMOMASTER_Active, bean.getActive());
+            cv.put(DBQ._PROMOMASTER_ActiveDays, bean.getActiveDays());
+            cv.put(DBQ._PROMOMASTER_TargetCategory, bean.getTargetCategory());
+            cv.put(DBQ._PROMOMASTER_DisCode, bean.getDiscode());
+            // Log.w("SQL", bean.getDiscode());
+
+
+            Log.d("DB Master", cv.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        // db.delete(_PROMOMASTER,null,null);
+        return db.replace(DBQ._PROMOMASTER, null, cv);
+    }
+
+    public long Insert_TBLM_PROMO(SQLiteDatabase db, Bean_RepDeals bean) {
+        ContentValues cv = new ContentValues();
+
+
+        try {
+            cv.put(DBQ._PROMO_DEALS_PromoNo, bean.getPromoNo());
+            cv.put(DBQ._PROMO_DEALS_PromoCode, bean.getPromoCode());
+            cv.put(DBQ._PROMO_DEALS_NoOfDealsQty, bean.getNoOfDealsQty());
+            cv.put(DBQ._PROMO_DEALS_NoOfDealsQtyBalance, bean.getNoOfDealsQtyBalance());
+            cv.put(DBQ._PROMO_DEALS_PRecLine, bean.getPRecLine());
+            Log.d("DB Deals", cv.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        // db.delete(_PROMOMASTER,null,null);
+        return db.replace(DBQ._TBLM_PROMO_DEALS, null, cv);
+    }
+
+
+    //PROMOTIONS
+    public ArrayList<Bean_PromotionDetails> getNFPromo(String itemCode) {
+        Log.e("Enter to GetDNPromo", itemCode);
+        ArrayList<Bean_PromotionDetails> arr = null;
+        String sql1 = "SELECT pm.*, pd.* FROM TBLM_PROMOMASTER AS pm LEFT JOIN TBLM_PROMODETAILS as pd ON pm.PromoNo = pd.PromoNo\n" +
+                "WHERE pm.Active = 1 AND pd.PTCode = 'NF' and pd.ItemCode = ? order by pd.QtyFrom desc;";
+
+        String[] params = new String[]{String.valueOf(itemCode)};
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(sql1, params);
+        Log.w("SQL NF", sql1);
+        Bean_PromotionDetails bean;
+        if (c.getColumnCount() > 0) {
+            arr = new ArrayList<>();
+            while (c.moveToNext()) {
+                String s = c.getString(c.getColumnIndex(DBQ._PROMOMASTER_DisCode));
+                Log.w("SQL - Discode : ", s);
+                bean = new Bean_PromotionDetails();
+
+                bean.setPromoCode(c.getString(c.getColumnIndex(DBQ._PROMOMASTER_PromoCode)));
+                bean.setPromoNo(c.getInt(c.getColumnIndex(DBQ._PROMODETAILS_PromoNo)));
+                bean.setDiscode(c.getString(c.getColumnIndex(DBQ._PROMOMASTER_DisCode)));
+                bean.setPromoDesc(c.getString(c.getColumnIndex(DBQ._PROMOMASTER_PromoDesc)));
+                bean.setQtyFrom(BigDecimal.valueOf(c.getDouble(c.getColumnIndex(DBQ._PROMODETAILS_QtyFrom))));
+                bean.setQtyTo(BigDecimal.valueOf(c.getDouble(c.getColumnIndex(DBQ._PROMODETAILS_QtyTo))));
+                bean.setFQTY(BigDecimal.valueOf(c.getDouble(c.getColumnIndex(DBQ._PROMODETAILS_FQTY))));
+                bean.setPTCode(c.getString(c.getColumnIndex(DBQ._PROMODETAILS_PTCode)));
+                arr.add(bean);
+            }
+        } else {
+            Log.d("FF", "No Prono");
+        }
+        c.close();
+        db.close();
+        return arr;
+    }
+
+    public ArrayList<Bean_PromotionDetails> getOtherPromo(String itemCode) {
+        Log.e("Enter to GetDNPromo", itemCode);
+        ArrayList<Bean_PromotionDetails> arr = null;
+        String sql1 = "SELECT pd.*,pm.*, IFNULL(pdl.NoOfDealsQtyBalance, 0) as NoOfDealsQtyBalance FROM TBLM_PROMOMASTER AS pm LEFT JOIN TBLM_PROMODETAILS as pd ON pm.PromoNo = pd.PromoNo\n" +
+                "LEFT JOIN TBLM_PROMO_DEALS as pdl ON pm.PromoNo = pdl.PromoNo\n" +
+                "    WHERE pm.Active = 1 AND pd.PTCode <> 'NF' and pd.ItemCode = ?  order by pd.QtyFrom desc;";
+
+        String sql2 = "SELECT * FROM TBLM_PROMODETAILS as pd JOIN TBLM_PROMOMASTER as pm on pd.PromoNo = pm.PromoNo where pd.PTCode <> 'NF'";
+
+      //  String[] params = new String[]{String.valueOf(itemCode,SharedPreference.COM_REP.getDiscode())};
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery(sql1, new String[]{itemCode});
+//        Cursor c = db.rawQuery(sql1, null);
+        Log.w("SQL OP", sql1);
+        Bean_PromotionDetails bean;
+        if (c.getColumnCount() > 0) {
+            arr = new ArrayList<>();
+            while (c.moveToNext()) {
+                String s = c.getString(c.getColumnIndex(DBQ._PROMOMASTER_DisCode));
+                Log.w("SQL OP - Discode : ", s);
+                bean = new Bean_PromotionDetails();
+                bean.setPromoCode(c.getString(c.getColumnIndex(DBQ._PROMOMASTER_PromoCode)));
+                bean.setPromoNo(c.getInt(c.getColumnIndex(DBQ._PROMODETAILS_PromoNo)));
+                bean.setDiscode(c.getString(c.getColumnIndex(DBQ._PROMOMASTER_DisCode)));
+                bean.setPromoDesc(c.getString(c.getColumnIndex(DBQ._PROMOMASTER_PromoDesc)));
+                bean.setQtyFrom(BigDecimal.valueOf(c.getDouble(c.getColumnIndex(DBQ._PROMODETAILS_QtyFrom))));
+                bean.setQtyTo(BigDecimal.valueOf(c.getDouble(c.getColumnIndex(DBQ._PROMODETAILS_QtyTo))));
+                bean.setFQTY(BigDecimal.valueOf(c.getDouble(c.getColumnIndex(DBQ._PROMODETAILS_FQTY))));
+                bean.setPTCode(c.getString(c.getColumnIndex(DBQ._PROMODETAILS_PTCode)));
+                bean.setNoOfDealsQtyBalance(c.getInt(c.getColumnIndex(DBQ._PROMO_DEALS_NoOfDealsQtyBalance)));
+                arr.add(bean);
+            }
+        } else {
+            Log.d("FF", "No Prono");
+        }
+        return arr;
+
+    }
+
 }

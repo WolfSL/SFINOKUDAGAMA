@@ -42,6 +42,7 @@ import com.flexiv.sfino.adapter.Adapter_Batch;
 import com.flexiv.sfino.adapter.Adapter_Item;
 import com.flexiv.sfino.fragment.Order_main;
 import com.flexiv.sfino.fragment.Order_sub;
+import com.flexiv.sfino.model.Bean_OrderPromotion;
 import com.flexiv.sfino.model.DefModal;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
@@ -60,6 +61,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Set;
@@ -368,7 +370,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                     cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
                     cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
                     cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
-                    cv.put(DBQ._TBLT_ORDERHED_RefNo, maxNo);
+                    cv.put(DBQ._TBLT_ORDERHED_RefNo, "V"+maxNo);
                     cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
                     cv.put(DBQ._TBLT_ORDERHED_Status, hed.getStatus());
                     cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
@@ -387,16 +389,17 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                         cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
                         cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
                         cv.put(DBQ._TBLT_ORDDTL_DocNo, maxNo);
-                        cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                        cv.put(DBQ._TBLT_ORDDTL_TradeFQTY, obj.getTradeFQTY());
+                        cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
+                        cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
                         cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                         cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                         cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
                         cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
                         cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
                         cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
-
-
                         db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
+                        InsertOrderPromotions(obj.getPromotions(),db,maxNo);
                         recLine++;
                     }
                     db.setTransactionSuccessful();
@@ -421,6 +424,41 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             msg = "Error : Can not Save Order Without Items!";
         }
         return msg;
+    }
+
+    public void InsertOrderPromotions(ArrayList<Bean_OrderPromotion> arr, SQLiteDatabase db,String docNo) throws Exception{
+       try {
+           ContentValues values = new ContentValues();
+           for (Bean_OrderPromotion bean : arr) {
+               values.put(DBQ._ORDERPROMOTION_DealCode, bean.getDealCode());
+               values.put(DBQ._ORDERPROMOTION_DisCode, SharedPreference.COM_REP.getDiscode());
+               Log.w("SQL Qty", bean.getQty().toString());
+               values.put(DBQ._ORDERPROMOTION_DocNo, docNo);
+               Log.e("Doc No ",docNo);
+               Log.e("Dis Code ", SharedPreference.COM_REP.getDiscode());
+               Log.e("Item Code ",bean.getItemCode());
+               values.put(DBQ._ORDERPROMOTION_DocType, bean.getDocType());
+               values.put(DBQ._ORDERPROMOTION_FQty, bean.getFQTY().doubleValue());
+               values.put(DBQ._ORDERPROMOTION_ItemCode, bean.getItemCode());
+               values.put(DBQ._ORDERPROMOTION_NoOfDeals, bean.getNoOfDeals());
+               values.put(DBQ._ORDERPROMOTION_PromoDesc, bean.getPromoDesc());
+               values.put(DBQ._ORDERPROMOTION_PromoNo, bean.getPromoNo());
+               values.put(DBQ._ORDERPROMOTION_CusCode, bean.getCusCode());
+               values.put(DBQ._ORDERPROMOTION_DealCode, bean.getDealCode());
+               values.put(DBQ._ORDERPROMOTION_PTCode, bean.getPTCode());
+               values.put(DBQ._ORDERPROMOTION_Qty, bean.getQty().doubleValue());
+               values.put(DBQ._ORDERPROMOTION_RepCode, bean.getRepCode());
+               values.put(DBQ._ORDERPROMOTION_UserID, bean.getUserID());
+               values.put(DBQ._ORDERPROMOTION_SysFQty, bean.getSysFQty().doubleValue());
+               values.put(DBQ._ORDERPROMOTION_sync, 0);
+               Log.i("SQL ", values.toString());
+               db.insertOrThrow(DBQ.TBLT_ORDERPROMOTION, null, values);
+
+           }
+       }catch (Exception e){
+           e.printStackTrace();
+           throw e;
+       }
     }
 
     public String SaveUpdate(TBLT_ORDERHED hed) {
@@ -454,6 +492,13 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
             db.replaceOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
+            //Delete Details
+            db.delete(DBQ._TBLT_ORDDTL,DBQ._TBLT_ORDDTL_Discode+"=? and "+DBQ._TBLT_ORDDTL_DocNo+"=?",
+                    new String[]{hed.getDiscode(),hed.getDocNo()});
+
+            db.delete(DBQ.TBLT_ORDERPROMOTION,DBQ._ORDERPROMOTION_DisCode+"=? and "+DBQ._ORDERPROMOTION_DocNo+"=?",
+                    new String[]{hed.getDiscode(),hed.getDocNo()});
+
             int recLine = 1;
             for (TBLT_ORDDTL obj : ItemList) {
                 cv.clear();
@@ -465,7 +510,9 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                 cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
                 cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
                 cv.put(DBQ._TBLT_ORDDTL_DocNo, hed.getDocNo());
-                cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                cv.put(DBQ._TBLT_ORDDTL_TradeFQTY, obj.getTradeFQTY());
+                cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
+                cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
                 cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                 cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                 cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
@@ -475,6 +522,8 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
 
                 db.replaceOrThrow(DBQ._TBLT_ORDDTL, null, cv);
+
+                InsertOrderPromotions(obj.getPromotions(),db,hed.getDocNo());
                 recLine++;
             }
             db.setTransactionSuccessful();
@@ -535,16 +584,56 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             dtl.setUsedQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_UsedQty)));
             dtl.setDate(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_Date)));
             dtl.setCusCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_CusCode)));
-            dtl.setFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_FQTY)));
+            dtl.setTradeFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TradeFQTY)));
+            dtl.setSysFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_SysFQTY)));
+            dtl.setTotalQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TotalQty)));
             dtl.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
             dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
             dtl.setItemName(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)));
+
+            dtl.setPromotions(getOrderPromotions(db,SharedPreference.COM_REP.getDiscode(),docNo,dtl.getItemCode()));
 
             ItemList.add(dtl);
         }
         c.close();
         db.close();
         dbHelper.close();
+    }
+
+    public ArrayList<Bean_OrderPromotion> getOrderPromotions(SQLiteDatabase db,String Discode, String DocNo,String itemCode) {
+        ArrayList<Bean_OrderPromotion> arr = null;
+       String sql = "select * from TBLT_ORDERPROMOTION WHERE "+DBQ._ORDERPROMOTION_DisCode+" = '"+Discode+"' AND "+ DBQ._ORDERPROMOTION_DocNo+" = '"+DocNo+"' AND "+DBQ._ORDERPROMOTION_ItemCode + " = '"+itemCode+"'";
+        //String sql = "select * from TBLT_ORDERPROMOTION";
+        System.out.println(sql);
+        Cursor c = db.rawQuery(sql, null);
+//        Cursor c = db.rawQuery(sql, null);
+
+        Bean_OrderPromotion bean;
+        if (c.getColumnCount() > 0) {
+            arr = new ArrayList<>();
+            while (c.moveToNext()) {
+                bean = new Bean_OrderPromotion();
+                bean.setPromoNo(c.getInt(c.getColumnIndex(DBQ._ORDERPROMOTION_PromoNo)));
+                bean.setItemCode(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_ItemCode)));
+                bean.setDealCode(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_DealCode)));
+                bean.setNoOfDeals(c.getInt(c.getColumnIndex(DBQ._ORDERPROMOTION_NoOfDeals)));
+                bean.setQty(new BigDecimal(c.getDouble(c.getColumnIndex(DBQ._ORDERPROMOTION_Qty))));
+                bean.setFQTY(new BigDecimal(c.getDouble(c.getColumnIndex(DBQ._ORDERPROMOTION_FQty))));
+                bean.setDiscode(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_DisCode)));
+                bean.setPTCode(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_PTCode)));
+                bean.setDocNo(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_DocNo)));
+                bean.setDocType(c.getInt(c.getColumnIndex(DBQ._ORDERPROMOTION_DocType)));
+                bean.setPromoDesc(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_PromoDesc)));
+
+                bean.setCusCode(c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_CusCode)));
+                bean.setFreeItem(new BigDecimal(c.getDouble(c.getColumnIndex(DBQ._ORDERPROMOTION_FreeItem))));
+                bean.setSysFQty(new BigDecimal(c.getDouble(c.getColumnIndex(DBQ._ORDERPROMOTION_SysFQty))));
+                Log.w("SQL QTY", c.getString(c.getColumnIndex(DBQ._ORDERPROMOTION_Qty)));
+                arr.add(bean);
+            }
+            c.close();
+        }
+        return arr;
     }
 
 

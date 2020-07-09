@@ -4,6 +4,15 @@ public class Modal_Item {
     String ItemCode;
     String Desc;
     String sih;
+    String RetPrice;
+
+    public String getRetPrice() {
+        return RetPrice;
+    }
+
+    public void setRetPrice(String retPrice) {
+        RetPrice = retPrice;
+    }
 
     public String getSih() {
         return sih;

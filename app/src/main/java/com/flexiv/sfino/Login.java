@@ -12,6 +12,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -32,12 +33,16 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.agrawalsuneet.dotsloader.loaders.LazyLoader;
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.flexiv.sfino.model.Bean_PromotionDetails;
+import com.flexiv.sfino.model.Bean_PromotionMaster;
+import com.flexiv.sfino.model.Bean_RepDeals;
 import com.flexiv.sfino.model.MasterDataModal;
 import com.flexiv.sfino.model.Modal_Rep;
 import com.flexiv.sfino.utill.DBHelper;
@@ -47,9 +52,14 @@ import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +74,10 @@ public class Login extends AppCompatActivity {
     //ProgressDialog progressDialog;
     private final String TAG = "Login";
 
+
+    private static final String SPF_NAME = "vidslogin"; //  <--- Add this
+    private static final String USERNAME = "username";  //  <--- To save username
+
     @SuppressLint("HardwareIds")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +90,10 @@ public class Login extends AppCompatActivity {
         txtUserName = findViewById(R.id.txtUserName);
         lazyLoader = findViewById(R.id.lazyLoader);
         setSupportActionBar(botNaw);
+
+        SharedPreferences loginPreferences = getSharedPreferences(SPF_NAME,
+                Context.MODE_PRIVATE);
+        txtUserName.setText(loginPreferences.getString(USERNAME, ""));
 
 
         botNaw.setNavigationOnClickListener(new View.OnClickListener() {
@@ -198,9 +216,10 @@ public class Login extends AppCompatActivity {
                                 getRepDetails(imei, repCode, password, db);
                             else {
                                 lazyLoader.setVisibility(View.VISIBLE);
-                                MakeSnackBar("Download Complete!",Color.GREEN);
+
                             }
-                            dialog.dismiss();
+                            getPromoMaster(repCode);
+                            //dialog.dismiss();
                         }
                     });
                     t.start();
@@ -279,6 +298,8 @@ public class Login extends AppCompatActivity {
                 getRepFromAPI(deviceIMI, repCode, password, db);
             }
         }
+        SharedPreferences loginPreferences = getSharedPreferences(SPF_NAME, Context.MODE_PRIVATE);
+        loginPreferences.edit().putString(USERNAME, repCode).apply();
     }
 
     public void downloadMasterManual() {
@@ -383,5 +404,107 @@ public class Login extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+
+    //Download Promo
+    public void getPromoMaster(String rep) {
+        //String url = "http://" + Common.gvarIp + "/gammawebapi/api/Promo/Promo_Get?id="+ Common.gvarSalesRep;
+        String url = SharedPreference.URL + "Promo/Promo_Get?id="+ rep+"&Discode="+androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null);
+        System.out.println(url);
+
+        runOnUiThread(() -> dialog.setMessage("Downloading Promo..."));
+
+        RequestQueue rq = Volley.newRequestQueue(this);
+
+        JsonObjectRequest jr = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println("Rest Response :" + response.toString());
+                        //activity.makeToas("success");
+                        createInvoiceList(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println("Rest Errr :" + error.toString());
+
+                    }
+                }
+        ) { //no semicolon or coma
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+
+        rq.add(jr);
+    }
+
+    private String createInvoiceList(JSONObject response) {
+
+        SQLiteDatabase sqLiteDatabase = null;
+        try {
+            Gson gson = new Gson();
+            JSONArray _master = response.getJSONArray("master");
+            JSONArray _details = response.getJSONArray("details");
+            JSONArray _deals = response.getJSONArray("deals");
+
+            Type type = new TypeToken<ArrayList<Bean_PromotionMaster>>() {
+            }.getType();
+            ArrayList<Bean_PromotionMaster> list_master = gson.fromJson(_master.toString(), type);
+
+            type = new TypeToken<ArrayList<Bean_PromotionDetails>>() {
+            }.getType();
+            ArrayList<Bean_PromotionDetails> list_detals = gson.fromJson(_details.toString(), type);
+
+            type = new TypeToken<ArrayList<Bean_RepDeals>>() {
+            }.getType();
+            ArrayList<Bean_RepDeals> list_deals= gson.fromJson(_deals.toString(), type);
+
+            DBHelper db = new DBHelper(this);
+            sqLiteDatabase = db.getWritableDatabase();
+            sqLiteDatabase.beginTransaction();
+
+            //Truncate Table
+            sqLiteDatabase.delete(DBQ._PROMOMASTER, null, null);
+            sqLiteDatabase.delete(DBQ._PROMODETAILS, null, null);
+            sqLiteDatabase.delete(DBQ._TBLM_PROMO_DEALS, null, null);
+
+            //Insert PROMO MASTER
+            for (Bean_PromotionMaster bean : list_master
+            ) {
+                db.Insert_TBLM_PROMO(sqLiteDatabase, bean);
+            }
+
+            for (Bean_PromotionDetails bean : list_detals
+            ) {
+                db.Insert_TBLM_PROMO(sqLiteDatabase,bean);
+            }
+            for (Bean_RepDeals bean : list_deals
+            ) {
+                db.Insert_TBLM_PROMO(sqLiteDatabase,bean);
+            }
+
+            //Insert PROMO DETAILS
+            sqLiteDatabase.setTransactionSuccessful();
+            dialog.dismiss();
+            MakeSnackBar("Download Complete!",Color.GREEN);
+            return "Successfully Downloaded!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            return e.getMessage();
+        } finally {
+            assert sqLiteDatabase != null;
+            sqLiteDatabase.endTransaction();
+        }
+
+
     }
 }

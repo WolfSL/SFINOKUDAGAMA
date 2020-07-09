@@ -1,5 +1,7 @@
 package com.flexiv.sfino.model;
 
+import java.util.ArrayList;
+
 public class TBLT_ORDDTL {
 
     private String ItemCode;
@@ -12,9 +14,31 @@ public class TBLT_ORDDTL {
     private String Date;
     private int RecordLine;
     private double UsedQty;
+    private double TotalQty;
+    private double SysFQTY;
+    private double TradeFQTY;
     private double FQTY;
     private String BATCH;
     private String ItemName;
+
+    public double getFQTY() {
+        return FQTY;
+    }
+
+    public void setFQTY(double FQTY) {
+        this.FQTY = FQTY;
+    }
+
+
+    private ArrayList<Bean_OrderPromotion> promotions;
+
+    public ArrayList<Bean_OrderPromotion> getPromotions() {
+        return promotions;
+    }
+
+    public void setPromotions(ArrayList<Bean_OrderPromotion> promotions) {
+        this.promotions = promotions;
+    }
 
     public String getItemName() {
         return ItemName;
@@ -104,12 +128,28 @@ public class TBLT_ORDDTL {
         UsedQty = usedQty;
     }
 
-    public double getFQTY() {
-        return FQTY;
+    public double getTotalQty() {
+        return TotalQty;
     }
 
-    public void setFQTY(double FQTY) {
-        this.FQTY = FQTY;
+    public void setTotalQty(double totalQty) {
+        TotalQty = totalQty;
+    }
+
+    public double getSysFQTY() {
+        return SysFQTY;
+    }
+
+    public void setSysFQTY(double sysFQTY) {
+        SysFQTY = sysFQTY;
+    }
+
+    public double getTradeFQTY() {
+        return TradeFQTY;
+    }
+
+    public void setTradeFQTY(double tradeFQTY) {
+        TradeFQTY = tradeFQTY;
     }
 
     public String getBATCH() {
@@ -119,4 +159,6 @@ public class TBLT_ORDDTL {
     public void setBATCH(String BATCH) {
         this.BATCH = BATCH;
     }
+
+
 }

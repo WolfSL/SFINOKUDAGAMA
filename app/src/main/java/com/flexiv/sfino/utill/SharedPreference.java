@@ -21,13 +21,16 @@ public class SharedPreference {
     public static String dateFormat_Format1 = "yyyy-MM-dd hh:mm:ss a";
     public static DateFormat dateFormat = new SimpleDateFormat(dateFormat_Format1);
 
+    public final static SimpleDateFormat Date_serverFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+    public final static SimpleDateFormat Date_App_Format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
 
     public static String address = "514-A5, Maithreepala Senanayake Mawatha, Anuradhapura";
     public static String tp = "025-4581281";
 
 //    public static String refid;
 //    public static String disid;
-    public static String terminalid;
+    public static String DisAID;
     public static String printername;
     public static String settings_pin;
     public static String URL;

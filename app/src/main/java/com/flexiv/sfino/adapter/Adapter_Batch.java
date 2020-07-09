@@ -46,7 +46,7 @@ public class Adapter_Batch extends RecyclerView.Adapter<Adapter_Batch.ViewsHolde
     @Override
     public void onBindViewHolder(@NonNull ViewsHolder holder, int position) {
         Modal_Batch item = arr.get(position);
-        holder.card_name.setText(SharedPreference.df.format(item.getRetialPrice()));
+        holder.card_name.setText("LKR "+SharedPreference.df.format(item.getRetialPrice()));
         holder.card_code.setText(item.getBatchNo());
         holder.card_code2.setText(SharedPreference.df.format(item.getSHI()));
 

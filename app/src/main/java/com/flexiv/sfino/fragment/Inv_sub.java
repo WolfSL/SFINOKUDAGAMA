@@ -129,7 +129,7 @@ public class Inv_sub extends Fragment {
         obj.setUsedQty(0);
         obj.setDate(SharedPreference.dateFormat.format(Calendar.getInstance().getTime()));
         obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
-        obj.setFQTY(Double.parseDouble(edt_FI1.getText().length()>0?edt_FI1.getText().toString():"0"));
+        obj.setTradeFQTY(Double.parseDouble(edt_FI1.getText().length()>0?edt_FI1.getText().toString():"0"));
         obj.setRecordLine(0);
         obj.setAmount((item.getRetialPrice() * obj.getItQty())-obj.getDiscAmt());
 

@@ -51,7 +51,7 @@ public class Adapter_Order_list extends RecyclerView.Adapter<Adapter_Order_list.
         TBLT_ORDERHED orderhed = arr.get(position);
         holder.OI_DocNo.setText(orderhed.getRefNo());
         holder.OI_Date.setText(orderhed.getSalesDate());
-        String price = "Rs " + SharedPreference.df.format(orderhed.getNetAmt());
+        String price = "Rs " + SharedPreference.ds_formatter.format(orderhed.getNetAmt());
         holder.OI_Rs.setText(price);
 
         if (orderhed.getStatus().equals("A")) {

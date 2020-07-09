@@ -46,7 +46,7 @@ public class Adapter_Oeder_Item extends RecyclerView.Adapter<Adapter_Oeder_Item.
         holder.item_name.setText(item.getItemName());
         holder.item_retPrice.setText(SharedPreference.df.format(item.getUnitPrice()));
         holder.item_disVal.setText(SharedPreference.df.format(item.getDiscAmt()));
-        holder.item_nfqty.setText(SharedPreference.df.format(item.getFQTY()));
+        holder.item_nfqty.setText(SharedPreference.df.format(item.getSysFQTY()));
         holder.item_total.setText(SharedPreference.df.format(item.getAmount()));
         holder.item_rqqty.setText(SharedPreference.df.format(item.getItQty()));
 

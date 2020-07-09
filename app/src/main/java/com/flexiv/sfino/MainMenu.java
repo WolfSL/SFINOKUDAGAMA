@@ -549,9 +549,17 @@ public class MainMenu extends AppCompatActivity implements Runnable{
                 return params;
             }
         };
-
         rq.add(jr);
+    }
 
+    public void LogOut(View v){
+        Intent i = new Intent(MainMenu.this,Login.class);
+        startActivity(i);
+        this.finish();
+    }
 
+    public void Stock(View v){
+        Intent i = new Intent(MainMenu.this,StockBal.class);
+        startActivity(i);
     }
 }

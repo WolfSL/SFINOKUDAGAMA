@@ -164,6 +164,9 @@ public class DBQ {
             "[Date] text  NULL,\n" +
             "[RecordLine] INTEGER  NULL,\n" +
             "[UsedQty] NUMERIC  NULL,\n" +
+            "[TradeFQTY] numERIC  NULL,\n" +
+            "[SysFQTY] numERIC  NULL,\n" +
+            "[TotalQty] numERIC  NULL,\n" +
             "[FQTY] numERIC  NULL,\n" +
             "[BATCH] text  NULL,\n" +
             "PRIMARY KEY ([DocNo],[Discode],[LocCode],[ItemCode],[RecordLine])\n" +
@@ -183,7 +186,10 @@ public class DBQ {
     public static final String _TBLT_ORDDTL_Date = "Date";
     public static final String _TBLT_ORDDTL_RecordLine = "RecordLine";
     public static final String _TBLT_ORDDTL_UsedQty = "UsedQty";
+    public static final String _TBLT_ORDDTL_TradeFQTY = "TradeFQTY";
+    public static final String _TBLT_ORDDTL_SysFQTY = "SysFQTY";
     public static final String _TBLT_ORDDTL_FQTY = "FQTY";
+    public static final String _TBLT_ORDDTL_TotalQty = "TotalQty";
     public static final String _TBLT_ORDDTL_BATCH = "BATCH";
 
 
@@ -314,5 +320,122 @@ public class DBQ {
     public static final String _TBLT_SALINVDET_LineID = "LineID";
 
 
+
+    //V2 Update
+    //PROMO TBLS
+    public static final String _PROMOMASTER = "TBLM_PROMOMASTER";
+    public static final String _PROMODETAILS = "TBLM_PROMODETAILS";
+    public static final String _TBLM_PROMO_DEALS = "TBLM_PROMO_DEALS";
+
+    public static final String CREATE_TABLE_PROMOMASTER = "CREATE TABLE IF NOT EXISTS \"TBLM_PROMOMASTER\" (\n" +
+            "\t\"PromoNo\"\tINTEGER,\n" +
+            "\t\"PromoCode\"\tTEXT,\n" +
+            "\t\"PromoType\"\tINTEGER,\n" +
+            "\t\"PromoDesc\"\tTEXT,\n" +
+            "\t\"DateFrom\"\tTEXT,\n" +
+            "\t\"DateTo\"\tTEXT,\n" +
+            "\t\"Active\"\tINTEGER,\n" +
+            "\t\"ActiveDays\"\tTEXT,\n" +
+            "\t\"TargetCategory\"\tTEXT,\n" +
+            "\t\"DisCode\"\tTEXT,\n" +
+            "\tPRIMARY KEY(\"PromoNo\")\n" +
+            ");";
+    public static final String _PROMOMASTER_PromoNo = "PromoNo";
+    public static final String _PROMOMASTER_PromoCode = "PromoCode";
+    public static final String _PROMOMASTER_PromoType = "PromoType";
+    public static final String _PROMOMASTER_PromoDesc = "PromoDesc";
+    public static final String _PROMOMASTER_DateFrom = "DateFrom";
+    public static final String _PROMOMASTER_DateTo = "DateTo";
+    public static final String _PROMOMASTER_Active = "Active";
+    public static final String _PROMOMASTER_ActiveDays = "ActiveDays";
+    public static final String _PROMOMASTER_TargetCategory = "TargetCategory";
+    public static final String _PROMOMASTER_DisCode = "DisCode";
+
+    public static final String CREATE_TABLE_PROMODETAILS = "CREATE TABLE \"TBLM_PROMODETAILS\" (\n" +
+            "\t\"RecLine\"\tINTEGER,\n" +
+            "\t\"PromoNo\"\tINTEGER,\n" +
+            "\t\"ItemCode\"\tTEXT,\n" +
+            "\t\"QtyFrom\"\tNUMERIC,\n" +
+            "\t\"QtyTo\"\tNUMERIC,\n" +
+            "\t\"FQTY\"\tNUMERIC,\n" +
+            "\t\"PTCode\"\tNUMERIC,\n" +
+            "\tPRIMARY KEY(\"RecLine\"),\n" +
+            "\tFOREIGN KEY(\"PromoNo\") REFERENCES \"TBLM_PROMOMASTER\"(\"PromoNo\")" +
+            ");";
+    public static final String _PROMODETAILS_RecLine = "RecLine";
+    public static final String _PROMODETAILS_PromoNo = "PromoNo";
+    public static final String _PROMODETAILS_ItemCode = "ItemCode";
+    public static final String _PROMODETAILS_QtyFrom = "QtyFrom";
+    public static final String _PROMODETAILS_QtyTo = "QtyTo";
+    public static final String _PROMODETAILS_FQTY = "FQTY";
+    public static final String _PROMODETAILS_PTCode = "PTCode";
+
+    public static final String CREATE_TBLT_ORDERPROMOTION = "CREATE TABLE \"TBLT_ORDERPROMOTION\" (\n" +
+            "\t\"PromoNo\"\tTEXT,\n" +
+            "\t\"ItemCode\"\tTEXT,\n" +
+            "\t\"DealCode\"\tTEXT,\n" +
+            "\t\"NoOfDeals\"\tINTEGER,\n" +
+            "\t\"Qty\"\tNUMERIC,\n" +
+            "\t\"FQty\"\tNUMERIC,\n" +
+            "\t\"TradeFQTY\"\tNUMERIC,\n" +
+            "\t\"DisCode\"\tTEXT,\n" +
+            "\t\"PTCode\"\tTEXT,\n" +
+            "\t\"DocNo\"\tTEXT,\n" +
+            "\t\"DocType\"\tINTEGER,\n" +
+            "\t\"UserID\"\tTEXT,\n" +
+            "\t\"PromoDesc\"\tTEXT,\n" +
+            "\t\"RepCode\"\tTEXT,\n" +
+            "\t\"CusCode\"\tTEXT,\n" +
+            "\t\"sync\"\tINTEGER,\n" +
+            "\t\"FreeItem\"\tTEXT,\n" +
+            "\t\"SysFQty\"\tTEXT\n" +
+            ")";
+
+    public static final String TBLT_ORDERPROMOTION = "TBLT_ORDERPROMOTION";
+    public static final String _ORDERPROMOTION_PromoNo = "PromoNo";
+    public static final String _ORDERPROMOTION_ItemCode = "ItemCode";
+    public static final String _ORDERPROMOTION_DealCode = "DealCode";
+    public static final String _ORDERPROMOTION_NoOfDeals = "NoOfDeals";
+    public static final String _ORDERPROMOTION_Qty = "Qty";
+    public static final String _ORDERPROMOTION_FQty = "FQty";
+    public static final String _ORDERPROMOTION_DisCode = "DisCode";
+    public static final String _ORDERPROMOTION_PTCode = "PTCode";
+    public static final String _ORDERPROMOTION_DocNo = "DocNo";
+    public static final String _ORDERPROMOTION_DocType = "DocType";
+    public static final String _ORDERPROMOTION_UserID = "UserID";
+    public static final String _ORDERPROMOTION_PromoDesc = "PromoDesc";
+    public static final String _ORDERPROMOTION_RepCode = "RepCode";
+    public static final String _ORDERPROMOTION_CusCode = "CusCode";
+    public static final String _ORDERPROMOTION_FreeItem = "FreeItem";
+    public static final String _ORDERPROMOTION_SysFQty = "SysFQty";
+    public static final String _ORDERPROMOTION_TradeFQTY = "TradeFQTY";
+    public static final String _ORDERPROMOTION_sync = "sync";
+
+
+
+    public static final String CREATE_TABLE_TBLM_PROMO_DEALS = "CREATE TABLE \"TBLM_PROMO_DEALS\" (\n" +
+            "\t\"PRecLine\"\tINTEGER,\n" +
+            "\t\"PromoNo\"\tINTEGER,\n" +
+            "\t\"PromoCode\"\tTEXT,\n" +
+            "\t\"NoOfDealsQty\"\tINTEGER,\n" +
+            "\t\"NoOfDealsQtyBalance\"\tINTEGER,\n" +
+            "\tPRIMARY KEY(\"PRecLine\"),\n" +
+            "\tFOREIGN KEY(\"PromoNo\") REFERENCES \"TBLM_PROMOMASTER\"(\"PromoNo\")\n" +
+            ");";
+    public static final String _PROMO_DEALS_PRecLine = "PRecLine";
+    public static final String _PROMO_DEALS_PromoNo = "PromoNo";
+    public static final String _PROMO_DEALS_PromoCode = "PromoCode";
+    public static final String _PROMO_DEALS_NoOfDealsQty = "NoOfDealsQty";
+    public static final String _PROMO_DEALS_NoOfDealsQtyBalance = "NoOfDealsQtyBalance";
+
+
+    public static final String CREATE_TABLE_Shop_Stock_Counter = "CREATE TABLE \"Shop_Stock_Counter\" (\n" +
+            "\t\"cusId\"\tTEXT,\n" +
+            "\t\"counter\"\tINTEGER,\n" +
+            "\tPRIMARY KEY(\"cusId\")\n" +
+            ");";
+    public static final String _Shop_Stock_Counter_cusId = "cusId";
+    public static final String _Shop_Stock_Counter_counter = "counter";
+    public static final String _Shop_Stock_Counter = "Shop_Stock_Counter";
 
 }

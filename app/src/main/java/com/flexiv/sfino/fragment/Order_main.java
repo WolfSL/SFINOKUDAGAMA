@@ -333,7 +333,6 @@ public class Order_main extends Fragment {
             context.removeItem(viewHolder.getAdapterPosition());
             adaper.notifyDataSetChanged();
             refreshItems();
-
         }
     };
 

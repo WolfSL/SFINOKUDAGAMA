@@ -356,7 +356,10 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
                         cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
                         cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
                         cv.put(DBQ._TBLT_ORDDTL_DocNo, maxNo);
+                        cv.put(DBQ._TBLT_ORDDTL_TradeFQTY, obj.getTradeFQTY());
+                        cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
                         cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                        cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
                         cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                         cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                         cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
@@ -434,7 +437,10 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
                 cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
                 cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
                 cv.put(DBQ._TBLT_ORDDTL_DocNo, hed.getDocNo());
+                cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
                 cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+                cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
+                cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                 cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                 cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                 cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
@@ -503,7 +509,10 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
             dtl.setUsedQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_UsedQty)));
             dtl.setDate(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_Date)));
             dtl.setCusCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_CusCode)));
+            dtl.setTradeFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TradeFQTY)));
+            dtl.setSysFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_SysFQTY)));
             dtl.setFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_FQTY)));
+            dtl.setTotalQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TotalQty)));
             dtl.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
             dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
 

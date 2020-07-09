@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private void doAnimation() {
         fa = this;
 
-        flex_logo = findViewById(R.id.flex_logo);
+        flex_logo = (ImageView) findViewById(R.id.flex_logo);
         appname = findViewById(R.id.appname);
 
         SharedPreference.setSettings(this);

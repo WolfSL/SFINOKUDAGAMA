@@ -32,24 +32,35 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.flexiv.sfino.adapter.Adapter_Cus_area;
+import com.flexiv.sfino.model.Bean_PromotionDetails;
+import com.flexiv.sfino.model.Bean_PromotionMaster;
+import com.flexiv.sfino.model.Bean_RepDeals;
 import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.model.MasterDataModal;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.utill.DBHelper;
+import com.flexiv.sfino.utill.DBQ;
 import com.flexiv.sfino.utill.PrinterCommands;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +69,7 @@ import java.util.UUID;
 
 import me.anwarshahriar.calligrapher.Calligrapher;
 
-public class MainMenu extends AppCompatActivity implements Runnable{
+public class MainMenu extends AppCompatActivity implements Runnable {
 
     private RecyclerView cusRecyclerView;
     private Adapter_Cus_area cusAdapter;
@@ -160,17 +171,16 @@ public class MainMenu extends AppCompatActivity implements Runnable{
         textViewRep_name.setText(SharedPreference.COM_REP == null ? "Dr.Wolf - Flexiv" : SharedPreference.COM_REP.getRepName());
         textViewDis_name.setText(SharedPreference.COM_REP == null ? "Please Contact Flexiv MicroSystem" : SharedPreference.COM_REP.getDisName());
 
-       // textViewDis_name.startAnimation((Animation) AnimationUtils.loadAnimation(this,R.anim.scroll_anim));
+        // textViewDis_name.startAnimation((Animation) AnimationUtils.loadAnimation(this,R.anim.scroll_anim));
 
         printerInit();
 
-        if(SharedPreference.SFTYPE.trim().equals("I")){
+        if (SharedPreference.SFTYPE.trim().equals("I")) {
             cardView_Order.setVisibility(View.GONE);
-        }else if(SharedPreference.SFTYPE.trim().equals("O")){
+        } else if (SharedPreference.SFTYPE.trim().equals("O")) {
             cardView_inv.setVisibility(View.GONE);
         }
     }
-
 
 
     @Override
@@ -269,8 +279,6 @@ public class MainMenu extends AppCompatActivity implements Runnable{
     }
 
 
-
-
     //Printer
     private static String TAG = "Print Tag";
     //BlueTooth Settings..
@@ -311,7 +319,7 @@ public class MainMenu extends AppCompatActivity implements Runnable{
 
         imageButtonP.setOnClickListener(view -> {
             Log.e(TAG, "Enter Print Test");
-            if (connect !=1) {
+            if (connect != 1) {
                 MainMenu.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                 if (MainMenu.mBluetoothAdapter == null) {
                     Toast.makeText(this, "Message1", Toast.LENGTH_SHORT).show();
@@ -422,8 +430,6 @@ public class MainMenu extends AppCompatActivity implements Runnable{
     }
 
 
-
-
     protected void printConfig(String bill, int size, int style, int align, OutputStream outputStream, boolean LF) {
         //size 1 = large, size 2 = medium, size 3 = small
         //style 1 = Regular, style 2 = Bold
@@ -502,13 +508,14 @@ public class MainMenu extends AppCompatActivity implements Runnable{
     @Override
     public void onBackPressed() {
         Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-        homeIntent.addCategory( Intent.CATEGORY_HOME );
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(homeIntent);
     }
 
 
     private ProgressDialog dialog;
+
     public void download(View v) {
         SQLiteDatabase db = new DBHelper(this).getWritableDatabase();
         dialog = new ProgressDialog(this);
@@ -527,10 +534,15 @@ public class MainMenu extends AppCompatActivity implements Runnable{
 
                     Thread t = new Thread(() -> {
                         new DBHelper(MainMenu.this).insertMasterData(master);
-                        this.runOnUiThread(() ->{
+//                        this.runOnUiThread(() ->{
+//                            dialog.dismiss();
+//                            Toast.makeText(MainMenu.this,"Download Complete!",Toast.LENGTH_LONG).show();
+//                        });
+                        if (!SharedPreference.SFTYPE.equals("I"))
+                            getPromoMaster(SharedPreference.COM_REP.getRepCode());
+                        else {
                             dialog.dismiss();
-                            Toast.makeText(MainMenu.this,"Download Complete!",Toast.LENGTH_LONG).show();
-                        });
+                        }
                     });
                     t.start();
 
@@ -538,7 +550,7 @@ public class MainMenu extends AppCompatActivity implements Runnable{
                 },
                 error -> {
                     System.out.println("Rest Errr :" + error.toString());
-                    Toast.makeText(MainMenu.this,error.toString(),Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainMenu.this, error.toString(), Toast.LENGTH_LONG).show();
                     dialog.setMessage(error.toString());
                 }
         ) {
@@ -552,14 +564,123 @@ public class MainMenu extends AppCompatActivity implements Runnable{
         rq.add(jr);
     }
 
-    public void LogOut(View v){
-        Intent i = new Intent(MainMenu.this,Login.class);
+    //Download Promo
+    public void getPromoMaster(String rep) {
+        //String url = "http://" + Common.gvarIp + "/gammawebapi/api/Promo/Promo_Get?id="+ Common.gvarSalesRep;
+        String url = SharedPreference.URL + "Promo/Promo_Get?id=" + rep + "&Discode=" + androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null);
+        System.out.println(url);
+
+        runOnUiThread(() -> dialog.setMessage("Downloading Promo..."));
+
+        RequestQueue rq = Volley.newRequestQueue(this);
+
+        JsonObjectRequest jr = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        System.out.println("Rest Response :" + response.toString());
+                        //activity.makeToas("success");
+                        createInvoiceList(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println("Rest Errr :" + error.toString());
+
+                    }
+                }
+        ) { //no semicolon or coma
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+
+        rq.add(jr);
+    }
+
+    private String createInvoiceList(JSONObject response) {
+
+        SQLiteDatabase sqLiteDatabase = null;
+        try {
+            Gson gson = new Gson();
+            JSONArray _master = response.getJSONArray("master");
+            JSONArray _details = response.getJSONArray("details");
+            JSONArray _deals = response.getJSONArray("deals");
+
+            Type type = new TypeToken<ArrayList<Bean_PromotionMaster>>() {
+            }.getType();
+            ArrayList<Bean_PromotionMaster> list_master = gson.fromJson(_master.toString(), type);
+
+            type = new TypeToken<ArrayList<Bean_PromotionDetails>>() {
+            }.getType();
+            ArrayList<Bean_PromotionDetails> list_detals = gson.fromJson(_details.toString(), type);
+
+            type = new TypeToken<ArrayList<Bean_RepDeals>>() {
+            }.getType();
+            ArrayList<Bean_RepDeals> list_deals = gson.fromJson(_deals.toString(), type);
+
+            DBHelper db = new DBHelper(this);
+            sqLiteDatabase = db.getWritableDatabase();
+            sqLiteDatabase.beginTransaction();
+
+            //Truncate Table
+            sqLiteDatabase.delete(DBQ._PROMOMASTER, null, null);
+            sqLiteDatabase.delete(DBQ._PROMODETAILS, null, null);
+            sqLiteDatabase.delete(DBQ._TBLM_PROMO_DEALS, null, null);
+
+            //Insert PROMO MASTER
+            for (Bean_PromotionMaster bean : list_master
+            ) {
+                db.Insert_TBLM_PROMO(sqLiteDatabase, bean);
+            }
+
+            for (Bean_PromotionDetails bean : list_detals
+            ) {
+                db.Insert_TBLM_PROMO(sqLiteDatabase, bean);
+            }
+            for (Bean_RepDeals bean : list_deals
+            ) {
+                db.Insert_TBLM_PROMO(sqLiteDatabase, bean);
+            }
+
+            //Insert PROMO DETAILS
+            sqLiteDatabase.setTransactionSuccessful();
+            dialog.dismiss();
+            // MakeSnackBar("Download Complete!",Color.GREEN);
+            this.runOnUiThread(() -> {
+                dialog.dismiss();
+                Toast.makeText(MainMenu.this, "Download Complete!", Toast.LENGTH_LONG).show();
+            });
+            return "Successfully Downloaded!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            this.runOnUiThread(() -> {
+                dialog.setMessage("Error In Downloading Data");
+                Toast.makeText(MainMenu.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            });
+            return e.getMessage();
+        } finally {
+            assert sqLiteDatabase != null;
+            sqLiteDatabase.endTransaction();
+        }
+
+
+    }
+
+    public void LogOut(View v) {
+        Intent i = new Intent(MainMenu.this, Login.class);
         startActivity(i);
         this.finish();
     }
 
-    public void Stock(View v){
-        Intent i = new Intent(MainMenu.this,StockBal.class);
+    public void Stock(View v) {
+        Intent i = new Intent(MainMenu.this, StockBal.class);
         startActivity(i);
     }
 }

@@ -1,5 +1,7 @@
 package com.flexiv.sfino.model;
 
+import com.flexiv.sfino.utill.SharedPreference;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class TBLT_ORDERHED implements Serializable {
     private String CreateUser;
     private String Status;
     private boolean ISUSED;
+    private String varID = SharedPreference.varID;
 
     private List<TBLT_ORDDTL> ItemList;
 

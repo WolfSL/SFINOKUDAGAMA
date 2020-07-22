@@ -32,7 +32,7 @@ class TBLT_SALINVHED {
     private String CreateUser;
     private boolean GLTransfer;
     private String Status;
-    private boolean DisPer;
+    private double DisPer;
     private int trType;
     private String AreaCode;
     private boolean ISPRINT;
@@ -273,11 +273,11 @@ class TBLT_SALINVHED {
         Status = status;
     }
 
-    public boolean isDisPer() {
+    public double getDisPer() {
         return DisPer;
     }
 
-    public void setDisPer(boolean disPer) {
+    public void setDisPer(double disPer) {
         DisPer = disPer;
     }
 

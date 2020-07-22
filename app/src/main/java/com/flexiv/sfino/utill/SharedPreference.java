@@ -17,6 +17,8 @@ import java.util.Locale;
 
 public class SharedPreference {
 
+    public final static String varID = "1.0.3";
+
     public static  DecimalFormat df = new DecimalFormat("0.00");
     public static String dateFormat_Format1 = "yyyy-MM-dd hh:mm:ss a";
     public static DateFormat dateFormat = new SimpleDateFormat(dateFormat_Format1);

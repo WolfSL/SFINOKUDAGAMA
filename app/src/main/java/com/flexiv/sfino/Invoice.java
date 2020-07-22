@@ -42,6 +42,8 @@ import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
+import com.flexiv.sfino.model.TBLT_SALINVDET;
+import com.flexiv.sfino.model.TBLT_SALINVHED;
 import com.flexiv.sfino.utill.DBHelper;
 import com.flexiv.sfino.utill.DBQ;
 import com.flexiv.sfino.utill.Fragment_sub_batching;
@@ -55,7 +57,7 @@ import java.util.ArrayList;
 
 public class Invoice extends AppCompatActivity implements Fragment_sub_batching {
 
-    String TAG = "ORDER";
+    String TAG = "INVOICE";
     //Components
     ImageButton imageButton_done;
     ImageButton imageButton_back;
@@ -64,13 +66,13 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
     TextView textView_Area;
     private TextView textView_InvNo;
 
-    private TBLT_ORDERHED obj = null;
+    private TBLT_SALINVHED obj = null;
 
-    public TBLT_ORDERHED getObj() {
+    public TBLT_SALINVHED getObj() {
         return obj;
     }
 
-    public void setObj(TBLT_ORDERHED obj) {
+    public void setObj(TBLT_SALINVHED obj) {
         this.obj = obj;
     }
 
@@ -78,13 +80,13 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
         return textView_InvNo;
     }
 
-    private ArrayList<TBLT_ORDDTL> ItemList = new ArrayList<>();
+    private ArrayList<TBLT_SALINVDET> ItemList = new ArrayList<>();
 
-    public ArrayList<TBLT_ORDDTL> getItemList() {
+    public ArrayList<TBLT_SALINVDET> getItemList() {
         return ItemList;
     }
 
-    public void setItemList(TBLT_ORDDTL itemList) {
+    public void setItemList(TBLT_SALINVDET itemList) {
         ItemList.add(itemList);
     }
 
@@ -110,7 +112,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
 
 
         Intent intent = getIntent();
-        obj = (TBLT_ORDERHED) intent.getSerializableExtra("hed");
+        obj = (TBLT_SALINVHED) intent.getSerializableExtra("hed");
 
         if (obj != null) {
             String msg = "INV Ref No. " + obj.getRefNo();
@@ -312,7 +314,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
     }
 
 
-    public String Save(TBLT_ORDERHED hed) {
+    public String Save(TBLT_SALINVHED hed) {
         String msg;
         if (!ItemList.isEmpty()) {
             DBHelper dbHelper = new DBHelper(this);
@@ -325,28 +327,42 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
                 String maxNo = getMaxDocNo(db);
                 if (Integer.parseInt(maxNo) > 0) {
                     ContentValues cv = new ContentValues();
-                    cv.put(DBQ._TBLT_ORDERHED_AreaCode, hed.getAreaCode());
-                    cv.put(DBQ._TBLT_ORDERHED_CreateUser, hed.getCreateUser());
-                    cv.put(DBQ._TBLT_ORDERHED_CusCode, hed.getCusCode());
-                    cv.put(DBQ._TBLT_ORDERHED_Discode, hed.getDiscode());
-                    cv.put(DBQ._TBLT_ORDERHED_Discount, hed.getDiscount());
-                    cv.put(DBQ._TBLT_ORDERHED_DisPer, hed.getDisPer());
-                    cv.put(DBQ._TBLT_ORDERHED_DocNo, maxNo);
-                    cv.put(DBQ._TBLT_ORDERHED_GrossAmt, hed.getGrossAmt());
-                    cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
-                    cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
-                    cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
-                    cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
-                    cv.put(DBQ._TBLT_ORDERHED_RefNo, maxNo);
-                    cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
-                    cv.put(DBQ._TBLT_ORDERHED_Status, hed.getStatus());
-                    cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
-                    cv.put(DBQ._TBLT_ORDERHED_RepCode, hed.getRepCode());
+                    cv.put(DBQ._TBLT_INVHED_DocNo, maxNo);
+                    cv.put(DBQ._TBLT_INVHED_Discode, hed.getDiscode());
+                    cv.put(DBQ._TBLT_INVHED_DocType, 6);
+                    cv.put(DBQ._TBLT_INVHED_SalesDate, hed.getSalesDate());
+                    cv.put(DBQ._TBLT_INVHED_SupCode,"");
+                    cv.put(DBQ._TBLT_INVHED_CusCode,hed.getCusCode());
+                    cv.put(DBQ._TBLT_INVHED_RepCode,hed.getRepCode());
+                    cv.put(DBQ._TBLT_INVHED_RefNo,maxNo);
+                    cv.put(DBQ._TBLT_INVHED_InvType,1);
+                    cv.put(DBQ._TBLT_INVHED_LocCode,"00001");
+                    cv.put(DBQ._TBLT_);
+
+
+
+
+                    cv.put(DBQ._TBLT_INVHED_AreaCode, hed.getAreaCode());
+                    cv.put(DBQ._TBLT_INVHED_CreateUser, hed.getCreateUser());
+                    cv.put(DBQ._TBLT_INVHED_CusCode, hed.getCusCode());
+
+                    cv.put(DBQ._TBLT_INVHED_Discount, hed.getDiscount());
+                    cv.put(DBQ._TBLT_INVHED_DisPer, hed.getDisPer());
+
+                    cv.put(DBQ._TBLT_INVHED_GrossAmt, hed.getGrossAmt());
+                    cv.put(DBQ.TBLT_INVHED_, hed.getLocCode());
+                    cv.put(DBQ.TBLT_INVHED_, hed.getNetAmt());
+                    cv.put(DBQ.TBLT_INVHED_, hed.getPayType());
+                    cv.put(DBQ.TBLT_INVHED_, maxNo);
+                    cv.put(DBQ.TBLT_INVHED_, hed.getSalesDate());
+                    cv.put(DBQ.TBLT_INVHED_, hed.getStatus());
+                    cv.put(DBQ.TBLT_INVHED_, hed.getVatAmt());
+                    cv.put(DBQ.TBLT_INVHED_, hed.getRepCode());
 
                     db.insertOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
                     int recLine = 1;
-                    for (TBLT_ORDDTL obj : ItemList) {
+                    for (TBLT_SALINVDET obj : ItemList) {
                         cv.clear();
                         cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
                         cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
@@ -395,7 +411,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
         return msg;
     }
 
-    public String SaveUpdate(TBLT_ORDERHED hed) {
+    public String SaveUpdate(TBLT_SALINVHED hed) {
         String msg;
         DBHelper dbHelper = new DBHelper(this);
 
@@ -427,7 +443,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
             db.replaceOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
             int recLine = 1;
-            for (TBLT_ORDDTL obj : ItemList) {
+            for (TBLT_SALINVDET obj : ItemList) {
                 cv.clear();
                 cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
                 cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
@@ -524,10 +540,10 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
     }
 
 
-    private TBLT_ORDERHED GetFullOrderForSync() {
+    private TBLT_SALINVHED GetFullOrderForSync() {
         if (obj != null) {
             obj.setStatus("A");
-            obj.setItemList(ItemList);
+            //obj.setItemList(ItemList);
         }
         return obj;
     }
@@ -540,7 +556,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
         pd.show();
         Gson gson = new Gson();
 
-        TBLT_ORDERHED orderhed = GetFullOrderForSync();
+        TBLT_SALINVHED orderhed = GetFullOrderForSync();
         JSONObject obj = new JSONObject(gson.toJson(orderhed));
 
 

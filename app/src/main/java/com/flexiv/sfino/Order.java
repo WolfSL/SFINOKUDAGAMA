@@ -396,6 +396,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                         cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                         cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
                         cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
+                        cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
                         cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
                         cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
                         db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
@@ -513,6 +514,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                 cv.put(DBQ._TBLT_ORDDTL_TradeFQTY, obj.getTradeFQTY());
                 cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
                 cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
+                cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
                 cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                 cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                 cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
@@ -586,6 +588,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             dtl.setCusCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDDTL_CusCode)));
             dtl.setTradeFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TradeFQTY)));
             dtl.setSysFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_SysFQTY)));
+            dtl.setFQTY(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_FQTY)));
             dtl.setTotalQty(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_TotalQty)));
             dtl.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
             dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
@@ -660,7 +663,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
         Log.i(TAG, obj.toString());
         RequestQueue rq = Volley.newRequestQueue(this);
 
-        String url = SharedPreference.URL + "Order/upload";
+        String url = SharedPreference.URL + "Order/upload?verID="+SharedPreference.varID;
 
 
         JsonObjectRequest jr = new JsonObjectRequest(
@@ -674,10 +677,11 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                         if (defModal.getVal1().equals("S")) {
                             updateOrderFlag(defModal, "A");
 
-                        } else if (defModal.getVal1().equals("E")) {
+                        }else {
                             Toast.makeText(Order.this, defModal.getVal2(), Toast.LENGTH_LONG).show();
                             updateOrderFlag(defModal, "E");
                         }
+
 
                         pd.dismiss();
                     }
@@ -719,7 +723,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
         db.close();
 
-        Toast.makeText(this, "Successfully Processed", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, modal.getVal4(), Toast.LENGTH_LONG).show();
         onBackPressed2();
 
     }

@@ -231,6 +231,7 @@
                             android:layout_height="wrap_content"
                             android:ems="3"
                             android:gravity="end"
+
                             android:hint="Request Qty"
                             android:inputType="numberDecimal"
                             android:textColor="?attr/colorControlNormal"

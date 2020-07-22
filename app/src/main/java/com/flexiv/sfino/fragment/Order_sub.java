@@ -117,6 +117,7 @@ public class Order_sub extends Fragment {
         edt_disVal = view.findViewById(R.id.edt_disVal);
         edt_FI1 = view.findViewById(R.id.edt_FI1);
         edt_Qtyx = view.findViewById(R.id.edt_Qtyx);
+        edt_Qtyx.requestFocus();
         textInputLayoutQty1 = view.findViewById(R.id.textInputLayoutQty1);
         button_add = view.findViewById(R.id.button3);
         //Promo ITems
@@ -379,60 +380,78 @@ public class Order_sub extends Fragment {
     //PROMO CAL
     //TODO
     private void calcNF(BigDecimal rqty) {
-        orderPromotion_NF = null;
-        double bal_qty = rqty.doubleValue();
-        int fqty = 0;
-        boolean first = true;
-        Bean_PromotionDetails pre_bean = null;
-        Bean_PromotionDetails pre_bean2 = null;
-        for (Bean_PromotionDetails bean : pronoArr) {
-            pre_bean2 = bean;
-            if (bal_qty >= bean.getQtyFrom().intValue() && first) {
+        if(checkBox_nf.isChecked()||checkBox_nf.isSelected()) {
+            orderPromotion_NF = null;
+            double bal_qty = rqty.doubleValue();
+            int fqty = 0;
+            boolean first = true;
+            Bean_PromotionDetails pre_bean = null;
+            Bean_PromotionDetails pre_bean2 = null;
+            int arrSize = pronoArr.size();
+            int tempSize = 0;
+            for (Bean_PromotionDetails bean : pronoArr) {
+                Log.wtf("getQtyFrom", bean.getQtyFrom().toString());
+                Log.wtf("getQtyTo", bean.getQtyTo().toString());
+                Log.wtf("bal_qty", String.valueOf(bal_qty));
+                pre_bean2 = bean;
+                if (bal_qty >= bean.getQtyFrom().intValue() && first) {
+//                fqty = bean.getFQTY().intValue();
+                    fqty = (int) (bal_qty / bean.getQtyFrom().doubleValue() * bean.getFQTY().doubleValue());
+                    break;
+                }
 
-                fqty = (int)(bal_qty / bean.getQtyFrom().doubleValue() * bean.getFQTY().doubleValue());
-                break;
-            }
+                tempSize++;
+                if (tempSize == arrSize) {
+                    if (bal_qty >= bean.getQtyFrom().intValue()) {
+                        fqty += (bean.getFQTY().intValue());
+                        break;
+                    }
+                }
 
-            if (bal_qty >= bean.getQtyFrom().intValue()) {
-                fqty += bean.getFQTY().intValue();
-                bal_qty -= (bean.getQtyFrom().intValue());
-
-            }
-
-            if (pre_bean != null) {
                 if (bal_qty >= bean.getQtyFrom().intValue()) {
-                    fqty += (pre_bean.getFQTY().intValue());
-                    bal_qty -= (pre_bean.getQtyFrom().intValue());
+                    fqty += bean.getFQTY().intValue();
+                    bal_qty -= (bean.getQtyFrom().intValue());
 
                 }
+
+                if (pre_bean != null) {
+                    if (bal_qty >= bean.getQtyFrom().intValue()) {
+                        fqty += (pre_bean.getFQTY().intValue());
+                        bal_qty -= (pre_bean.getQtyFrom().intValue());
+
+                    }
+                }
+
+                pre_bean = bean;
+                first = false;
+
             }
+            Log.d("ArrSize", String.valueOf(arrSize));
+            Log.d("Temp Size", String.valueOf(tempSize));
+            String fq = String.valueOf(fqty);
+            System.out.println(fq);
+            editText_SugNF.setText(fq);
+            edt_FI1.setText(fq);
 
-            pre_bean = bean;
-            first = false;
-        }
-        String fq = String.valueOf(fqty);
-        System.out.println(fq);
-        editText_SugNF.setText(fq);
-        edt_FI1.setText(fq);
+            Log.wtf("WTF", fqty + "");
+            if (fqty > 0) {
+                Log.e("Test FQ", "Done! " + fq);
 
-        Log.wtf("WTF", fqty + "");
-        if (fqty > 0) {
-            Log.e("Test FQ", "Done! " + fq);
-
-            orderPromotion_NF = new Bean_OrderPromotion();
-            orderPromotion_NF.setPromoNo(pre_bean2.getPromoNo());
-            orderPromotion_NF.setItemCode(item.getItemCode());
-            orderPromotion_NF.setDealCode(pre_bean2.getPromoCode());
-            orderPromotion_NF.setNoOfDeals(1);
-            orderPromotion_NF.setSysFQty(new BigDecimal(fqty));
-            orderPromotion_NF.setDiscode(pre_bean2.getDiscode());
-            orderPromotion_NF.setPTCode(pre_bean2.getPTCode());
-            orderPromotion_NF.setDocNo("");
-            orderPromotion_NF.setDocType(5);
-            orderPromotion_NF.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
-            Log.w("CODE", SharedPreference.COM_CUSTOMER.getTxt_code());
-            orderPromotion_NF.setPromoDesc(pre_bean2.getPromoDesc());
-            orderPromotion_NF.setFreeItem(BigDecimal.ZERO);
+                orderPromotion_NF = new Bean_OrderPromotion();
+                orderPromotion_NF.setPromoNo(pre_bean2.getPromoNo());
+                orderPromotion_NF.setItemCode(item.getItemCode());
+                orderPromotion_NF.setDealCode(pre_bean2.getPromoCode());
+                orderPromotion_NF.setNoOfDeals(1);
+                orderPromotion_NF.setSysFQty(new BigDecimal(fqty));
+                orderPromotion_NF.setDiscode(pre_bean2.getDiscode());
+                orderPromotion_NF.setPTCode(pre_bean2.getPTCode());
+                orderPromotion_NF.setDocNo("");
+                orderPromotion_NF.setDocType(5);
+                orderPromotion_NF.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
+                Log.w("CODE", SharedPreference.COM_CUSTOMER.getTxt_code());
+                orderPromotion_NF.setPromoDesc(pre_bean2.getPromoDesc());
+                orderPromotion_NF.setFreeItem(BigDecimal.ZERO);
+            }
         }
     }
 
@@ -497,12 +516,18 @@ public class Order_sub extends Fragment {
             if (rqQty.compareTo(b.getQtyFrom()) > -1) {
                 deals = rqQty.intValue() / b.getQtyFrom().intValue();
             }
-            lp = b.getFQTY().intValue() * deals;
+
             // lp = new BigDecimal(rqQty.doubleValue() / b.getQtyFrom().doubleValue() * b.getFQTY().doubleValue());
+            if (b.getPTCode().equals("LP")) {
+                lp = b.getFQTY().intValue();
+            } else {
+                lp = b.getFQTY().intValue() * deals;
+            }
         }
 
         if (b.getPTCode().equals("LP")) {
-            Toast.makeText(context, "Cannot Process Line Percentage Discount", Toast.LENGTH_LONG).show();
+            dis_pre.setText(String.valueOf(lp));
+           // Toast.makeText(context, "Cannot Process Line Percentage Discount", Toast.LENGTH_LONG).show();
         } else if (b.getPTCode().equals("LR")) {
             edt_disVal.setText(String.valueOf(lp));
         }

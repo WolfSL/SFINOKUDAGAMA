@@ -32,7 +32,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "SFINO.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
 
     public DBHelper(@Nullable Context context) {
@@ -99,11 +99,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.beginTransaction();
         try {
 
-            db.delete(DBQ._TBLM_REPSTOCK,null,null);
-            db.delete(DBQ._TBLM_AREA,null,null);
-            db.delete(DBQ._TBLM_ITEM,null,null);
-            db.delete(DBQ._TBLM_CUSTOMER,null,null);
-            db.delete(DBQ._TBLM_BATCHWISESTOCK,null,null);
+            db.delete(DBQ._TBLM_REPSTOCK, null, null);
+            db.delete(DBQ._TBLM_AREA, null, null);
+            db.delete(DBQ._TBLM_ITEM, null, null);
+            db.delete(DBQ._TBLM_CUSTOMER, null, null);
+            db.delete(DBQ._TBLM_BATCHWISESTOCK, null, null);
 
 
             ContentValues c = new ContentValues();
@@ -126,6 +126,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 c.put(DBQ._TBLM_CUSTOMER_CusCode, cus.getCusCode());
                 c.put(DBQ._TBLM_CUSTOMER_CusName, cus.getCusName());
                 c.put(DBQ._TBLM_CUSTOMER_Discode, cus.getDiscode());
+                c.put(DBQ._TBLM_CUSTOMER_CurBal, cus.getCurBal());
+                c.put(DBQ._TBLM_CUSTOMER_CreditDays, cus.getCreditDays());
+                c.put(DBQ._TBLM_CUSTOMER_CreditLimit, cus.getCreditLimit());
+                c.put(DBQ._TBLM_CUSTOMER_AllCreLmtExceed, cus.isAllCreLmtExceed()?1:0);
                 c.put(DBQ._TBLM_CUSTOMER_VAT, cus.getVAT());
 
                 db.replace(DBQ._TBLM_CUSTOMER, null, c);
@@ -140,17 +144,19 @@ public class DBHelper extends SQLiteOpenHelper {
                 c.clear();
             }
 
-            for (Modal_Batch batch : data.getModal_Batches_Stock()) {
-                c.put(DBQ._TBLM_BATCHWISESTOCK_DisCode, batch.getDisCode());
-                c.put(DBQ._TBLM_BATCHWISESTOCK_BatchNo, batch.getBatchNo());
-                c.put(DBQ._TBLM_BATCHWISESTOCK_ItemCode, batch.getItemCode());
-                c.put(DBQ._TBLM_BATCHWISESTOCK_RetialPrice, batch.getRetialPrice());
-                c.put(DBQ._TBLM_BATCHWISESTOCK_SIH, batch.getSHI());
-                db.replace(DBQ._TBLM_BATCHWISESTOCK, null, c);
-                c.clear();
-            }
+            if (data.getModal_Batches_Stock() != null)
+                for (Modal_Batch batch : data.getModal_Batches_Stock()) {
+                    c.put(DBQ._TBLM_BATCHWISESTOCK_DisCode, batch.getDisCode());
+                    c.put(DBQ._TBLM_BATCHWISESTOCK_BatchNo, batch.getBatchNo());
+                    c.put(DBQ._TBLM_BATCHWISESTOCK_ItemCode, batch.getItemCode());
+                    c.put(DBQ._TBLM_BATCHWISESTOCK_RetialPrice, batch.getRetialPrice());
+                    c.put(DBQ._TBLM_BATCHWISESTOCK_SIH, batch.getSHI());
+                    db.replace(DBQ._TBLM_BATCHWISESTOCK, null, c);
+                    c.clear();
+                }
 
-            if(data.getModal_Rep_Stock()!=null) {
+            if(data.getModal_Rep_Stock()!=null)
+            if (data.getModal_Rep_Stock() != null) {
                 for (Modal_RepStock batch : data.getModal_Rep_Stock()) {
                     c.put(DBQ._TBLM_REPSTOCK_DisCode, batch.getDisCode());
                     c.put(DBQ._TBLM_REPSTOCK_BatchNo, batch.getBatchNo());
@@ -241,14 +247,21 @@ public class DBHelper extends SQLiteOpenHelper {
 
             System.out.println(discode + ", " + areacode);
             db = this.getReadableDatabase();
-            Cursor c = db.query(DBQ._TBLM_CUSTOMER, new String[]{DBQ._TBLM_CUSTOMER_CusCode, DBQ._TBLM_CUSTOMER_CusName}, DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?"
-                    , new String[]{discode, areacode}, null, null, null);
+          //  Cursor c = db.query(DBQ._TBLM_CUSTOMER, new String[]{DBQ._TBLM_CUSTOMER_CusCode, DBQ._TBLM_CUSTOMER_CusName}, DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?"
+           //         , new String[]{discode, areacode}, null, null, null);
+
+            String sql = "SELECT * FROM "+DBQ._TBLM_CUSTOMER+" where "+DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?";
+            Cursor c = db.rawQuery(sql,new String[]{discode, areacode} );
 
             area_modals = new ArrayList<>();
             Card_cus_area area;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 area = new Card_cus_area(c.getString(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CusCode)),
                         c.getString(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CusName)));
+                area.setAllCreLmtExceed(c.getInt(c.getColumnIndex(DBQ._TBLM_CUSTOMER_AllCreLmtExceed))==1);
+                area.setCurBal(c.getDouble(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CurBal)));
+                area.setCreditDays(c.getInt(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CreditDays)));
+                area.setCreditLimit(c.getDouble(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CreditLimit)));
                 area_modals.add(area);
             }
             c.close();
@@ -263,20 +276,20 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<Modal_Item> getItems(String discode,String repcode) throws Exception {
+    public ArrayList<Modal_Item> getItems(String discode, String repcode) throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Modal_Item> item_modals = null;
         try {
 
             db = this.getReadableDatabase();
-            String sql = "select i.ItemCode,i.ItemDes,s.sih from "+DBQ._TBLM_ITEM+" as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '"+discode+"' and RepCode = '"+repcode+"'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null";
-            Cursor c = db.rawQuery(sql,null);
+            String sql = "select i.ItemCode,i.ItemDes,s.sih from " + DBQ._TBLM_ITEM + " as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '" + discode + "' and RepCode = '" + repcode + "'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null";
+            Cursor c = db.rawQuery(sql, null);
 
             item_modals = new ArrayList<>();
             Modal_Item item;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes))
-                         , SharedPreference.ds_formatter.format(c.getDouble(2)));
+                        , SharedPreference.ds_formatter.format(c.getDouble(2)));
                 item_modals.add(item);
             }
             c.close();
@@ -290,6 +303,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
     }
+
     public ArrayList<Modal_Item> getItems() throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Modal_Item> item_modals = null;
@@ -302,7 +316,7 @@ public class DBHelper extends SQLiteOpenHelper {
             item_modals = new ArrayList<>();
             Modal_Item item;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)),"");
+                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)), "");
                 item_modals.add(item);
             }
             c.close();
@@ -348,13 +362,14 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
     }
-    public ArrayList<Modal_Batch> getRepStock(String disCode, String itemcode,String repcode) throws Exception {
+
+    public ArrayList<Modal_Batch> getRepStock(String disCode, String itemcode, String repcode) throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Modal_Batch> item_modals = null;
         try {
 
             db = this.getReadableDatabase();
-            String sql = "SELECT st.*, item.ItemDes FROM TBLM_REPSTOCK as st left join " + DBQ._TBLM_ITEM + " as item on st.ItemCode = item.ItemCode where st.DisCode = '" + disCode + "' and st.ItemCode = '" + itemcode + "' and st.RepCode = '"+repcode+"'";
+            String sql = "SELECT st.*, item.ItemDes FROM TBLM_REPSTOCK as st left join " + DBQ._TBLM_ITEM + " as item on st.ItemCode = item.ItemCode where st.DisCode = '" + disCode + "' and st.ItemCode = '" + itemcode + "' and st.RepCode = '" + repcode + "'";
 
             System.out.println(sql);
             Cursor c = db.rawQuery(sql,
@@ -384,11 +399,11 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public TBLT_ORDERHED getOrder(String refNo, String poa){
+    public TBLT_ORDERHED getOrder(String refNo, String poa) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         try {
-            Cursor c = db.rawQuery("SELECT * FROM " + DBQ._TBLT_ORDERHED + " WHERE " + DBQ._TBLT_ORDERHED_RefNo + " = ? AND "+DBQ._TBLT_ORDERHED_Status + " = ?", new String[]{String.valueOf(refNo),String.valueOf(poa)});
+            Cursor c = db.rawQuery("SELECT * FROM " + DBQ._TBLT_ORDERHED + " WHERE " + DBQ._TBLT_ORDERHED_RefNo + " = ? AND " + DBQ._TBLT_ORDERHED_Status + " = ?", new String[]{String.valueOf(refNo), String.valueOf(poa)});
 
             TBLT_ORDERHED hed = new TBLT_ORDERHED();
             if (c.moveToNext()) {
@@ -444,7 +459,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
 
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return null;
@@ -465,6 +480,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Log.d("DB Details", values.toString());
         return db.replace(DBQ._PROMODETAILS, null, values);
     }
+
     public long Insert_TBLM_PROMO(SQLiteDatabase db, Bean_PromotionMaster bean) {
         ContentValues cv = new ContentValues();
 
@@ -557,7 +573,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         String sql2 = "SELECT * FROM TBLM_PROMODETAILS as pd JOIN TBLM_PROMOMASTER as pm on pd.PromoNo = pm.PromoNo where pd.PTCode <> 'NF'";
 
-      //  String[] params = new String[]{String.valueOf(itemCode,SharedPreference.COM_REP.getDiscode())};
+        //  String[] params = new String[]{String.valueOf(itemCode,SharedPreference.COM_REP.getDiscode())};
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor c = db.rawQuery(sql1, new String[]{itemCode});

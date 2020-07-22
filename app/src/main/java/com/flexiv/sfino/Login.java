@@ -185,6 +185,7 @@ public class Login extends AppCompatActivity {
      * @param repCode
      */
     private ProgressDialog dialog;
+
     private void download(String repCode, String imei, String password, SQLiteDatabase db, boolean login) {
         // lazyLoader.setVisibility(View.VISIBLE);
         //progressDialog.setTitle("Downloading Master Data. Please Wait..");
@@ -200,11 +201,6 @@ public class Login extends AppCompatActivity {
         JsonObjectRequest jr = new JsonObjectRequest(
                 Request.Method.GET, url, null,
                 response -> {
-                    try {
-                        System.out.println("Rest Response :" + response.getJSONArray("modal_Batches_Stock").toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
                     Gson gson = new Gson();
                     MasterDataModal master = gson.fromJson(response.toString(), MasterDataModal.class);
 
@@ -218,7 +214,12 @@ public class Login extends AppCompatActivity {
                                 lazyLoader.setVisibility(View.VISIBLE);
 
                             }
-                            getPromoMaster(repCode);
+                            if (!SharedPreference.SFTYPE.equals("I"))
+                                getPromoMaster(repCode);
+                            else {
+                                dialog.dismiss();
+                                MakeSnackBar("Download Complete!", Color.GREEN);
+                            }
                             //dialog.dismiss();
                         }
                     });
@@ -316,7 +317,7 @@ public class Login extends AppCompatActivity {
             imei = telephonyManager.getDeviceId();
         }
         DBHelper dbHelper = new DBHelper(this);
-        download(txtUserName.getText().toString(), imei, "password", dbHelper.getWritableDatabase(),false);
+        download(txtUserName.getText().toString(), imei, "password", dbHelper.getWritableDatabase(), false);
     }
 
     public boolean getRepFromAPI(String imei, String repCode, String password, SQLiteDatabase db) {
@@ -336,7 +337,7 @@ public class Login extends AppCompatActivity {
                         //CHeck rep distributor
                         if (modal_rep.getDiscode().equals(androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null))) {
                             if (SaveRepToDB(db, modal_rep))
-                                download(repCode, imei, password, db,true);
+                                download(repCode, imei, password, db, true);
                             // getRepDetails(imei, repCode, password, db);
                         } else {
 //                            if (SaveRepToDB(db, modal_rep))
@@ -410,7 +411,7 @@ public class Login extends AppCompatActivity {
     //Download Promo
     public void getPromoMaster(String rep) {
         //String url = "http://" + Common.gvarIp + "/gammawebapi/api/Promo/Promo_Get?id="+ Common.gvarSalesRep;
-        String url = SharedPreference.URL + "Promo/Promo_Get?id="+ rep+"&Discode="+androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null);
+        String url = SharedPreference.URL + "Promo/Promo_Get?id=" + rep + "&Discode=" + androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).getString("disid", null);
         System.out.println(url);
 
         runOnUiThread(() -> dialog.setMessage("Downloading Promo..."));
@@ -465,7 +466,7 @@ public class Login extends AppCompatActivity {
 
             type = new TypeToken<ArrayList<Bean_RepDeals>>() {
             }.getType();
-            ArrayList<Bean_RepDeals> list_deals= gson.fromJson(_deals.toString(), type);
+            ArrayList<Bean_RepDeals> list_deals = gson.fromJson(_deals.toString(), type);
 
             DBHelper db = new DBHelper(this);
             sqLiteDatabase = db.getWritableDatabase();
@@ -484,17 +485,17 @@ public class Login extends AppCompatActivity {
 
             for (Bean_PromotionDetails bean : list_detals
             ) {
-                db.Insert_TBLM_PROMO(sqLiteDatabase,bean);
+                db.Insert_TBLM_PROMO(sqLiteDatabase, bean);
             }
             for (Bean_RepDeals bean : list_deals
             ) {
-                db.Insert_TBLM_PROMO(sqLiteDatabase,bean);
+                db.Insert_TBLM_PROMO(sqLiteDatabase, bean);
             }
 
             //Insert PROMO DETAILS
             sqLiteDatabase.setTransactionSuccessful();
             dialog.dismiss();
-            MakeSnackBar("Download Complete!",Color.GREEN);
+            MakeSnackBar("Download Complete!", Color.GREEN);
             return "Successfully Downloaded!";
         } catch (Exception e) {
             e.printStackTrace();
@@ -503,6 +504,7 @@ public class Login extends AppCompatActivity {
         } finally {
             assert sqLiteDatabase != null;
             sqLiteDatabase.endTransaction();
+            lazyLoader.setVisibility(View.GONE);
         }
 
 

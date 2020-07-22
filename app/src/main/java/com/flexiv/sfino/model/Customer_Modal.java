@@ -9,7 +9,32 @@ public class Customer_Modal implements Serializable {
     private String AreaCode;
     private int VAT;
     private  double CurBal;
+    private  int CreditDays;
+    private  double CreditLimit;
+    private  boolean AllCreLmtExceed;
 
+    public double getCreditLimit() {
+        return CreditLimit;
+    }
+
+    public void setCreditLimit(double creditLimit) {
+        CreditLimit = creditLimit;
+    }
+
+    public boolean isAllCreLmtExceed() {
+        return AllCreLmtExceed;
+    }
+
+    public void setAllCreLmtExceed(boolean allCreLmtExceed) {
+        AllCreLmtExceed = allCreLmtExceed;
+    }
+
+    public int getCreditDays() {
+        return CreditDays;
+    }
+    public void setCreditDays(int creditDays) {
+        CreditDays = creditDays;
+    }
     public double getCurBal() {
         return CurBal;
     }

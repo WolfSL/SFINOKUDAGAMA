@@ -1,6 +1,6 @@
 package com.flexiv.sfino.model;
 
-public class Card_cus_area {
+public class Card_cus_area extends Customer_Modal{
     private String txt_code;
     private String txt_name;
 

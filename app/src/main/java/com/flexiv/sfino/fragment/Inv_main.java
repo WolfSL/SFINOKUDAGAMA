@@ -25,6 +25,7 @@ import com.flexiv.sfino.R;
 import com.flexiv.sfino.adapter.Adapter_Oeder_Item;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
+import com.flexiv.sfino.model.TBLT_SALINVHED;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -237,51 +238,95 @@ public class Inv_main extends Fragment {
 
     }
 
-    private TBLT_ORDERHED CreateORDERHED() {
+    private TBLT_SALINVHED CreateORDERHED() {
         Date date = Calendar.getInstance().getTime();
 
+        Date ddt = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(ddt);
+        c.add(Calendar.DATE, SharedPreference.COM_CUSTOMER.getCreditDays());
+        ddt = c.getTime();
+
         String strDate = SharedPreference.dateFormat.format(date);
-        TBLT_ORDERHED obj = new TBLT_ORDERHED();
+        TBLT_SALINVHED obj = new TBLT_SALINVHED();
 
         obj.setDocNo("");
-        obj.setRepCode(SharedPreference.COM_REP.getRepCode());
         obj.setDiscode(SharedPreference.COM_REP.getDiscode());
-        obj.setRefNo("");
-        obj.setAreaCode(SharedPreference.COM_AREA.getTxt_code());
-        obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
-        obj.setCreateUser(SharedPreference.COM_REP.getRepName());
+        obj.setDocType(6);
         obj.setSalesDate(strDate);
-        obj.setPayType("CASH");
-        obj.setISUSED(false);
-        obj.setLocCode("");
+        obj.setSupCode("");
+        obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
+        obj.setRepCode(SharedPreference.COM_REP.getRepCode());
+        obj.setRefNo("");
+        obj.setInvType(1);
+        obj.setLocCode("00001");
+        obj.setCrDrType("");
+        obj.setDueDate(SharedPreference.dateFormat.format(ddt));
+        //Due Amount
+        obj.setAddTax1(0);
+        obj.setAddTax2(0);
+        obj.setAddTax3(0);
+        obj.setDedAmt1(0);
+        obj.setDedAmt2(0);
+        obj.setDedAmt3(0);
+        obj.setRefDueAmt(0);
+        obj.setOrdRefNo("");
         obj.setVatAmt(0);
+        obj.setCreateUser(SharedPreference.COM_REP.getRepCode());
+        obj.setGLTransfer(false);
         obj.setStatus("S");
+        obj.setTrType(0);
+        obj.setAreaCode(SharedPreference.COM_AREA.getTxt_code());
+        obj.setISPRINT(false);
+        obj.setDamageQty(0.00);
+        obj.setSalesRep("OP");
+
+
 
         obj.setGrossAmt(Double.parseDouble(textView_total.getText().toString()));
         obj.setDiscount(Double.parseDouble(DisAmt.getText().length() <= 0 ? "0" : DisAmt.getText().toString()));
         obj.setDisPer(Double.parseDouble(DisPre.getText().length() <= 0 ? "0" : DisPre.getText().toString()));
         obj.setNetAmt(Double.parseDouble(textView_Nettotal.getText().toString()));
+        obj.setDueAmount(obj.getNetAmt());
 
 
         return obj;
     }
 
-    private TBLT_ORDERHED CreateORDERHED_ForUpdate() {
+    private TBLT_SALINVHED CreateORDERHED_ForUpdate() {
 
-        TBLT_ORDERHED obj = new TBLT_ORDERHED();
+        TBLT_SALINVHED obj = new TBLT_SALINVHED();
+
         obj.setDocNo(context.getObj().getDocNo());
-        obj.setRepCode(context.getObj().getRepCode());
         obj.setDiscode(context.getObj().getDiscode());
-        obj.setRefNo(context.getObj().getRefNo());
-        obj.setAreaCode(context.getObj().getAreaCode());
-        obj.setCusCode(context.getObj().getCusCode());
-        obj.setCreateUser(context.getObj().getCreateUser());
+        obj.setDocType(context.getObj().getDocType());
         obj.setSalesDate(context.getObj().getSalesDate());
-        obj.setPayType(context.getObj().getPayType());
-        obj.setISUSED(false);
+        obj.setSupCode(context.getObj().getSupCode());
+        obj.setCusCode(context.getObj().getCusCode());
+        obj.setRepCode(context.getObj().getRepCode());
+        obj.setRefNo(context.getObj().getRefNo());
+        obj.setInvType(context.getObj().getInvType());
         obj.setLocCode(context.getObj().getLocCode());
+        obj.setCrDrType(context.getObj().getCrDrType());
+        obj.setDueDate(context.getObj().getDueDate());
+        //Due Amount
+        obj.setAddTax1(0);
+        obj.setAddTax2(0);
+        obj.setAddTax3(0);
+        obj.setDedAmt1(0);
+        obj.setDedAmt2(0);
+        obj.setDedAmt3(0);
+        obj.setRefDueAmt(context.getObj().getRefDueAmt());
+        obj.setOrdRefNo(context.getObj().getOrdRefNo());
         obj.setVatAmt(context.getObj().getVatAmt());
+        obj.setCreateUser(SharedPreference.COM_REP.getRepCode());
+        obj.setGLTransfer(false);
         obj.setStatus("S");
+        obj.setTrType(0);
+        obj.setAreaCode(context.getObj().getAreaCode());
+        obj.setISPRINT(context.getObj().isISPRINT());
+        obj.setDamageQty(0.00);
+        obj.setSalesRep("OP");
 
         obj.setGrossAmt(Double.parseDouble(textView_total.getText().toString()));
         obj.setDiscount(Double.parseDouble(DisAmt.getText().length() <= 0 ? "0" : DisAmt.getText().toString()));
@@ -292,7 +337,7 @@ public class Inv_main extends Fragment {
         return obj;
     }
 
-    public void setDetailsFromIntent(TBLT_ORDERHED hed) {
+    public void setDetailsFromIntent(TBLT_SALINVHED hed) {
 
         System.out.println("--------------------------------------");
         textView_total.setText(SharedPreference.df.format(hed.getGrossAmt()));

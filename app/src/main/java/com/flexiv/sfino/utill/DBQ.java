@@ -41,6 +41,10 @@ public class DBQ {
             "[Discode] TEXT  NOT NULL,\n" +
             "[CusName] TEXT  NOT NULL,\n" +
             "[AreaCode] TEXT  NOT NULL,\n" +
+            "[CurBal] NUMERIC  NOT NULL,\n" +
+            "[CreditLimit] NUMERIC  NOT NULL,\n" +
+            "[CreditDays] NUMERIC  NOT NULL,\n" +
+            "[AllCreLmtExceed] BOOLEAN  NOT NULL,\n" +
             "[VAT] BOOLEAN  NOT NULL,\n" +
             "PRIMARY KEY ([CusCode],[Discode])\n" +
             ")";
@@ -49,6 +53,10 @@ public class DBQ {
     public static final String _TBLM_CUSTOMER_Discode = "Discode";
     public static final String _TBLM_CUSTOMER_CusName = "CusName";
     public static final String _TBLM_CUSTOMER_AreaCode = "AreaCode";
+    public static final String _TBLM_CUSTOMER_CurBal = "CurBal";
+    public static final String _TBLM_CUSTOMER_CreditLimit = "CreditLimit";
+    public static final String _TBLM_CUSTOMER_CreditDays = "CreditDays";
+    public static final String _TBLM_CUSTOMER_AllCreLmtExceed = "AllCreLmtExceed";
     public static final String _TBLM_CUSTOMER_VAT = "VAT";
 
 

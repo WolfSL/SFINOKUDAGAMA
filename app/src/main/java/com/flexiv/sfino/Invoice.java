@@ -337,7 +337,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
                     cv.put(DBQ._TBLT_INVHED_RefNo,maxNo);
                     cv.put(DBQ._TBLT_INVHED_InvType,1);
                     cv.put(DBQ._TBLT_INVHED_LocCode,"00001");
-                    cv.put(DBQ._TBLT_);
+                 //   cv.put(DBQ._TBLT_);
 
 
 
@@ -350,41 +350,42 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
                     cv.put(DBQ._TBLT_INVHED_DisPer, hed.getDisPer());
 
                     cv.put(DBQ._TBLT_INVHED_GrossAmt, hed.getGrossAmt());
-                    cv.put(DBQ.TBLT_INVHED_, hed.getLocCode());
-                    cv.put(DBQ.TBLT_INVHED_, hed.getNetAmt());
-                    cv.put(DBQ.TBLT_INVHED_, hed.getPayType());
-                    cv.put(DBQ.TBLT_INVHED_, maxNo);
-                    cv.put(DBQ.TBLT_INVHED_, hed.getSalesDate());
-                    cv.put(DBQ.TBLT_INVHED_, hed.getStatus());
-                    cv.put(DBQ.TBLT_INVHED_, hed.getVatAmt());
-                    cv.put(DBQ.TBLT_INVHED_, hed.getRepCode());
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getLocCode());
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getNetAmt());
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getPayType());
+//                    cv.put(DBQ.TBLT_INVHED_, maxNo);
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getSalesDate());
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getStatus());
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getVatAmt());
+//                    cv.put(DBQ.TBLT_INVHED_, hed.getRepCode());
 
                     db.insertOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
                     int recLine = 1;
                     for (TBLT_SALINVDET obj : ItemList) {
                         cv.clear();
-                        cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
-                        cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
-                        cv.put(DBQ._TBLT_ORDDTL_CusCode, hed.getCusCode());
-                        cv.put(DBQ._TBLT_ORDDTL_Date, obj.getDate());
-                        cv.put(DBQ._TBLT_ORDDTL_DiscAmt, obj.getDiscAmt());
-                        cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
-                        cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
-                        cv.put(DBQ._TBLT_ORDDTL_DocNo, maxNo);
-                        cv.put(DBQ._TBLT_ORDDTL_TradeFQTY, obj.getTradeFQTY());
-                        cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
-                        cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
-                        cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
-                        cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
-                        cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
-                        cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
-                        cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
-                        cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
-                        cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
+                        cv.put(DBQ._TBLT_SALINVDET_Amount, obj.getAmount());
+                        cv.put(DBQ._TBLT_SALINVDET_ExpiryDate, obj.getExpiryDate());
+                        cv.put(DBQ._TBLT_SALINVDET_CusCode, hed.getCusCode());
+                        cv.put(DBQ._TBLT_SALINVDET_Date, obj.getDate());
+                        cv.put(DBQ._TBLT_SALINVDET_DiscAmt, obj.getDiscAmt());
+                        cv.put(DBQ._TBLT_SALINVDET_Discode, hed.getDiscode());
+                        cv.put(DBQ._TBLT_SALINVDET_DiscPer, obj.getDiscPer());
+                        cv.put(DBQ._TBLT_SALINVDET_DocNo, maxNo);
+                        cv.put(DBQ._TBLT_SALINVDET_DocType, 6);
+//                        cv.put(DBQ._TBLT_ORDDTL_TradeFQTY, obj.getTradeFQTY());
+//                        cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
+//                        cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
+//                        cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
+                        cv.put(DBQ._TBLT_SALINVDET_ItemCode, obj.getItemCode());
+                        cv.put(DBQ._TBLT_SALINVDET_ItQty, obj.getItQty());
+                        cv.put(DBQ._TBLT_SALINVDET_LocCode, hed.getLocCode());
+                        cv.put(DBQ._TBLT_SALINVDET_LineID, recLine);
+                        cv.put(DBQ._TBLT_SALINVDET_UnitPrice, obj.getUnitPrice());
+//                        cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
 
 
-                        db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
+                        db.insertOrThrow(DBQ._TBLT_SALINVDET, null, cv);
                         recLine++;
                     }
                     db.setTransactionSuccessful();
@@ -430,7 +431,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
             cv.put(DBQ._TBLT_ORDERHED_DisPer, hed.getDisPer());
             cv.put(DBQ._TBLT_ORDERHED_DocNo, hed.getDocNo());
             cv.put(DBQ._TBLT_ORDERHED_GrossAmt, hed.getGrossAmt());
-            cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
+//            cv.put(DBQ._TBLT_ORDERHED_ISUSED, hed.isISUSED());
             cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
             cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
             cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
@@ -446,23 +447,23 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
             for (TBLT_SALINVDET obj : ItemList) {
                 cv.clear();
                 cv.put(DBQ._TBLT_ORDDTL_Amount, obj.getAmount());
-                cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
+//                cv.put(DBQ._TBLT_ORDDTL_BATCH, obj.getBATCH());
                 cv.put(DBQ._TBLT_ORDDTL_CusCode, hed.getCusCode());
                 cv.put(DBQ._TBLT_ORDDTL_Date, obj.getDate());
                 cv.put(DBQ._TBLT_ORDDTL_DiscAmt, obj.getDiscAmt());
                 cv.put(DBQ._TBLT_ORDDTL_Discode, hed.getDiscode());
                 cv.put(DBQ._TBLT_ORDDTL_DiscPer, obj.getDiscPer());
                 cv.put(DBQ._TBLT_ORDDTL_DocNo, hed.getDocNo());
-                cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
+//                cv.put(DBQ._TBLT_ORDDTL_SysFQTY, obj.getSysFQTY());
                 cv.put(DBQ._TBLT_ORDDTL_FQTY, obj.getFQTY());
-                cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
+//                cv.put(DBQ._TBLT_ORDDTL_TotalQty, obj.getTotalQty());
                 cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                 cv.put(DBQ._TBLT_ORDDTL_ItemCode, obj.getItemCode());
                 cv.put(DBQ._TBLT_ORDDTL_ItQty, obj.getItQty());
                 cv.put(DBQ._TBLT_ORDDTL_LocCode, hed.getLocCode());
                 cv.put(DBQ._TBLT_ORDDTL_RecordLine, recLine);
                 cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
-                cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
+//                cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
 
 
                 db.replaceOrThrow(DBQ._TBLT_ORDDTL, null, cv);
@@ -532,7 +533,7 @@ public class Invoice extends AppCompatActivity implements Fragment_sub_batching 
             dtl.setRecordLine(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDDTL_RecordLine)));
             dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
 
-            ItemList.add(dtl);
+//            ItemList.add(dtl);
         }
         c.close();
         db.close();

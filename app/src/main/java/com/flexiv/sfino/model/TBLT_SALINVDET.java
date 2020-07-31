@@ -18,6 +18,7 @@ class TBLT_SALINVDET {
     private String Date;
     private String LocCode;
     private String ExpDate;
+    private String ItemName;
     private double FQTY;
     private boolean Is_Damage;
     private double IncreaseAmt;
@@ -173,5 +174,13 @@ class TBLT_SALINVDET {
 
     public void setLineID(int lineID) {
         LineID = lineID;
+    }
+
+    public String getItemName() {
+        return ItemName;
+    }
+
+    public void setItemName(String itemName) {
+        ItemName = itemName;
     }
 }

@@ -32,7 +32,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "SFINO.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
 
     public DBHelper(@Nullable Context context) {
@@ -268,6 +268,7 @@ public class DBHelper extends SQLiteOpenHelper {
             return area_modals;
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw ex;
         } finally {
             if (db != null) {

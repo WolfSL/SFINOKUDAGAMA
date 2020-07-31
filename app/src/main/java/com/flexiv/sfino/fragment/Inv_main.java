@@ -22,9 +22,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.flexiv.sfino.Invoice;
 import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
+import com.flexiv.sfino.adapter.Adapter_Invo_Item;
 import com.flexiv.sfino.adapter.Adapter_Oeder_Item;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
+import com.flexiv.sfino.model.TBLT_SALINVDET;
 import com.flexiv.sfino.model.TBLT_SALINVHED;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -52,7 +54,7 @@ public class Inv_main extends Fragment {
     private Button button_process;
 
     private RecyclerView Order_recView;
-    private Adapter_Oeder_Item adaper;
+    private Adapter_Invo_Item adaper;
     private RecyclerView.LayoutManager layoutManager;
     private FloatingActionButton floatingActionButton_OM;
 
@@ -108,7 +110,7 @@ public class Inv_main extends Fragment {
 
         Order_recView = view.findViewById(R.id.Order_recView);
         layoutManager = new LinearLayoutManager(context);
-        adaper = new Adapter_Oeder_Item(context.getItemList(), context);
+        adaper = new Adapter_Invo_Item(context.getItemList(), context);
         new ItemTouchHelper(simpleCallback).attachToRecyclerView(Order_recView);
         Order_recView.setLayoutManager(layoutManager);
         Order_recView.setAdapter(adaper);
@@ -201,7 +203,7 @@ public class Inv_main extends Fragment {
 
     public void refreshItems() {
         total = 0;
-        for (TBLT_ORDDTL obj : context.getItemList()) {
+        for (TBLT_SALINVDET obj : context.getItemList()) {
             total = total + obj.getAmount();
         }
         textView_total.setText(SharedPreference.df.format(total));

@@ -390,40 +390,67 @@ public class Order_sub extends Fragment {
             int arrSize = pronoArr.size();
             int tempSize = 0;
             for (Bean_PromotionDetails bean : pronoArr) {
-                Log.wtf("getQtyFrom", bean.getQtyFrom().toString());
-                Log.wtf("getQtyTo", bean.getQtyTo().toString());
-                Log.wtf("bal_qty", String.valueOf(bal_qty));
+
                 pre_bean2 = bean;
                 if (bal_qty >= bean.getQtyFrom().intValue() && first) {
+                    Log.wtf("IF -- ", "1");
+                    Log.wtf("getQtyFrom", bean.getQtyFrom().toString());
+                    Log.wtf("getQtyTo", bean.getQtyTo().toString());
+                    Log.wtf("bal_qty", String.valueOf(bal_qty));
+                    Log.wtf("--", "");
 //                fqty = bean.getFQTY().intValue();
                     fqty = (int) (bal_qty / bean.getQtyFrom().doubleValue() * bean.getFQTY().doubleValue());
+                    Log.wtf("FQTY --", String.valueOf(fqty));
                     break;
                 }
 
                 tempSize++;
                 if (tempSize == arrSize) {
                     if (bal_qty >= bean.getQtyFrom().intValue()) {
+                        Log.wtf("IF -- ", "2");
+                        Log.wtf("getQtyFrom", bean.getQtyFrom().toString());
+                        Log.wtf("getQtyTo", bean.getQtyTo().toString());
+                        Log.wtf("bal_qty", String.valueOf(bal_qty));
+                        Log.wtf("--", "");
                         fqty += (bean.getFQTY().intValue());
+                        Log.wtf("FQTY --", String.valueOf(fqty));
                         break;
                     }
                 }
 
                 if (bal_qty >= bean.getQtyFrom().intValue()) {
+                    Log.wtf("IF -- ", "3");
+                    Log.wtf("getQtyFrom", bean.getQtyFrom().toString());
+                    Log.wtf("getQtyTo", bean.getQtyTo().toString());
+
+
+
                     fqty += bean.getFQTY().intValue();
+                    Log.wtf("FQTY --", String.valueOf(fqty));
                     bal_qty -= (bean.getQtyFrom().intValue());
+                    Log.wtf("bal_qty", String.valueOf(bal_qty));
 
                 }
 
                 if (pre_bean != null) {
-                    if (bal_qty >= bean.getQtyFrom().intValue()) {
+                    if (bal_qty >= pre_bean.getQtyFrom().intValue()) {
+                        Log.wtf("IF -- ", "4");
+                        Log.wtf("getQtyFrom", bean.getQtyFrom().toString());
+                        Log.wtf("getQtyTo", bean.getQtyTo().toString());
+                        Log.wtf("--", "");
+
                         fqty += (pre_bean.getFQTY().intValue());
+                        Log.wtf("FQTY --", String.valueOf(fqty));
                         bal_qty -= (pre_bean.getQtyFrom().intValue());
+                        Log.wtf("bal_qty", String.valueOf(bal_qty));
 
                     }
                 }
 
                 pre_bean = bean;
                 first = false;
+
+               // Log.wtf("----------- bal_qty", String.valueOf(fqty));
 
             }
             Log.d("ArrSize", String.valueOf(arrSize));

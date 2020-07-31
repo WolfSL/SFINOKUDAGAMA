@@ -19,6 +19,8 @@ import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
+import com.flexiv.sfino.model.TBLT_SALINVDET;
+import com.flexiv.sfino.model.TBLT_SALINVHED;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -118,22 +120,22 @@ public class Inv_sub extends Fragment {
             textInputLayoutQty1.setError("Please Enter Qty");
             return;
         }
-        TBLT_ORDDTL obj = new TBLT_ORDDTL();
+        TBLT_SALINVDET obj = new TBLT_SALINVDET();
         obj.setItemCode(item.getItemCode());
         obj.setItemName(item.getDesc());
-        obj.setBATCH(item.getBatchNo());
+        obj.setExpiryDate(item.getBatchNo());
         obj.setUnitPrice(item.getRetialPrice());
         obj.setDiscPer(Double.parseDouble(dis_pre.getText().length()>0?dis_pre.getText().toString():"0"));
         obj.setDiscAmt(Double.parseDouble(edt_disVal.getText().length()>0?edt_disVal.getText().toString():"0"));
         obj.setItQty(Double.parseDouble(edt_Qtyx.getText().toString()));
-        obj.setUsedQty(0);
+        //obj.setUsedQty(0);
         obj.setDate(SharedPreference.dateFormat.format(Calendar.getInstance().getTime()));
         obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
-        obj.setTradeFQTY(Double.parseDouble(edt_FI1.getText().length()>0?edt_FI1.getText().toString():"0"));
-        obj.setRecordLine(0);
+       // obj.setTradeFQTY(Double.parseDouble(edt_FI1.getText().length()>0?edt_FI1.getText().toString():"0"));
+        obj.setLineID(0);
         obj.setAmount((item.getRetialPrice() * obj.getItQty())-obj.getDiscAmt());
 
-        context.setItemList(obj);
+       context.setItemList(obj);
 
 
         context.GoBackWithItems();

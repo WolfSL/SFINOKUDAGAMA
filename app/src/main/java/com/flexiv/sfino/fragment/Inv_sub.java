@@ -120,7 +120,7 @@ public class Inv_sub extends Fragment {
         textView_itemCode.setText(item.getItemCode());
         textView_itemName.setText(item.getDesc());
         Log.e("item.getVolume()",String.valueOf(item.getVolume()));
-        textView_Price.setText(SharedPreference.df.format(item.getRetialPrice()/item.getVolume()));
+        textView_Price.setText(SharedPreference.df.format(item.getRetialPrice()));
         txt_avlQty.setText(SharedPreference.df.format(item.getSHI()));
 
         if(invStatus==1){

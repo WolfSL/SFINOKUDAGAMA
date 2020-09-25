@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                             };
                             registerReceiver(receiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
                         }else{
+                            Log.e("Update :","Not awailable");
                             h.postDelayed(() -> {
                                 Pair[] pairs = new Pair[2];
                                 pairs[0] = new Pair<View, String>(flex_logo, "flex_logo");

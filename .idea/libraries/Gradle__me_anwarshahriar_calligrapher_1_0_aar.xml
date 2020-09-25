@@ -1,8 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: me.anwarshahriar:calligrapher:1.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b84e76b91267df55064979e51f94cdd8/jetified-calligrapher-1.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/b84e76b91267df55064979e51f94cdd8/jetified-calligrapher-1.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a70c4ee0fc3ab0c2645b6d56c7675290/jetified-calligrapher-1.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a70c4ee0fc3ab0c2645b6d56c7675290/jetified-calligrapher-1.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a70c4ee0fc3ab0c2645b6d56c7675290/jetified-calligrapher-1.0/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/me.anwarshahriar/calligrapher/1.0/96d075f4a94bee00e6f20987b957e3f580285f8a/calligrapher-1.0-javadoc.jar!/" />

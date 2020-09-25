@@ -306,7 +306,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/reply/baseline_reply_24.xml" />
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/monetization_on/baseline_monetization_on_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -316,8 +316,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="color" value="005a63" />
-                            <entry key="outputName" value="ic_baseline_reply_24" />
+                            <entry key="color" value="ff596b" />
+                            <entry key="outputName" value="ic_baseline_monetization_on_24" />
                             <entry key="sourceFile" value="C:\Users\Roshan" />
                           </map>
                         </option>

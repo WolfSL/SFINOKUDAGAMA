@@ -31,7 +31,11 @@ android {
     }
 
 }
-
+repositories {
+    maven {
+        url "https://jitpack.io"
+    }
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -52,5 +56,5 @@ dependencies {
 
     //CUSTOM
     implementation 'me.anwarshahriar:calligrapher:1.0'
-
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
 }

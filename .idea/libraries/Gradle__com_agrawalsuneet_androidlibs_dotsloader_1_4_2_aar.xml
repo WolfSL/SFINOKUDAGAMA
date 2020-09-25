@@ -1,8 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.agrawalsuneet.androidlibs:dotsloader:1.4.2@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fc60f932b10f503118d976c94582f3e1/jetified-dotsloader-1.4.2/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fc60f932b10f503118d976c94582f3e1/jetified-dotsloader-1.4.2/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/1e0712ad2189ac290fd1f476581a07da/jetified-dotsloader-1.4.2/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/1e0712ad2189ac290fd1f476581a07da/jetified-dotsloader-1.4.2/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/1e0712ad2189ac290fd1f476581a07da/jetified-dotsloader-1.4.2/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.agrawalsuneet.androidlibs/dotsloader/1.4.2/200f1a7dd78b6e05bbfa8aba02110f3d0e328d9/dotsloader-1.4.2-javadoc.jar!/" />

@@ -4,8 +4,35 @@ public class Modal_Batch extends Modal_Item{
     private String BatchNo;
     private double SHI;
     private double RetialPrice;
+    private double CostPrice;
     private String RepCode;
     private String DisCode;
+    private String ExpDate;
+    private String TourID;
+
+    public double getCostPrice() {
+        return CostPrice;
+    }
+
+    public void setCostPrice(double costPrice) {
+        CostPrice = costPrice;
+    }
+
+    public String getTourID() {
+        return TourID;
+    }
+
+    public void setTourID(String tourID) {
+        TourID = tourID;
+    }
+
+    public String getExpDate() {
+        return ExpDate;
+    }
+
+    public void setExpDate(String expDate) {
+        ExpDate = expDate;
+    }
 
     public Modal_Batch(){
 

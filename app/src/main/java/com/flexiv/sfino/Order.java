@@ -43,6 +43,7 @@ import com.flexiv.sfino.adapter.Adapter_Item;
 import com.flexiv.sfino.fragment.Order_main;
 import com.flexiv.sfino.fragment.Order_sub;
 import com.flexiv.sfino.model.Bean_OrderPromotion;
+import com.flexiv.sfino.model.Bean_PromotionDetails;
 import com.flexiv.sfino.model.DefModal;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
@@ -150,7 +151,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             if (tv.getText().equals("Connected"))
                 p2();
             else
-                Toast.makeText(Order.this,"Please Connet the printer",Toast.LENGTH_LONG).show();
+                Toast.makeText(Order.this, "Please Connet the printer", Toast.LENGTH_LONG).show();
         });
 
     }
@@ -211,7 +212,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
         // SelectorrecyclerView.setHasFixedSize(true);
         cusLayoutManager = new LinearLayoutManager(this);
-        adapter_item = new Adapter_Item(arr_cus, dialog, this);
+        adapter_item = new Adapter_Item(arr_cus, dialog, this,0);
         SelectorrecyclerView.setLayoutManager(cusLayoutManager);
         SelectorrecyclerView.setAdapter(adapter_item);
 
@@ -244,7 +245,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
     //Load Batchs
     @Override
-    public void LoadFragment_sub_batchs(String itemCode) {
+    public void LoadFragment_sub_batchs(String itemCode,int i) {
 
         try {
             DBHelper db = new DBHelper(this);
@@ -272,7 +273,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
         // SelectorrecyclerView.setHasFixedSize(true);
         cusLayoutManager = new LinearLayoutManager(this);
-        adapter_batch = new Adapter_Batch(arr_cus, dialog, this);
+        adapter_batch = new Adapter_Batch(arr_cus, dialog, this,0);
         SelectorrecyclerView.setLayoutManager(cusLayoutManager);
         SelectorrecyclerView.setAdapter(adapter_batch);
 
@@ -302,7 +303,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
     }
 
-    public void LoadOrderSub(Modal_Batch item) {
+    public void LoadOrderSub(Modal_Batch item,int i) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.animator.in, R.animator.out);
         transaction.replace(R.id.OrderFrame, new Order_sub(this, item)).commit();
@@ -370,7 +371,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                     cv.put(DBQ._TBLT_ORDERHED_LocCode, hed.getLocCode());
                     cv.put(DBQ._TBLT_ORDERHED_NetAmt, hed.getNetAmt());
                     cv.put(DBQ._TBLT_ORDERHED_PayType, hed.getPayType());
-                    cv.put(DBQ._TBLT_ORDERHED_RefNo, "V"+maxNo);
+                    cv.put(DBQ._TBLT_ORDERHED_RefNo, "V" + maxNo);
                     cv.put(DBQ._TBLT_ORDERHED_SalesDate, hed.getSalesDate());
                     cv.put(DBQ._TBLT_ORDERHED_Status, hed.getStatus());
                     cv.put(DBQ._TBLT_ORDERHED_VatAmt, hed.getVatAmt());
@@ -400,7 +401,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                         cv.put(DBQ._TBLT_ORDDTL_UnitPrice, obj.getUnitPrice());
                         cv.put(DBQ._TBLT_ORDDTL_UsedQty, obj.getUsedQty());
                         db.insertOrThrow(DBQ._TBLT_ORDDTL, null, cv);
-                        InsertOrderPromotions(obj.getPromotions(),db,maxNo);
+                        InsertOrderPromotions(obj.getPromotions(), db, maxNo);
                         recLine++;
                     }
                     db.setTransactionSuccessful();
@@ -427,39 +428,39 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
         return msg;
     }
 
-    public void InsertOrderPromotions(ArrayList<Bean_OrderPromotion> arr, SQLiteDatabase db,String docNo) throws Exception{
-       try {
-           ContentValues values = new ContentValues();
-           for (Bean_OrderPromotion bean : arr) {
-               values.put(DBQ._ORDERPROMOTION_DealCode, bean.getDealCode());
-               values.put(DBQ._ORDERPROMOTION_DisCode, SharedPreference.COM_REP.getDiscode());
-               Log.w("SQL Qty", bean.getQty().toString());
-               values.put(DBQ._ORDERPROMOTION_DocNo, docNo);
-               Log.e("Doc No ",docNo);
-               Log.e("Dis Code ", SharedPreference.COM_REP.getDiscode());
-               Log.e("Item Code ",bean.getItemCode());
-               values.put(DBQ._ORDERPROMOTION_DocType, bean.getDocType());
-               values.put(DBQ._ORDERPROMOTION_FQty, bean.getFQTY().doubleValue());
-               values.put(DBQ._ORDERPROMOTION_ItemCode, bean.getItemCode());
-               values.put(DBQ._ORDERPROMOTION_NoOfDeals, bean.getNoOfDeals());
-               values.put(DBQ._ORDERPROMOTION_PromoDesc, bean.getPromoDesc());
-               values.put(DBQ._ORDERPROMOTION_PromoNo, bean.getPromoNo());
-               values.put(DBQ._ORDERPROMOTION_CusCode, bean.getCusCode());
-               values.put(DBQ._ORDERPROMOTION_DealCode, bean.getDealCode());
-               values.put(DBQ._ORDERPROMOTION_PTCode, bean.getPTCode());
-               values.put(DBQ._ORDERPROMOTION_Qty, bean.getQty().doubleValue());
-               values.put(DBQ._ORDERPROMOTION_RepCode, bean.getRepCode());
-               values.put(DBQ._ORDERPROMOTION_UserID, bean.getUserID());
-               values.put(DBQ._ORDERPROMOTION_SysFQty, bean.getSysFQty().doubleValue());
-               values.put(DBQ._ORDERPROMOTION_sync, 0);
-               Log.i("SQL ", values.toString());
-               db.insertOrThrow(DBQ.TBLT_ORDERPROMOTION, null, values);
+    public void InsertOrderPromotions(ArrayList<Bean_OrderPromotion> arr, SQLiteDatabase db, String docNo) throws Exception {
+        try {
+            ContentValues values = new ContentValues();
+            for (Bean_OrderPromotion bean : arr) {
+                values.put(DBQ._ORDERPROMOTION_DealCode, bean.getDealCode());
+                values.put(DBQ._ORDERPROMOTION_DisCode, SharedPreference.COM_REP.getDiscode());
+                Log.w("SQL Qty", bean.getQty().toString());
+                values.put(DBQ._ORDERPROMOTION_DocNo, docNo);
+                Log.e("Doc No ", docNo);
+                Log.e("Dis Code ", SharedPreference.COM_REP.getDiscode());
+                Log.e("Item Code ", bean.getItemCode());
+                values.put(DBQ._ORDERPROMOTION_DocType, bean.getDocType());
+                values.put(DBQ._ORDERPROMOTION_FQty, bean.getFQTY().doubleValue());
+                values.put(DBQ._ORDERPROMOTION_ItemCode, bean.getItemCode());
+                values.put(DBQ._ORDERPROMOTION_NoOfDeals, bean.getNoOfDeals());
+                values.put(DBQ._ORDERPROMOTION_PromoDesc, bean.getPromoDesc());
+                values.put(DBQ._ORDERPROMOTION_PromoNo, bean.getPromoNo());
+                values.put(DBQ._ORDERPROMOTION_CusCode, bean.getCusCode());
+                values.put(DBQ._ORDERPROMOTION_DealCode, bean.getDealCode());
+                values.put(DBQ._ORDERPROMOTION_PTCode, bean.getPTCode());
+                values.put(DBQ._ORDERPROMOTION_Qty, bean.getQty().doubleValue());
+                values.put(DBQ._ORDERPROMOTION_RepCode, bean.getRepCode());
+                values.put(DBQ._ORDERPROMOTION_UserID, bean.getUserID());
+                values.put(DBQ._ORDERPROMOTION_SysFQty, bean.getSysFQty().doubleValue());
+                values.put(DBQ._ORDERPROMOTION_sync, 0);
+                Log.i("SQL ", values.toString());
+                db.insertOrThrow(DBQ.TBLT_ORDERPROMOTION, null, values);
 
-           }
-       }catch (Exception e){
-           e.printStackTrace();
-           throw e;
-       }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public String SaveUpdate(TBLT_ORDERHED hed) {
@@ -494,11 +495,11 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             db.replaceOrThrow(DBQ._TBLT_ORDERHED, null, cv);
 
             //Delete Details
-            db.delete(DBQ._TBLT_ORDDTL,DBQ._TBLT_ORDDTL_Discode+"=? and "+DBQ._TBLT_ORDDTL_DocNo+"=?",
-                    new String[]{hed.getDiscode(),hed.getDocNo()});
+            db.delete(DBQ._TBLT_ORDDTL, DBQ._TBLT_ORDDTL_Discode + "=? and " + DBQ._TBLT_ORDDTL_DocNo + "=?",
+                    new String[]{hed.getDiscode(), hed.getDocNo()});
 
-            db.delete(DBQ.TBLT_ORDERPROMOTION,DBQ._ORDERPROMOTION_DisCode+"=? and "+DBQ._ORDERPROMOTION_DocNo+"=?",
-                    new String[]{hed.getDiscode(),hed.getDocNo()});
+            db.delete(DBQ.TBLT_ORDERPROMOTION, DBQ._ORDERPROMOTION_DisCode + "=? and " + DBQ._ORDERPROMOTION_DocNo + "=?",
+                    new String[]{hed.getDiscode(), hed.getDocNo()});
 
             int recLine = 1;
             for (TBLT_ORDDTL obj : ItemList) {
@@ -525,7 +526,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
 
                 db.replaceOrThrow(DBQ._TBLT_ORDDTL, null, cv);
 
-                InsertOrderPromotions(obj.getPromotions(),db,hed.getDocNo());
+                InsertOrderPromotions(obj.getPromotions(), db, hed.getDocNo());
                 recLine++;
             }
             db.setTransactionSuccessful();
@@ -594,7 +595,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             dtl.setAmount(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDDTL_Amount)));
             dtl.setItemName(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)));
 
-            dtl.setPromotions(getOrderPromotions(db,SharedPreference.COM_REP.getDiscode(),docNo,dtl.getItemCode()));
+            dtl.setPromotions(getOrderPromotions(db, SharedPreference.COM_REP.getDiscode(), docNo, dtl.getItemCode()));
 
             ItemList.add(dtl);
         }
@@ -603,9 +604,9 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
         dbHelper.close();
     }
 
-    public ArrayList<Bean_OrderPromotion> getOrderPromotions(SQLiteDatabase db,String Discode, String DocNo,String itemCode) {
+    public ArrayList<Bean_OrderPromotion> getOrderPromotions(SQLiteDatabase db, String Discode, String DocNo, String itemCode) {
         ArrayList<Bean_OrderPromotion> arr = null;
-       String sql = "select * from TBLT_ORDERPROMOTION WHERE "+DBQ._ORDERPROMOTION_DisCode+" = '"+Discode+"' AND "+ DBQ._ORDERPROMOTION_DocNo+" = '"+DocNo+"' AND "+DBQ._ORDERPROMOTION_ItemCode + " = '"+itemCode+"'";
+        String sql = "select * from TBLT_ORDERPROMOTION WHERE " + DBQ._ORDERPROMOTION_DisCode + " = '" + Discode + "' AND " + DBQ._ORDERPROMOTION_DocNo + " = '" + DocNo + "' AND " + DBQ._ORDERPROMOTION_ItemCode + " = '" + itemCode + "'";
         //String sql = "select * from TBLT_ORDERPROMOTION";
         System.out.println(sql);
         Cursor c = db.rawQuery(sql, null);
@@ -645,25 +646,48 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
             obj.setStatus("A");
             obj.setItemList(ItemList);
         }
-        return obj;
+        return validateOrder(obj);
+    }
+
+
+    private TBLT_ORDERHED validateOrder(TBLT_ORDERHED orderhed) {
+        //validate NF
+        ArrayList<String> PromoCode = new ArrayList<>();
+        for (TBLT_ORDDTL dtl : orderhed.getItemList()) {
+            PromoCode.clear();
+            if (dtl.getSysFQTY() > dtl.getSysFQTY()) {
+                orderhed.setProAppStatus("2");
+            }
+
+            if (dtl.getTradeFQTY() > 0 && dtl.getSysFQTY() > 0) {
+                orderhed.setProAppStatus("2");
+            }
+
+            for (Bean_PromotionDetails ordtl : dtl.getPromotions()) {
+                if (!PromoCode.contains(ordtl.getPromoCode()) && PromoCode.size() != 0) {
+                    orderhed.setProAppStatus("2");
+                }
+
+                PromoCode.add(ordtl.getPromoCode());
+            }
+        }
+        return orderhed;
     }
 
     ProgressDialog pd;
 
-    public void UploadOrder() throws JSONException {
+    private void FinUpload(TBLT_ORDERHED orderhed) throws JSONException {
         pd = new ProgressDialog(this);
         pd.setMessage("Processing..");
         pd.show();
         Gson gson = new Gson();
-
-        TBLT_ORDERHED orderhed = GetFullOrderForSync();
         JSONObject obj = new JSONObject(gson.toJson(orderhed));
 
 
         Log.i(TAG, obj.toString());
         RequestQueue rq = Volley.newRequestQueue(this);
 
-        String url = SharedPreference.URL + "Order/upload?verID="+SharedPreference.varID;
+        String url = SharedPreference.URL + "Order/upload?verID=" + SharedPreference.varID;
 
 
         JsonObjectRequest jr = new JsonObjectRequest(
@@ -677,7 +701,7 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
                         if (defModal.getVal1().equals("S")) {
                             updateOrderFlag(defModal, "A");
 
-                        }else {
+                        } else {
                             Toast.makeText(Order.this, defModal.getVal2(), Toast.LENGTH_LONG).show();
                             updateOrderFlag(defModal, "E");
                         }
@@ -706,6 +730,40 @@ public class Order extends AppCompatActivity implements Fragment_sub_batching {
         };
 
         rq.add(jr);
+    }
+
+    public void UploadOrder() {
+
+
+        TBLT_ORDERHED orderhed = GetFullOrderForSync();
+        if (orderhed.getProAppStatus() == null) {
+            orderhed.setProAppStatus("1");
+            try {
+                FinUpload(orderhed);
+            } catch (JSONException e) {
+                Toast.makeText(Order.this, e.toString(), Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        } else if (orderhed.getProAppStatus().equals("2")) {
+            new AlertDialog.Builder(this).setTitle("Approval!")
+                    .setMessage("this order needs to promotion approval")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            try {
+                                FinUpload(orderhed);
+                            } catch (JSONException e) {
+                                Toast.makeText(Order.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                e.printStackTrace();
+                            }
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show();
+        }
+
+
         System.out.println("------------------------------------------------------------------------");
 
     }

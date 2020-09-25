@@ -15,6 +15,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -78,6 +80,8 @@ public class MainMenu extends AppCompatActivity implements Runnable {
     private View contextView;
     private TextView textViewCustomer;
     private TextView textViewArea;
+    private TextView textViewTour;
+    private TextView textViewRep_tour;
     //Card Button
     private CardView cardView_Order;
     private CardView cardView_inv;
@@ -97,6 +101,12 @@ public class MainMenu extends AppCompatActivity implements Runnable {
         cardView_Order = findViewById(R.id.cardView_Order);
         contextView = findViewById(R.id.context_view);
         cardView_inv = findViewById(R.id.cardView3);
+        textViewTour = findViewById(R.id.textViewPrinter2);
+        textViewRep_tour = findViewById(R.id.textViewRep_tour);
+
+        if (SharedPreference.COM_TOUR_X != null) {
+            textViewRep_tour.setText(SharedPreference.COM_TOUR_X.getTxt_code());
+        }
 
         //set Click
         cardView_Order.setOnClickListener(new View.OnClickListener() {
@@ -160,7 +170,21 @@ public class MainMenu extends AppCompatActivity implements Runnable {
                             });
 
                     snackbar.show();
-                } else {
+                }
+//                else if (SharedPreference.COM_TOUR == null) {
+//                    Snackbar snackbar = Snackbar
+//                            .make(contextView, "Tour Can not be Empty!", Snackbar.LENGTH_LONG)
+//                            .setActionTextColor(Color.RED)
+//                            .setAction("Select", new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View view) {
+//                                    openTuorSelector(view);
+//                                }
+//                            });
+//
+//                    snackbar.show();
+//                }
+                else {
                     Intent i = new Intent(MainMenu.this, InvList.class);
                     startActivity(i);
                 }
@@ -220,6 +244,11 @@ public class MainMenu extends AppCompatActivity implements Runnable {
         } catch (Exception ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void openTuorSelector(View v) {
+        openDialogAreaCusSelector(new DBHelper(this).getToures(), "SELECT TOUR", 2);
+
     }
 
     private void openDialogAreaCusSelector(ArrayList<Card_cus_area> arr_cus, String title, int type) {
@@ -517,7 +546,7 @@ public class MainMenu extends AppCompatActivity implements Runnable {
     private ProgressDialog dialog;
 
     public void download(View v) {
-        SQLiteDatabase db = new DBHelper(this).getWritableDatabase();
+
         dialog = new ProgressDialog(this);
         dialog.setMessage("Downloading Master Data. Please Wait!");
         dialog.show();
@@ -683,4 +712,85 @@ public class MainMenu extends AppCompatActivity implements Runnable {
         Intent i = new Intent(MainMenu.this, StockBal.class);
         startActivity(i);
     }
+
+    public void Outs(View v) {
+
+        boolean connected = false;
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(this.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+        }
+        else {
+            Snackbar snackbar = Snackbar
+                    .make(contextView, "Please Connect To the Internet\nTurn on Data or WIFI", Snackbar.LENGTH_LONG);
+
+            snackbar.show();
+            return;
+        }
+
+
+        if (SharedPreference.COM_AREA == null) {
+            Snackbar snackbar = Snackbar
+                    .make(contextView, "Area Can not be Empty!", Snackbar.LENGTH_LONG)
+                    .setActionTextColor(Color.RED)
+                    .setAction("Select", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            openAreaSelector(view);
+                        }
+                    });
+
+            snackbar.show();
+        }else if (MainMenu.mBluetoothSocket != null){
+            if (MainMenu.mBluetoothSocket.isConnected()) {
+                Intent i = new Intent(MainMenu.this, PaymentList.class);
+                startActivity(i);
+            }else{
+                if (connect != 1) {
+                    MainMenu.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                    if (MainMenu.mBluetoothAdapter == null) {
+                        Toast.makeText(this, "Message1", Toast.LENGTH_SHORT).show();
+                    } else {
+                        if (!MainMenu.mBluetoothAdapter.isEnabled()) {
+                            Intent enableBtIntent = new Intent(
+                                    BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            startActivityForResult(enableBtIntent,
+                                    REQUEST_ENABLE_BT);
+                        } else if (MainMenu.mBluetoothDevice == null) {
+                            ListPairedDevices();
+                            Intent connectIntent = new Intent(this,
+                                    DeviceList.class);
+                            startActivityForResult(connectIntent,
+                                    REQUEST_CONNECT_DEVICE);
+
+                        }
+                    }
+                }
+            }
+        }else {
+            if (connect != 1) {
+                MainMenu.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                if (MainMenu.mBluetoothAdapter == null) {
+                    Toast.makeText(this, "Message1", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (!MainMenu.mBluetoothAdapter.isEnabled()) {
+                        Intent enableBtIntent = new Intent(
+                                BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                        startActivityForResult(enableBtIntent,
+                                REQUEST_ENABLE_BT);
+                    } else if (MainMenu.mBluetoothDevice == null) {
+                        ListPairedDevices();
+                        Intent connectIntent = new Intent(this,
+                                DeviceList.class);
+                        startActivityForResult(connectIntent,
+                                REQUEST_CONNECT_DEVICE);
+
+                    }
+                }
+            }
+        }
+    }
+
+
 }

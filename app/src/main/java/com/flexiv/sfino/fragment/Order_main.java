@@ -21,18 +21,26 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Visibility;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
 import com.flexiv.sfino.adapter.Adapter_Oeder_Item;
+import com.flexiv.sfino.model.DefModal;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Order_main extends Fragment {
     private final static String TAG = "Order_main";
@@ -69,6 +77,8 @@ public class Order_main extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        download(view);
 
         constraintLayout3 = view.findViewById(R.id.constraintLayout3);
         textView_total = view.findViewById(R.id.textView10);
@@ -185,12 +195,8 @@ public class Order_main extends Fragment {
         //Proccess Order
         button_process.setOnClickListener(view1 -> {
             button_process.setEnabled(false);
-            try {
-                context.UploadOrder();
-            } catch (JSONException e) {
-                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            }
+            context.UploadOrder();
+
 
         });
     }
@@ -307,7 +313,7 @@ public class Order_main extends Fragment {
             button_save.setVisibility(View.GONE);
             button_process.setVisibility(View.GONE);
             floatingActionButton_OM.setVisibility(View.GONE);
-        }else if (hed.getStatus().equals("E")) {
+        } else if (hed.getStatus().equals("E")) {
             textView_readOnly_oreder.setVisibility(View.VISIBLE);
             button_save.setVisibility(View.GONE);
             button_process.setAlpha(1);
@@ -335,5 +341,45 @@ public class Order_main extends Fragment {
             refreshItems();
         }
     };
+
+    private TextView salesText, outstanding;
+
+    public void download(View v) {
+
+     //   SharedPreference.symbols.setGroupingSeparator(',');
+       // SharedPreference.ds_formatter.setDecimalFormatSymbols(SharedPreference.symbols);
+        salesText = v.findViewById(R.id.textView6);
+        outstanding = v.findViewById(R.id.textView8);
+        String url = SharedPreference.URL + "Payment/getCusBal?cusCode=" + SharedPreference.COM_CUSTOMER.getTxt_code();
+        System.out.println(url);
+
+        RequestQueue rq = Volley.newRequestQueue(context);
+
+        JsonObjectRequest jr = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+                response -> {
+                    Gson gson = new Gson();
+                    DefModal master = gson.fromJson(response.toString(), DefModal.class);
+
+                    if (master != null) {
+                        salesText.setText("LKR " + String.format("%,.2f", Double.parseDouble(master.getVal1())));
+                        outstanding.setText("LKR " + String.format("%,.2f", Double.parseDouble(master.getVal2())));
+                    }
+                },
+                error -> {
+                    salesText.setText("Failed to load Customer Balance");
+                    outstanding.setText("Check your internet connection");
+                    System.out.println("Rest Errr :" + error.toString());
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+        rq.add(jr);
+    }
 
 }

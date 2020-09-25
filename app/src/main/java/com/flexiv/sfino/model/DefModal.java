@@ -1,10 +1,21 @@
 package com.flexiv.sfino.model;
 
-public class DefModal {
+import java.io.Serializable;
+
+public class DefModal implements Serializable {
     private String val1;
     private String val2;
     private String val3;
     private String val4;
+    private String val5;
+
+    public String getVal5() {
+        return val5;
+    }
+
+    public void setVal5(String val5) {
+        this.val5 = val5;
+    }
 
     public String getVal1() {
         return val1;

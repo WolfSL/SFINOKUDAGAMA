@@ -54,6 +54,8 @@ public class Adapter_Cus_area extends RecyclerView.Adapter<Adapter_Cus_area.View
                     SharedPreference.COM_CUSTOMER = cusArea;
                 }else if(type==0){
                     SharedPreference.COM_AREA = cusArea;
+                }else if(type ==2){
+                    SharedPreference.COM_BANK = cusArea;
                 }
                 dialog.cancel();
             }

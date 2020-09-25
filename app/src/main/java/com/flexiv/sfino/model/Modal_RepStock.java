@@ -9,6 +9,33 @@ public class Modal_RepStock {
     private double FreeQty;
     private String Status;
     private double RetialPrice;
+    private String ExpDate;
+    private String TourID;
+    private String Createdate;
+
+    public String getCreatedate() {
+        return Createdate;
+    }
+
+    public void setCreatedate(String createdate) {
+        Createdate = createdate;
+    }
+
+    public String getExpDate() {
+        return ExpDate;
+    }
+
+    public void setExpDate(String expDate) {
+        ExpDate = expDate;
+    }
+
+    public String getTourID() {
+        return TourID;
+    }
+
+    public void setTourID(String tourID) {
+        TourID = tourID;
+    }
 
     public String getRepCode() {
         return RepCode;

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.flexiv.sfino">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -18,7 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".StockBal"></activity>
+        <activity android:name=".Recept"></activity>
+        <activity android:name=".PaymentList" />
+        <activity android:name=".StockBal" />
         <activity android:name=".DeviceList" />
         <activity android:name=".InvList" />
         <activity android:name=".Invoice" />

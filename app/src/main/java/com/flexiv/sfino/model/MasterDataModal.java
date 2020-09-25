@@ -10,7 +10,17 @@ public class MasterDataModal implements Serializable {
     private ArrayList<Modal_Item> Modal_Items;
     private ArrayList<Modal_Batch> modal_Batches_Stock;
     private ArrayList<Modal_RepStock> modal_Rep_Stock;
+    private ArrayList<TBLM_BANK> modal_banks;
     private TBLT_ORDERHED MaxOrder;
+    private TBLT_SALINVHED MaxInv;
+
+    public ArrayList<TBLM_BANK> getModal_banks() {
+        return modal_banks;
+    }
+
+    public void setModal_banks(ArrayList<TBLM_BANK> modal_banks) {
+        this.modal_banks = modal_banks;
+    }
 
     public ArrayList<Modal_RepStock> getModal_Rep_Stock() {
         return modal_Rep_Stock;
@@ -60,5 +70,11 @@ public class MasterDataModal implements Serializable {
         Customer_Modal = customerList;
     }
 
+    public TBLT_SALINVHED getMaxInv() {
+        return MaxInv;
+    }
 
+    public void setMaxInv(TBLT_SALINVHED maxInv) {
+        MaxInv = maxInv;
+    }
 }

@@ -27,6 +27,7 @@ public class Adapter_Batch extends RecyclerView.Adapter<Adapter_Batch.ViewsHolde
     private ArrayList<Modal_Batch> arr_full;
     private AlertDialog dialog;
     private Fragment_sub_batching context;
+    private int invStatus;
 
     @NonNull
     @Override
@@ -36,11 +37,12 @@ public class Adapter_Batch extends RecyclerView.Adapter<Adapter_Batch.ViewsHolde
         return mvh;
     }
 
-    public Adapter_Batch(ArrayList<Modal_Batch> arr, AlertDialog dialog, Fragment_sub_batching context) {
+    public Adapter_Batch(ArrayList<Modal_Batch> arr, AlertDialog dialog, Fragment_sub_batching context,int invStatus) {
         this.arr = arr;
         this.arr_full = new ArrayList<>(arr);
         this.dialog = dialog;
         this.context = context;
+        this.invStatus = invStatus;
     }
 
     @Override
@@ -53,7 +55,7 @@ public class Adapter_Batch extends RecyclerView.Adapter<Adapter_Batch.ViewsHolde
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                context.LoadOrderSub(item);
+                context.LoadOrderSub(item,invStatus);
                 dialog.cancel();
             }
         });

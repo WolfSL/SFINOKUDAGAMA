@@ -72,9 +72,11 @@ public class DBQ {
     /*Item Table*/
     public static final String CREATE_TBLM_ITEM = "CREATE TABLE [TBLM_ITEM] (" +
             "[ItemCode] TEXT NOT NULL PRIMARY KEY," +
-            "[ItemDes] TEXT NOT NULL)";
+            "[ItemDes] TEXT NOT NULL , "+
+            "[Volume] TEXT NOT NULL)";
     public static final String _TBLM_ITEM_ItemCode = "ItemCode";
     public static final String _TBLM_ITEM_ItemDes = "ItemDes";
+    public static final String _TBLM_ITEM_Volume = "Volume";
     public static final String _TBLM_ITEM = "TBLM_ITEM";
 
 
@@ -99,9 +101,12 @@ public class DBQ {
             "[DisCode] TEXT  NOT NULL,\n" +
             "[BatchNo] TEXT  NOT NULL,\n" +
             "[ItemCode] TEXT  NOT NULL,\n" +
+            "[ExpDate] TEXT  NOT NULL,\n" +
             "[SIH] NUMERIC  NOT NULL,\n" +
             "[FreeQty] NUMERIC  NOT NULL,\n" +
             "[Status] TEXT  NOT NULL,\n" +
+            "[Createdate] TEXT  NOT NULL,\n" +
+            "[TourID] TEXT  NOT NULL,\n" +
             "[RetialPrice] NUMERIC  NOT NULL,\n" +
             "PRIMARY KEY ([RepCode],[DisCode],[BatchNo],[ItemCode])\n" +
             ")";
@@ -111,9 +116,12 @@ public class DBQ {
     public static final String _TBLM_REPSTOCK_BatchNo = "BatchNo";
     public static final String _TBLM_REPSTOCK_ItemCode = "ItemCode";
     public static final String _TBLM_REPSTOCK_SIH = "SIH";
+    public static final String _TBLM_REPSTOCK_Createdate = "Createdate";
+    public static final String _TBLM_REPSTOCK_ExpDate = "ExpDate";
     public static final String _TBLM_REPSTOCK_FreeQty = "FreeQty";
     public static final String _TBLM_REPSTOCK_Status = "Status";
     public static final String _TBLM_REPSTOCK_RetialPrice = "RetialPrice";
+    public static final String _TBLM_REPSTOCK_TourID = "TourID";
 
 
 
@@ -242,6 +250,8 @@ public class DBQ {
             "[IncreaseAmt] NUMERIC  NULL,\n" +
             "[DamageDue] NUMERIC  NULL,\n" +
             "[SalesRep] TEXT  NULL,\n" +
+            "[TourID] TEXT  NULL,\n" +
+            "[SYNC] BOOLEAN DEFAULT 'false' NULL,\n" +
             "PRIMARY KEY ([DocNo],[Discode],[DocType])\n" +
             ")";
 
@@ -283,6 +293,9 @@ public class DBQ {
     public static final String _TBLT_INVHED_IncreaseAmt = "IncreaseAmt";
     public static final String _TBLT_INVHED_DamageDue = "DamageDue";
     public static final String _TBLT_INVHED_SalesRep = "SalesRep";
+    public static final String _TBLT_INVHED_SYNC = "SYNC";
+    public static final String _TBLT_INVHED_TourID = "TourID";
+
 
     public static final String CREATE_TBLT_SALINVDET = "CREATE TABLE [TBLT_SALINVDET] (\n" +
             "[DocNo] TEXT  NULL,\n" +
@@ -290,7 +303,9 @@ public class DBQ {
             "[DocType] INTEGER  NULL,\n" +
             "[ItemCode] TEXT  NULL,\n" +
             "[ItQty] REAL  NULL,\n" +
+            "[ULQty] REAL  NULL,\n" +
             "[UnitPrice] NUMERIC  NULL,\n" +
+            "[CostPrice] NUMERIC  NULL,\n" +
             "[DiscPer] REAL  NULL,\n" +
             "[DiscAmt] NUMERIC  NULL,\n" +
             "[Amount] NUMERIC  NULL,\n" +
@@ -303,6 +318,7 @@ public class DBQ {
             "[FQTY] TEXT  NULL,\n" +
             "[Is_Damage] BOOLEAN  NULL,\n" +
             "[IncreaseAmt] NUMERIC  NULL,\n" +
+
             "[LineID] INTEGER  NULL,\n" +
             "PRIMARY KEY ([DocNo],[Discode],[DocType],[ItemCode],[ExpiryDate])\n" +
             ")";
@@ -312,7 +328,9 @@ public class DBQ {
     public static final String _TBLT_SALINVDET_DocType = "DocType";
     public static final String _TBLT_SALINVDET_ItemCode = "ItemCode";
     public static final String _TBLT_SALINVDET_ItQty = "ItQty";
+    public static final String _TBLT_SALINVDET_ULQty = "ULQty";
     public static final String _TBLT_SALINVDET_UnitPrice = "UnitPrice";
+    public static final String _TBLT_SALINVDET_CostPrice = "CostPrice";
     public static final String _TBLT_SALINVDET_DiscPer = "DiscPer";
     public static final String _TBLT_SALINVDET_DiscAmt = "DiscAmt";
     public static final String _TBLT_SALINVDET_Amount = "Amount";
@@ -445,5 +463,17 @@ public class DBQ {
     public static final String _Shop_Stock_Counter_cusId = "cusId";
     public static final String _Shop_Stock_Counter_counter = "counter";
     public static final String _Shop_Stock_Counter = "Shop_Stock_Counter";
+
+    //Create Bank
+    public static final  String CREATE_TBLM_BANK = "CREATE TABLE [TBLM_BANK] (\n" +
+            "[BankCode] TEXT  NULL PRIMARY KEY,\n" +
+            "[Branch] TEXT  NULL ,\n" +
+            "[Name] TEXT  NULL\n" +
+            ")";
+
+    public static final String _TBLM_BANK_BankCode = "BankCode";
+    public static final String _TBLM_BANK = "TBLM_BANK";
+    public static final String _TBLM_BANK_Branch = "Branch";
+    public static final String _TBLM_BANK_Name = "Name";
 
 }

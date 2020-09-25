@@ -28,6 +28,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
     private ArrayList<Modal_Item> arr_full;
     private AlertDialog dialog;
     private Fragment_sub_batching context;
+    private int invStatus;
 
     @NonNull
     @Override
@@ -37,11 +38,12 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
         return mvh;
     }
 
-    public Adapter_Item(ArrayList<Modal_Item> arr, AlertDialog dialog,Fragment_sub_batching context) {
+    public Adapter_Item(ArrayList<Modal_Item> arr, AlertDialog dialog,Fragment_sub_batching context,int invStatus) {
         this.arr = arr;
         this.arr_full = new ArrayList<>(arr);
         this.dialog = dialog;
         this.context = context;
+        this.invStatus = invStatus;
     }
 
     @Override
@@ -55,7 +57,7 @@ public class Adapter_Item extends RecyclerView.Adapter<Adapter_Item.ViewsHolder>
             @Override
             public void onClick(View v) {
                 dialog.cancel();
-                context.LoadFragment_sub_batchs(item.getItemCode());
+                context.LoadFragment_sub_batchs(item.getItemCode(),invStatus);
             }
         });
     }

@@ -8,7 +8,9 @@ class TBLT_SALINVDET {
     private int DocType;
     private String ItemCode;
     private double ItQty;
+    private double ULQty;
     private double UnitPrice;
+    private double CostPrice;
     private double DiscPer;
     private double DiscAmt;
     private double Amount;
@@ -19,10 +21,45 @@ class TBLT_SALINVDET {
     private String LocCode;
     private String ExpDate;
     private String ItemName;
+    private String TourID;
     private double FQTY;
     private boolean Is_Damage;
     private double IncreaseAmt;
+    private double Volume;
     private int LineID;
+
+
+    public double getCostPrice() {
+        return CostPrice;
+    }
+
+    public void setCostPrice(double costPrice) {
+        CostPrice = costPrice;
+    }
+
+    public double getVolume() {
+        return Volume;
+    }
+
+    public void setVolume(double volume) {
+        Volume = volume;
+    }
+
+    public double getULQty() {
+        return ULQty;
+    }
+
+    public void setULQty(double ULQty) {
+        this.ULQty = ULQty;
+    }
+
+    public String getTourID() {
+        return TourID;
+    }
+
+    public void setTourID(String tourID) {
+        TourID = tourID;
+    }
 
     public String getDocNo() {
         return DocNo;
@@ -182,5 +219,31 @@ class TBLT_SALINVDET {
 
     public void setItemName(String itemName) {
         ItemName = itemName;
+    }
+
+    @Override
+    public String toString() {
+        return "TBLT_SALINVDET{" +
+                "DocNo='" + DocNo + '\'' +
+                ", Discode='" + Discode + '\'' +
+                ", DocType=" + DocType +
+                ", ItemCode='" + ItemCode + '\'' +
+                ", ItQty=" + ItQty +
+                ", UnitPrice=" + UnitPrice +
+                ", DiscPer=" + DiscPer +
+                ", DiscAmt=" + DiscAmt +
+                ", Amount=" + Amount +
+                ", Crep='" + Crep + '\'' +
+                ", CusCode='" + CusCode + '\'' +
+                ", ExpiryDate='" + ExpiryDate + '\'' +
+                ", Date='" + Date + '\'' +
+                ", LocCode='" + LocCode + '\'' +
+                ", ExpDate='" + ExpDate + '\'' +
+                ", ItemName='" + ItemName + '\'' +
+                ", FQTY=" + FQTY +
+                ", Is_Damage=" + Is_Damage +
+                ", IncreaseAmt=" + IncreaseAmt +
+                ", LineID=" + LineID +
+                '}';
     }
 }

@@ -66,14 +66,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="4dp"
+                    android:text="Rep Name"
+                    android:textColor="@color/design_default_color_background"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewDist_name" />
+
+                <TextView
+                    android:id="@+id/textViewRep_tour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
                     android:layout_marginBottom="6dp"
                     android:text="Rep Name"
                     android:textColor="@color/design_default_color_background"
                     android:textSize="14sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewDist_name" />
+                    app:layout_constraintTop_toBottomOf="@+id/textViewRep_name" />
 
                 <ImageView
                     android:id="@+id/imageView"
@@ -331,8 +343,19 @@
                                 android:backgroundTint="@color/colorPrimary"
                                 android:onClick="openCusSelector"
                                 app:layout_constraintStart_toStartOf="@+id/imageButton"
-                                app:layout_constraintTop_toBottomOf="@+id/imageButton2"
+                                app:layout_constraintTop_toBottomOf="@+id/imageButtonP2"
                                 app:srcCompat="@drawable/ic_baseline_local_printshop_24" />
+
+                            <ImageButton
+                                android:id="@+id/imageButtonP2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:backgroundTint="@color/colorPrimary"
+                                android:onClick="openTuorSelector"
+                                android:visibility="gone"
+                                app:layout_constraintStart_toStartOf="@+id/imageButton"
+                                app:layout_constraintTop_toBottomOf="@+id/imageButton2"
+                                app:srcCompat="@drawable/ic_baseline_local_shipping_24" />
 
                             <ImageButton
                                 android:id="@+id/imageButton4"
@@ -356,6 +379,21 @@
                                 android:textAllCaps="true"
                                 android:textSize="18sp"
                                 app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toEndOf="@+id/imageButton2"
+                                app:layout_constraintTop_toTopOf="@+id/imageButtonP" />
+
+                            <TextView
+                                android:id="@+id/textViewPrinter2"
+                                android:layout_width="0dp"
+                                android:layout_height="0dp"
+                                android:layout_marginLeft="@dimen/casper_def_marg"
+                                android:gravity="center_vertical"
+                                android:hint="Please Select the Tour ID"
+                                android:textAllCaps="true"
+                                android:textSize="18sp"
+                                android:visibility="gone"
+                                app:layout_constraintBottom_toTopOf="@+id/imageButtonP"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintStart_toEndOf="@+id/imageButton2"
                                 app:layout_constraintTop_toBottomOf="@+id/textViewCustomer" />
@@ -404,6 +442,7 @@
                         android:layout_height="wrap_content"
                         android:clickable="true"
                         android:foreground="?android:selectableItemBackground"
+                        android:onClick="Outs"
                         app:cardCornerRadius="3dp"
                         app:cardElevation="3dp"
                         app:cardUseCompatPadding="true"

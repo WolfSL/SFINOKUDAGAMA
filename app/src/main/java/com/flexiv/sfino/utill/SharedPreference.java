@@ -21,19 +21,21 @@ public class SharedPreference {
 
     public static  DecimalFormat df = new DecimalFormat("0.00");
     public static String dateFormat_Format1 = "yyyy-MM-dd hh:mm:ss a";
+    public static String dateFormat_Format2 = "MMddhhmmss";
     public static DateFormat dateFormat = new SimpleDateFormat(dateFormat_Format1);
+    public static DateFormat dateFormat2 = new SimpleDateFormat(dateFormat_Format2);
 
     public final static SimpleDateFormat Date_serverFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
     public final static SimpleDateFormat Date_App_Format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
 
-    public static String address = "514-A5, Maithreepala Senanayake Mawatha, Anuradhapura";
-    public static String tp = "025-4581281";
+    public static String address = "No 69, kegalle Road, Rambukkana";
+    public static String tp = "035 22 64 246";
 
 //    public static String refid;
 //    public static String disid;
-    public static String DisAID;
-    public static String printername;
+//    public static String DisAID;
+//    public static String printername;
     public static String settings_pin;
     public static String URL;
     public static String webapi;
@@ -44,14 +46,15 @@ public class SharedPreference {
 
     public static Card_cus_area COM_CUSTOMER;
     public static Card_cus_area COM_AREA;
+    public static Card_cus_area COM_BANK;
+    public static Card_cus_area COM_TOUR_X;
 
-    public static DecimalFormat ds_formatter = new DecimalFormat("0.00");
-    public static DecimalFormatSymbols symbols = ds_formatter.getDecimalFormatSymbols();
+
+    public static DecimalFormat ds_formatter = new DecimalFormat("###,##0.00");
+
 
     public static void setSettings(Context context){
 
-        symbols.setGroupingSeparator(',');
-        ds_formatter.setDecimalFormatSymbols(symbols);
 
         webapi =  PreferenceManager.getDefaultSharedPreferences(context).getString("webapi",null);
         hostname =  PreferenceManager.getDefaultSharedPreferences(context).getString("hostname",null);

@@ -65,7 +65,7 @@ public class StockBal extends AppCompatActivity {
 
         DBHelper dbHelper = new DBHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String sql = "select st.ItemCode,item.ItemDes,AVG(st.RetialPrice) as RetialPrice,sum(st.SIH) as SIH from TBLM_ITEM as item left outer join TBLM_BATCHWISESTOCK as st\n" +
+        String sql = "select st.ItemCode,item.ItemDes,AVG(st.RetialPrice) as RetialPrice,sum(st.SIH) as SIH from TBLM_ITEM as item left outer join TBLM_BATCHWISESTOCK  as st\n" +
                 "on item.ItemCode = st.ItemCode where DisCode = ? group by st.ItemCode, item.ItemDes";
         Cursor c = db.rawQuery(sql,new String[]{SharedPreference.COM_REP.getDiscode()});
         Modal_Item item;

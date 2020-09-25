@@ -21,6 +21,7 @@ import com.flexiv.sfino.model.MasterDataModal;
 import com.flexiv.sfino.model.Modal_Batch;
 import com.flexiv.sfino.model.Modal_Item;
 import com.flexiv.sfino.model.Modal_RepStock;
+import com.flexiv.sfino.model.TBLM_BANK;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
 
@@ -32,7 +33,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     private static final String DATABASE_NAME = "SFINO.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 17;
 
 
     public DBHelper(@Nullable Context context) {
@@ -63,6 +64,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DBQ.CREATE_TBLT_ORDERPROMOTION);
         db.execSQL(DBQ.CREATE_TABLE_TBLM_PROMO_DEALS);
         db.execSQL(DBQ.CREATE_TABLE_Shop_Stock_Counter);
+        db.execSQL(DBQ.CREATE_TBLM_BANK);
     }
 
     @Override
@@ -85,6 +87,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DELETE + DBQ._TBLM_PROMO_DEALS);
         db.execSQL(DELETE + DBQ.TBLT_ORDERPROMOTION);
         db.execSQL(DELETE + DBQ._Shop_Stock_Counter);
+        db.execSQL(DELETE + DBQ._TBLM_BANK);
 
         onCreate(db);
     }
@@ -100,64 +103,85 @@ public class DBHelper extends SQLiteOpenHelper {
         try {
 
             db.delete(DBQ._TBLM_REPSTOCK, null, null);
-            db.delete(DBQ._TBLM_AREA, null, null);
-            db.delete(DBQ._TBLM_ITEM, null, null);
-            db.delete(DBQ._TBLM_CUSTOMER, null, null);
-            db.delete(DBQ._TBLM_BATCHWISESTOCK, null, null);
-
 
             ContentValues c = new ContentValues();
 
             //Insert Area
-            for (Area_Modal area : data.getAreaList()) {
+            if (data.getAreaList() != null) {
+                db.delete(DBQ._TBLM_AREA, null, null);
+                for (Area_Modal area : data.getAreaList()) {
 
-                c.put(DBQ._TBLM_AREA_AreaCode, area.getAreaCode());
-                c.put(DBQ._TBLM_AREA_AreaName, area.getAreaName());
-                c.put(DBQ._TBLM_AREA_DisCode, area.getDisCode());
+                    c.put(DBQ._TBLM_AREA_AreaCode, area.getAreaCode());
+                    c.put(DBQ._TBLM_AREA_AreaName, area.getAreaName());
+                    c.put(DBQ._TBLM_AREA_DisCode, area.getDisCode());
 
-                db.replace(DBQ._TBLM_AREA, null, c);
-                c.clear();
+                    db.replaceOrThrow(DBQ._TBLM_AREA, null, c);
+                    c.clear();
+                }
+            }
+
+            if (data.getModal_banks() != null) {
+                for (TBLM_BANK bank : data.getModal_banks()) {
+
+                    c.put(DBQ._TBLM_BANK_BankCode, bank.getBankCode());
+                    c.put(DBQ._TBLM_BANK_Name, bank.getName());
+                    c.put(DBQ._TBLM_BANK_Branch, bank.getBranch());
+
+                    db.replaceOrThrow(DBQ._TBLM_BANK, null, c);
+                    c.clear();
+                }
             }
 
             //Insert Customer
-            for (Customer_Modal cus : data.getCustomerList()) {
+            if (data.getCustomerList() != null) {
+                db.delete(DBQ._TBLM_CUSTOMER, null, null);
+                for (Customer_Modal cus : data.getCustomerList()) {
 
-                c.put(DBQ._TBLM_CUSTOMER_AreaCode, cus.getAreaCode());
-                c.put(DBQ._TBLM_CUSTOMER_CusCode, cus.getCusCode());
-                c.put(DBQ._TBLM_CUSTOMER_CusName, cus.getCusName());
-                c.put(DBQ._TBLM_CUSTOMER_Discode, cus.getDiscode());
-                c.put(DBQ._TBLM_CUSTOMER_CurBal, cus.getCurBal());
-                c.put(DBQ._TBLM_CUSTOMER_CreditDays, cus.getCreditDays());
-                c.put(DBQ._TBLM_CUSTOMER_CreditLimit, cus.getCreditLimit());
-                c.put(DBQ._TBLM_CUSTOMER_AllCreLmtExceed, cus.isAllCreLmtExceed()?1:0);
-                c.put(DBQ._TBLM_CUSTOMER_VAT, cus.getVAT());
+                    c.put(DBQ._TBLM_CUSTOMER_AreaCode, cus.getAreaCode());
+                    c.put(DBQ._TBLM_CUSTOMER_CusCode, cus.getCusCode());
+                    c.put(DBQ._TBLM_CUSTOMER_CusName, cus.getCusName());
+                    c.put(DBQ._TBLM_CUSTOMER_Discode, cus.getDiscode());
+                    c.put(DBQ._TBLM_CUSTOMER_CurBal, cus.getCurBal());
+                    c.put(DBQ._TBLM_CUSTOMER_CreditDays, cus.getCreditDays());
+                    c.put(DBQ._TBLM_CUSTOMER_CreditLimit, cus.getCreditLimit());
+                    c.put(DBQ._TBLM_CUSTOMER_AllCreLmtExceed, cus.isAllCreLmtExceed() ? 1 : 0);
+                    c.put(DBQ._TBLM_CUSTOMER_VAT, cus.getVAT());
 
-                db.replace(DBQ._TBLM_CUSTOMER, null, c);
-                c.clear();
+                    db.replaceOrThrow(DBQ._TBLM_CUSTOMER, null, c);
+                    c.clear();
+                }
             }
 
-            for (Modal_Item item : data.getModal_Items()) {
-                c.put(DBQ._TBLM_ITEM_ItemCode, item.getItemCode());
-                c.put(DBQ._TBLM_ITEM_ItemDes, item.getDesc());
-
-                db.replace(DBQ._TBLM_ITEM, null, c);
-                c.clear();
+            if (data.getModal_Items() != null) {
+                db.delete(DBQ._TBLM_ITEM, null, null);
+                System.out.println("Len : "+data.getModal_Items().size());
+                for (Modal_Item item : data.getModal_Items()) {
+                    c.put(DBQ._TBLM_ITEM_ItemCode, item.getItemCode());
+                    c.put(DBQ._TBLM_ITEM_ItemDes, item.getDesc());
+                    c.put(DBQ._TBLM_ITEM_Volume, item.getVolume());
+                    System.out.println(item.getVolume()+item.getItemCode());
+                    db.replaceOrThrow(DBQ._TBLM_ITEM, null, c);
+                    c.clear();
+                }
             }
 
-            if (data.getModal_Batches_Stock() != null)
+            if (data.getModal_Batches_Stock() != null) {
+                db.delete(DBQ._TBLM_BATCHWISESTOCK, null, null);
                 for (Modal_Batch batch : data.getModal_Batches_Stock()) {
                     c.put(DBQ._TBLM_BATCHWISESTOCK_DisCode, batch.getDisCode());
                     c.put(DBQ._TBLM_BATCHWISESTOCK_BatchNo, batch.getBatchNo());
                     c.put(DBQ._TBLM_BATCHWISESTOCK_ItemCode, batch.getItemCode());
                     c.put(DBQ._TBLM_BATCHWISESTOCK_RetialPrice, batch.getRetialPrice());
                     c.put(DBQ._TBLM_BATCHWISESTOCK_SIH, batch.getSHI());
-                    db.replace(DBQ._TBLM_BATCHWISESTOCK, null, c);
+                    db.replaceOrThrow(DBQ._TBLM_BATCHWISESTOCK, null, c);
                     c.clear();
                 }
+            }
 
-            if(data.getModal_Rep_Stock()!=null)
+
             if (data.getModal_Rep_Stock() != null) {
                 for (Modal_RepStock batch : data.getModal_Rep_Stock()) {
+                   // System.out.println(batch.getItemCode());
                     c.put(DBQ._TBLM_REPSTOCK_DisCode, batch.getDisCode());
                     c.put(DBQ._TBLM_REPSTOCK_BatchNo, batch.getBatchNo());
                     c.put(DBQ._TBLM_REPSTOCK_ItemCode, batch.getItemCode());
@@ -166,14 +190,16 @@ public class DBHelper extends SQLiteOpenHelper {
                     c.put(DBQ._TBLM_REPSTOCK_RepCode, batch.getRepCode());
                     c.put(DBQ._TBLM_REPSTOCK_Status, batch.getStatus());
                     c.put(DBQ._TBLM_REPSTOCK_SIH, batch.getSIH());
+                    c.put(DBQ._TBLM_REPSTOCK_ExpDate, batch.getExpDate());
+                    c.put(DBQ._TBLM_REPSTOCK_TourID, batch.getTourID());
+                    c.put(DBQ._TBLM_REPSTOCK_Createdate, batch.getCreatedate());
                     db.replace(DBQ._TBLM_REPSTOCK, null, c);
                     c.clear();
                 }
             }
 
             if (data.getDefModal() != null) {
-
-                System.out.println(data.getDefModal());
+               // System.out.println(data.getDefModal());
                 c.put(DBQ._TBLT_ORDERHED_VatAmt, data.getDefModal().getVatAmt());
                 c.put(DBQ._TBLT_ORDERHED_Status, data.getDefModal().getStatus());
                 c.put(DBQ._TBLT_ORDERHED_SalesDate, data.getDefModal().getSalesDate());
@@ -181,7 +207,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 c.put(DBQ._TBLT_ORDERHED_PayType, data.getDefModal().getPayType());
                 c.put(DBQ._TBLT_ORDERHED_NetAmt, data.getDefModal().getNetAmt());
                 c.put(DBQ._TBLT_ORDERHED_LocCode, data.getDefModal().getLocCode());
-                c.put(DBQ._TBLT_ORDERHED_ISUSED, data.getDefModal().isISUSED());
+              //  c.put(DBQ._TBLT_ORDERHED_ISUSED, data.getDefModal().isISUSED());
                 c.put(DBQ._TBLT_ORDERHED_GrossAmt, data.getDefModal().getGrossAmt());
                 c.put(DBQ._TBLT_ORDERHED_DocNo, data.getDefModal().getDocNo());
                 c.put(DBQ._TBLT_ORDERHED_DisPer, data.getDefModal().getDisPer());
@@ -193,7 +219,36 @@ public class DBHelper extends SQLiteOpenHelper {
                 c.put(DBQ._TBLT_ORDERHED_RepCode, data.getDefModal().getRepCode());
                 c.put(DBQ._TBLT_ORDERHED_SYNC, true);
 
-                db.replace(DBQ._TBLT_ORDERHED, null, c);
+                db.replaceOrThrow(DBQ._TBLT_ORDERHED, null, c);
+            }
+
+            if (data.getMaxInv() != null) {
+
+                db.delete(DBQ._TBLT_SALINVHED, "DocType = 8", null);
+
+
+              //  System.out.println(data.getMaxInv());
+                c.put(DBQ._TBLT_INVHED_VatAmt, data.getMaxInv().getVatAmt());
+                c.put(DBQ._TBLT_INVHED_DocType, data.getMaxInv().getDocType());
+                c.put(DBQ._TBLT_INVHED_Status, data.getMaxInv().getStatus());
+                c.put(DBQ._TBLT_INVHED_SalesDate, data.getMaxInv().getSalesDate());
+                c.put(DBQ._TBLT_INVHED_RefNo, data.getMaxInv().getRefNo());
+                c.put(DBQ._TBLT_INVHED_PayType, data.getMaxInv().getPayType());
+                c.put(DBQ._TBLT_INVHED_NetAmt, data.getMaxInv().getNetAmt());
+                c.put(DBQ._TBLT_INVHED_LocCode, data.getMaxInv().getLocCode());
+                //   //  c.put(DBQ._TBLT_INVHED_ISUSED, data.getDefModal().isISUSED());
+                c.put(DBQ._TBLT_INVHED_GrossAmt, data.getMaxInv().getGrossAmt());
+                c.put(DBQ._TBLT_INVHED_DocNo, data.getMaxInv().getDocNo());
+                c.put(DBQ._TBLT_INVHED_DisPer, data.getMaxInv().getDisPer());
+                c.put(DBQ._TBLT_INVHED_Discount, data.getMaxInv().getDiscount());
+                c.put(DBQ._TBLT_INVHED_Discode, data.getMaxInv().getDiscode());
+                c.put(DBQ._TBLT_INVHED_CusCode, data.getMaxInv().getCusCode());
+                c.put(DBQ._TBLT_INVHED_CreateUser, data.getMaxInv().getCreateUser());
+                c.put(DBQ._TBLT_INVHED_AreaCode, data.getMaxInv().getAreaCode());
+                c.put(DBQ._TBLT_INVHED_RepCode, data.getMaxInv().getRepCode());
+                c.put(DBQ._TBLT_INVHED_SYNC, true);
+
+                db.replaceOrThrow(DBQ._TBLT_SALINVHED, null, c);
             }
 
             db.setTransactionSuccessful();
@@ -240,25 +295,82 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    public ArrayList<Card_cus_area> getBanks() {
+        SQLiteDatabase db = null;
+        ArrayList<Card_cus_area> area_modals = null;
+        try {
+
+            db = this.getReadableDatabase();
+            Cursor c = db.rawQuery("SELECT * FROM "+DBQ._TBLM_BANK,null);
+
+            area_modals = new ArrayList<>();
+            Card_cus_area area;
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                area = new Card_cus_area(c.getString(c.getColumnIndex(DBQ._TBLM_BANK_BankCode)),
+                        c.getString(c.getColumnIndex(DBQ._TBLM_BANK_Name))+" - "+c.getString(c.getColumnIndex(DBQ._TBLM_BANK_Branch)));
+                area_modals.add(area);
+            }
+            return area_modals;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
+    public ArrayList<Card_cus_area> getToures() {
+        SQLiteDatabase db = null;
+        ArrayList<Card_cus_area> area_modals = null;
+        try {
+
+            db = this.getReadableDatabase();
+            Cursor c = db.rawQuery("select TourID,count(ItemCode) as a from TBLM_REPSTOCK where RepCode = ?  group by TourID order by TourID desc",
+                    new String[]{SharedPreference.COM_REP.getRepCode()});
+
+            area_modals = new ArrayList<>();
+            Card_cus_area area;
+            for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+                area = new Card_cus_area(c.getString(c.getColumnIndex("TourID")),
+                        "No. of Items : " + c.getString(c.getColumnIndex("a")));
+                area_modals.add(area);
+            }
+            return area_modals;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+    }
+
     public ArrayList<Card_cus_area> getCustomers(String discode, String areacode) throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Card_cus_area> area_modals = null;
         try {
 
-            System.out.println(discode + ", " + areacode);
+          //  System.out.println(discode + ", " + areacode);
             db = this.getReadableDatabase();
-          //  Cursor c = db.query(DBQ._TBLM_CUSTOMER, new String[]{DBQ._TBLM_CUSTOMER_CusCode, DBQ._TBLM_CUSTOMER_CusName}, DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?"
-           //         , new String[]{discode, areacode}, null, null, null);
+            //  Cursor c = db.query(DBQ._TBLM_CUSTOMER, new String[]{DBQ._TBLM_CUSTOMER_CusCode, DBQ._TBLM_CUSTOMER_CusName}, DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?"
+            //         , new String[]{discode, areacode}, null, null, null);
 
-            String sql = "SELECT * FROM "+DBQ._TBLM_CUSTOMER+" where "+DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?";
-            Cursor c = db.rawQuery(sql,new String[]{discode, areacode} );
+            String sql = "SELECT * FROM " + DBQ._TBLM_CUSTOMER + " where " + DBQ._TBLM_CUSTOMER_Discode + " = ? and " + DBQ._TBLM_CUSTOMER_AreaCode + " = ?";
+            Cursor c = db.rawQuery(sql, new String[]{discode, areacode});
 
             area_modals = new ArrayList<>();
             Card_cus_area area;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 area = new Card_cus_area(c.getString(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CusCode)),
                         c.getString(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CusName)));
-                area.setAllCreLmtExceed(c.getInt(c.getColumnIndex(DBQ._TBLM_CUSTOMER_AllCreLmtExceed))==1);
+                area.setAllCreLmtExceed(c.getInt(c.getColumnIndex(DBQ._TBLM_CUSTOMER_AllCreLmtExceed)) == 1);
                 area.setCurBal(c.getDouble(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CurBal)));
                 area.setCreditDays(c.getInt(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CreditDays)));
                 area.setCreditLimit(c.getDouble(c.getColumnIndex(DBQ._TBLM_CUSTOMER_CreditLimit)));
@@ -277,20 +389,28 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<Modal_Item> getItems(String discode, String repcode) throws Exception {
+    public ArrayList<Modal_Item> getItems(String discode, String repcode,int invStatus) throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Modal_Item> item_modals = null;
         try {
-
+            //+ "' and TourID = '"+SharedPreference.COM_TOUR.getTxt_code()+"'"
             db = this.getReadableDatabase();
-            String sql = "select i.ItemCode,i.ItemDes,s.sih from " + DBQ._TBLM_ITEM + " as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '" + discode + "' and RepCode = '" + repcode + "'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null";
-            Cursor c = db.rawQuery(sql, null);
+            String sql;
+            if(invStatus==1){
+                sql = "select ItemCode,ItemDes,0 as sih,Volume from " + DBQ._TBLM_ITEM;
+            }else{
+                sql = "select i.ItemCode,i.ItemDes,s.sih,i.Volume from " + DBQ._TBLM_ITEM + " as i left outer join (select ItemCode,sum(SIH) as SIH from TBLM_REPSTOCK where DisCode = '" + discode + "' and RepCode = '" + repcode + "' and TourID = '"+SharedPreference.COM_TOUR_X.getTxt_code()+"'  group by ItemCode) as s on i.ItemCode = s.ItemCode where s.sih is not null";
+            }
+
+           // System.out.println(sql);
+           Cursor c = db.rawQuery(sql, null);
 
             item_modals = new ArrayList<>();
             Modal_Item item;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes))
-                        , SharedPreference.ds_formatter.format(c.getDouble(2)));
+                        , SharedPreference.ds_formatter.format(c.getDouble(2)),c.getDouble(c.getColumnIndex(DBQ._TBLM_ITEM_Volume)));
+                System.out.println("VOL : "+c.getDouble(c.getColumnIndex(DBQ._TBLM_ITEM_Volume)));
                 item_modals.add(item);
             }
             c.close();
@@ -305,19 +425,20 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+
     public ArrayList<Modal_Item> getItems() throws Exception {
         SQLiteDatabase db = null;
         ArrayList<Modal_Item> item_modals = null;
         try {
 
             db = this.getReadableDatabase();
-            Cursor c = db.query(DBQ._TBLM_ITEM, new String[]{DBQ._TBLM_ITEM_ItemCode, DBQ._TBLM_ITEM_ItemDes}, null
+            Cursor c = db.query(DBQ._TBLM_ITEM, new String[]{DBQ._TBLM_ITEM_ItemCode, DBQ._TBLM_ITEM_ItemDes,DBQ._TBLM_ITEM_Volume}, null
                     , null, null, null, null);
 
             item_modals = new ArrayList<>();
             Modal_Item item;
             for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)), "");
+                item = new Modal_Item(c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemCode)), c.getString(c.getColumnIndex(DBQ._TBLM_ITEM_ItemDes)), "",c.getDouble(c.getColumnIndex(DBQ._TBLM_ITEM_Volume)));
                 item_modals.add(item);
             }
             c.close();
@@ -370,9 +491,9 @@ public class DBHelper extends SQLiteOpenHelper {
         try {
 
             db = this.getReadableDatabase();
-            String sql = "SELECT st.*, item.ItemDes FROM TBLM_REPSTOCK as st left join " + DBQ._TBLM_ITEM + " as item on st.ItemCode = item.ItemCode where st.DisCode = '" + disCode + "' and st.ItemCode = '" + itemcode + "' and st.RepCode = '" + repcode + "'";
+            String sql = "SELECT st.*, item.* FROM TBLM_REPSTOCK as st left join " + DBQ._TBLM_ITEM + " as item on st.ItemCode = item.ItemCode where st.DisCode = '" + disCode + "' and st.ItemCode = '" + itemcode + "' and st.RepCode = '" + repcode + "' and TourID = '"+SharedPreference.COM_TOUR_X.getTxt_code()+"'";
 
-            System.out.println(sql);
+           // System.out.println(sql);
             Cursor c = db.rawQuery(sql,
                     null);
 
@@ -383,8 +504,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 batch.setDesc(c.getString(c.getColumnIndex("ItemDes")));
                 batch.setItemCode(c.getString(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_ItemCode)));
                 batch.setBatchNo(c.getString(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_BatchNo)));
+                batch.setExpDate(c.getString(c.getColumnIndex(DBQ._TBLM_REPSTOCK_ExpDate)));
+                batch.setTourID(c.getString(c.getColumnIndex(DBQ._TBLM_REPSTOCK_TourID)));
                 batch.setRetialPrice(c.getDouble(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_RetialPrice)));
                 batch.setSHI(c.getDouble(c.getColumnIndex(DBQ._TBLM_BATCHWISESTOCK_SIH)));
+                batch.setVolume(c.getDouble(c.getColumnIndex("Volume")));
                 item_modals.add(batch);
             }
             c.close();
@@ -411,7 +535,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 hed.setRepCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDERHED_RepCode)));
                 hed.setPayType(c.getString(c.getColumnIndex(DBQ._TBLT_ORDERHED_PayType)));
                 hed.setLocCode(c.getString(c.getColumnIndex(DBQ._TBLT_ORDERHED_LocCode)));
-                hed.setISUSED(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDERHED_ISUSED)) > 0);
+              //  hed.setISUSED(c.getInt(c.getColumnIndex(DBQ._TBLT_ORDERHED_ISUSED)) > 0);
                 hed.setNetAmt(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDERHED_NetAmt)));
                 hed.setGrossAmt(c.getDouble(c.getColumnIndex(DBQ._TBLT_ORDERHED_GrossAmt)));
                 hed.setDocNo(c.getString(c.getColumnIndex(DBQ._TBLT_ORDERHED_DocNo)));

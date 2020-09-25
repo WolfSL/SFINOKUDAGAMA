@@ -6,6 +6,16 @@ public class Modal_Item {
     String sih;
     String RetPrice;
 
+    double Volume;
+
+    public double getVolume() {
+        return Volume;
+    }
+
+    public void setVolume(double volume) {
+        Volume = volume;
+    }
+
     public String getRetPrice() {
         return RetPrice;
     }
@@ -26,10 +36,11 @@ public class Modal_Item {
 
     }
 
-    public Modal_Item(String itemCode, String desc, String sih) {
-        ItemCode = itemCode;
-        Desc = desc;
+    public Modal_Item(String itemCode, String desc, String sih,double Volume) {
+        this.ItemCode = itemCode;
+        this.Desc = desc;
         this.sih = sih;
+        this.Volume = Volume;
     }
 
     public String getItemCode() {

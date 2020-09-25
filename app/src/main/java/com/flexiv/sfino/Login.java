@@ -43,6 +43,7 @@ import com.android.volley.toolbox.Volley;
 import com.flexiv.sfino.model.Bean_PromotionDetails;
 import com.flexiv.sfino.model.Bean_PromotionMaster;
 import com.flexiv.sfino.model.Bean_RepDeals;
+import com.flexiv.sfino.model.Card_cus_area;
 import com.flexiv.sfino.model.MasterDataModal;
 import com.flexiv.sfino.model.Modal_Rep;
 import com.flexiv.sfino.utill.DBHelper;
@@ -201,6 +202,7 @@ public class Login extends AppCompatActivity {
         JsonObjectRequest jr = new JsonObjectRequest(
                 Request.Method.GET, url, null,
                 response -> {
+                  //  System.out.println(response.toString());
                     Gson gson = new Gson();
                     MasterDataModal master = gson.fromJson(response.toString(), MasterDataModal.class);
 
@@ -283,10 +285,10 @@ public class Login extends AppCompatActivity {
                         if (!rep.getDeviceIMI().equals(deviceIMI)) {
                             MakeSnackBar("Can not sign in using this device.\nPlease use the device provide by the Distributor", Color.RED);
                         } else {
-                            this.startActivity(db);
+                            this.startActivity(db,repCode);
                         }
                     } else {
-                        this.startActivity(db);
+                        this.startActivity(db,repCode);
                     }
 
                 } else {
@@ -377,7 +379,15 @@ public class Login extends AppCompatActivity {
         return false;
     }
 
-    private void startActivity(SQLiteDatabase db) {
+    private void startActivity(SQLiteDatabase db,String repcode) {
+//        String sql = "SELECT top 1 TourID from TBLM_REPSTOCK where RepCode = '"+repcode+"'";
+        String sql = "SELECT TourID from TBLM_REPSTOCK where RepCode = '"+repcode+"' group by TourID order by Createdate DESC\n";
+        Cursor c = db.rawQuery(sql,null);
+        if(c.moveToNext()){
+            SharedPreference.COM_TOUR_X = new Card_cus_area(c.getString(c.getColumnIndex("TourID")),c.getString(c.getColumnIndex("TourID")));
+        }
+
+        c.close();
         db.close();
         Intent intent = new Intent(this, MainMenu.class);
         startActivity(intent);

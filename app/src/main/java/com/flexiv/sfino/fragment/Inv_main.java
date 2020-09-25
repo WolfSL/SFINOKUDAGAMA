@@ -1,6 +1,8 @@
 package com.flexiv.sfino.fragment;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -19,22 +21,33 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.flexiv.sfino.Invoice;
+import com.flexiv.sfino.MainMenu;
 import com.flexiv.sfino.Order;
 import com.flexiv.sfino.R;
 import com.flexiv.sfino.adapter.Adapter_Invo_Item;
 import com.flexiv.sfino.adapter.Adapter_Oeder_Item;
+import com.flexiv.sfino.model.DefModal;
+import com.flexiv.sfino.model.MasterDataModal;
 import com.flexiv.sfino.model.TBLT_ORDDTL;
 import com.flexiv.sfino.model.TBLT_ORDERHED;
 import com.flexiv.sfino.model.TBLT_SALINVDET;
 import com.flexiv.sfino.model.TBLT_SALINVHED;
+import com.flexiv.sfino.utill.DBHelper;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Inv_main extends Fragment {
     private final static String TAG = "Order_main";
@@ -57,6 +70,7 @@ public class Inv_main extends Fragment {
     private Adapter_Invo_Item adaper;
     private RecyclerView.LayoutManager layoutManager;
     private FloatingActionButton floatingActionButton_OM;
+    private FloatingActionButton floatingActionButton_OM2;
 
     //Components
     private Invoice context;
@@ -72,6 +86,8 @@ public class Inv_main extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        download(view);
+
         constraintLayout3 = view.findViewById(R.id.constraintLayout3);
         textView_total = view.findViewById(R.id.textView10);
         textView_Nettotal = view.findViewById(R.id.textView19);
@@ -81,6 +97,7 @@ public class Inv_main extends Fragment {
         button_save = view.findViewById(R.id.button_save);
         button_process = view.findViewById(R.id.button2);
         floatingActionButton_OM = view.findViewById(R.id.floatingActionButton_OM);
+        floatingActionButton_OM2 = view.findViewById(R.id.floatingActionButton_OM2);
 
         textView_readOnly_oreder = view.findViewById(R.id.textView_readOnly_oreder);
 
@@ -116,7 +133,7 @@ public class Inv_main extends Fragment {
         Order_recView.setAdapter(adaper);
 
         //FAB Action
-        floatingActionButton_OM.setOnClickListener(v -> context.LoadFragment_sub());
+        floatingActionButton_OM.setOnClickListener(v -> context.LoadFragment_sub(0));
         TextWatcher tw = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -140,6 +157,10 @@ public class Inv_main extends Fragment {
 
             }
         };
+
+        //FAb 2
+        floatingActionButton_OM2.setOnClickListener(v -> context.LoadFragment_sub(1));
+
         DisPre.addTextChangedListener(tw);
 
 //        DisAmt.setOnFocusChangeListener((view1, b) -> DisPre.getText().clear());
@@ -252,6 +273,7 @@ public class Inv_main extends Fragment {
         String strDate = SharedPreference.dateFormat.format(date);
         TBLT_SALINVHED obj = new TBLT_SALINVHED();
 
+        obj.setTourID(SharedPreference.COM_TOUR_X.getTxt_code());
         obj.setDocNo("");
         obj.setDiscode(SharedPreference.COM_REP.getDiscode());
         obj.setDocType(6);
@@ -299,6 +321,7 @@ public class Inv_main extends Fragment {
 
         TBLT_SALINVHED obj = new TBLT_SALINVHED();
 
+        obj.setTourID(context.getObj().getTourID());
         obj.setDocNo(context.getObj().getDocNo());
         obj.setDiscode(context.getObj().getDiscode());
         obj.setDocType(context.getObj().getDocType());
@@ -353,12 +376,14 @@ public class Inv_main extends Fragment {
             button_save.setVisibility(View.GONE);
             button_process.setVisibility(View.GONE);
             floatingActionButton_OM.setVisibility(View.GONE);
+            floatingActionButton_OM2.setVisibility(View.GONE);
         }else if (hed.getStatus().equals("E")) {
             textView_readOnly_oreder.setVisibility(View.VISIBLE);
             button_save.setVisibility(View.GONE);
             button_process.setAlpha(1);
             button_process.setEnabled(true);
             floatingActionButton_OM.setVisibility(View.GONE);
+            floatingActionButton_OM2.setVisibility(View.GONE);
         } else {
             button_process.setAlpha(1);
             button_process.setEnabled(true);
@@ -382,5 +407,44 @@ public class Inv_main extends Fragment {
 
         }
     };
+
+    private TextView salesText,outstanding;
+    public void download(View v) {
+
+      //  SharedPreference.symbols.setGroupingSeparator(',');
+      //  SharedPreference.ds_formatter.setDecimalFormatSymbols(SharedPreference.symbols);
+        salesText = v.findViewById(R.id.textView6);
+        outstanding = v.findViewById(R.id.textView8);
+        String url = SharedPreference.URL + "Payment/getCusBal?cusCode="+SharedPreference.COM_CUSTOMER.getTxt_code();
+        System.out.println(url);
+
+        RequestQueue rq = Volley.newRequestQueue(context);
+
+        JsonObjectRequest jr = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+                response -> {
+                    Gson gson = new Gson();
+                    DefModal master = gson.fromJson(response.toString(), DefModal.class);
+
+                    if(master!=null){
+                        salesText.setText("LKR "+String.format("%,.2f", Double.parseDouble(master.getVal1())));
+                        outstanding.setText("LKR "+String.format("%,.2f",Double.parseDouble(master.getVal2())));
+                    }
+                },
+                error -> {
+                    salesText.setText("Failed to load Customer Balance");
+                    outstanding.setText("Check your internet connection");
+                    System.out.println("Rest Errr :" + error.toString());
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> params = new HashMap<>();
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+        rq.add(jr);
+    }
 
 }

@@ -1,7 +1,10 @@
 package com.flexiv.sfino.model;
 
+import java.io.Serializable;
+import java.util.List;
+
 public
-class TBLT_SALINVHED {
+class TBLT_SALINVHED implements Serializable {
 
     private String DocNo;
     private String Discode;
@@ -40,6 +43,34 @@ class TBLT_SALINVHED {
     private double IncreaseAmt;
     private double DamageDue;
     private String SalesRep;
+    private String varID;
+    private String TourID;
+
+    public String getTourID() {
+        return TourID;
+    }
+
+    public void setTourID(String tourID) {
+        TourID = tourID;
+    }
+
+    private List<TBLT_SALINVDET> ItemList;
+
+    public List<TBLT_SALINVDET> getItemList() {
+        return ItemList;
+    }
+
+    public void setItemList(List<TBLT_SALINVDET> itemList) {
+        ItemList = itemList;
+    }
+
+    public String getVarID() {
+        return varID;
+    }
+
+    public void setVarID(String varID) {
+        this.varID = varID;
+    }
 
     public String getDocNo() {
         return DocNo;
@@ -309,6 +340,7 @@ class TBLT_SALINVHED {
         return DamageQty;
     }
 
+
     public void setDamageQty(double damageQty) {
         DamageQty = damageQty;
     }
@@ -335,5 +367,49 @@ class TBLT_SALINVHED {
 
     public void setSalesRep(String salesRep) {
         SalesRep = salesRep;
+    }
+
+
+    @Override
+    public String toString() {
+        return "TBLT_SALINVHED{" +
+                "DocNo='" + DocNo + '\'' +
+                ", Discode='" + Discode + '\'' +
+                ", DocType=" + DocType +
+                ", SalesDate='" + SalesDate + '\'' +
+                ", SupCode='" + SupCode + '\'' +
+                ", CusCode='" + CusCode + '\'' +
+                ", RepCode='" + RepCode + '\'' +
+                ", RefNo='" + RefNo + '\'' +
+                ", InvType=" + InvType +
+                ", LocCode='" + LocCode + '\'' +
+                ", CrDrType='" + CrDrType + '\'' +
+                ", DueDate='" + DueDate + '\'' +
+                ", DueAmount=" + DueAmount +
+                ", GrossAmt=" + GrossAmt +
+                ", AddTax1=" + AddTax1 +
+                ", AddTax2=" + AddTax2 +
+                ", AddTax3=" + AddTax3 +
+                ", DedAmt1=" + DedAmt1 +
+                ", DedAmt2=" + DedAmt2 +
+                ", DedAmt3=" + DedAmt3 +
+                ", NetAmt=" + NetAmt +
+                ", RefDueAmt=" + RefDueAmt +
+                ", Discount=" + Discount +
+                ", VatAmt=" + VatAmt +
+                ", OrdRefNo='" + OrdRefNo + '\'' +
+                ", PayType='" + PayType + '\'' +
+                ", CreateUser='" + CreateUser + '\'' +
+                ", GLTransfer=" + GLTransfer +
+                ", Status='" + Status + '\'' +
+                ", DisPer=" + DisPer +
+                ", trType=" + trType +
+                ", AreaCode='" + AreaCode + '\'' +
+                ", ISPRINT=" + ISPRINT +
+                ", DamageQty=" + DamageQty +
+                ", IncreaseAmt=" + IncreaseAmt +
+                ", DamageDue=" + DamageDue +
+                ", SalesRep='" + SalesRep + '\'' +
+                '}';
     }
 }

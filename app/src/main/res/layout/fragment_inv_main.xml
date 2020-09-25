@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Outstanding"
+            android:text="Over Payment"
             android:textColor="@color/x_white"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="Avbl.Bal"
+            android:text="Outstanding"
             android:textColor="@color/x_white"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -417,6 +417,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_add_shopping_cart_black_24dp"
         app:useCompatPadding="true" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton_OM2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/design_default_color_error"
+        android:clickable="true"
+        android:focusable="auto"
+        android:tint="#FFFFFF"
+        app:fabCustomSize="45dp"
+        app:layout_constraintBottom_toTopOf="@+id/floatingActionButton_OM"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/floatingActionButton_OM"
+        app:srcCompat="@android:drawable/ic_menu_revert"
+        app:useCompatPadding="false" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

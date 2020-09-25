@@ -22,8 +22,17 @@ public class TBLT_ORDERHED implements Serializable {
     private String PayType;
     private String CreateUser;
     private String Status;
+    private String ProAppStatus;
     private boolean ISUSED;
     private String varID = SharedPreference.varID;
+
+    public String getProAppStatus() {
+        return ProAppStatus;
+    }
+
+    public void setProAppStatus(String proAppStatus) {
+        ProAppStatus = proAppStatus;
+    }
 
     private List<TBLT_ORDDTL> ItemList;
 

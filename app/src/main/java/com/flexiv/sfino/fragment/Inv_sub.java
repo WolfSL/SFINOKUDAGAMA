@@ -1,8 +1,12 @@
 package com.flexiv.sfino.fragment;
 
+import android.content.DialogInterface;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.flexiv.sfino.Invoice;
@@ -24,6 +29,7 @@ import com.flexiv.sfino.model.TBLT_SALINVHED;
 import com.flexiv.sfino.utill.SharedPreference;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 
 public class Inv_sub extends Fragment {
@@ -46,6 +52,7 @@ public class Inv_sub extends Fragment {
     Button button_add;
 
     TextInputLayout textInputLayoutQty1;
+    TextInputLayout textInputLayoutDis;
 
     EditText dis_pre;
     EditText edt_disVal;
@@ -53,11 +60,13 @@ public class Inv_sub extends Fragment {
 
     EditText txt_avlQty;
     EditText edt_Qtyx;
-
-    public Inv_sub(Invoice context, Modal_Batch item) {
+    int invStatus = 0;
+    public Inv_sub(Invoice context, Modal_Batch item,int invStatus) {
         this.context = context;
         this.item = item;
         context.changeNavButton(2);
+
+        this.invStatus = invStatus;
     }
 
     @Override
@@ -74,6 +83,7 @@ public class Inv_sub extends Fragment {
         edt_FI1 = view.findViewById(R.id.edt_FI1);
         edt_Qtyx = view.findViewById(R.id.edt_Qtyx);
         textInputLayoutQty1 = view.findViewById(R.id.textInputLayoutQty1);
+        textInputLayoutDis = view.findViewById(R.id.textInputLayoutDis);
         button_add = view.findViewById(R.id.button3);
 
         button_add.setOnClickListener(view1 -> createItem());
@@ -109,8 +119,19 @@ public class Inv_sub extends Fragment {
         textView_BatchCode.setText(item.getBatchNo());
         textView_itemCode.setText(item.getItemCode());
         textView_itemName.setText(item.getDesc());
-        textView_Price.setText(SharedPreference.df.format(item.getRetialPrice()));
+        Log.e("item.getVolume()",String.valueOf(item.getVolume()));
+        textView_Price.setText(SharedPreference.df.format(item.getRetialPrice()/item.getVolume()));
         txt_avlQty.setText(SharedPreference.df.format(item.getSHI()));
+
+        if(invStatus==1){
+            textInputLayoutQty1.setHint("Return Qty");
+           // edt_Qtyx.setHint("Return Qty");
+            edt_Qtyx.setTextColor(Color.RED);
+           // edt_disVal.setHint("Return Price");
+            textInputLayoutDis.setHint("Return Price");
+            button_add.setText("Return Item");
+            button_add.setBackgroundColor(Color.RED);
+        }
     }
 
     private void createItem() {
@@ -120,25 +141,66 @@ public class Inv_sub extends Fragment {
             textInputLayoutQty1.setError("Please Enter Qty");
             return;
         }
+        if(edt_disVal.getText().length()<=0){
+            textInputLayoutDis.setError("Please Enter Price");
+            return;
+        }
         TBLT_SALINVDET obj = new TBLT_SALINVDET();
+
+        item.setCostPrice(item.getRetialPrice());
+        item.setRetialPrice(Double.parseDouble(edt_disVal.getText().length()>0?edt_disVal.getText().toString():"0"));
         obj.setItemCode(item.getItemCode());
         obj.setItemName(item.getDesc());
         obj.setExpiryDate(item.getBatchNo());
         obj.setUnitPrice(item.getRetialPrice());
-        obj.setDiscPer(Double.parseDouble(dis_pre.getText().length()>0?dis_pre.getText().toString():"0"));
-        obj.setDiscAmt(Double.parseDouble(edt_disVal.getText().length()>0?edt_disVal.getText().toString():"0"));
+        obj.setCostPrice(item.getRetialPrice());
+        obj.setExpDate(item.getExpDate());
+        obj.setTourID(item.getTourID());
+        obj.setDiscPer(0);
+        obj.setDiscAmt(0);
+        obj.setVolume(item.getVolume());
         obj.setItQty(Double.parseDouble(edt_Qtyx.getText().toString()));
+
         //obj.setUsedQty(0);
         obj.setDate(SharedPreference.dateFormat.format(Calendar.getInstance().getTime()));
         obj.setCusCode(SharedPreference.COM_CUSTOMER.getTxt_code());
        // obj.setTradeFQTY(Double.parseDouble(edt_FI1.getText().length()>0?edt_FI1.getText().toString():"0"));
+        obj.setFQTY(Double.parseDouble(edt_FI1.getText().length()>0?edt_FI1.getText().toString():"0"));
         obj.setLineID(0);
-        obj.setAmount((item.getRetialPrice() * obj.getItQty())-obj.getDiscAmt());
+        obj.setAmount((item.getRetialPrice() * obj.getItQty()));
 
-       context.setItemList(obj);
+        if(item.getSHI()<0){
+            obj.setULQty(obj.getItQty());
+        }
+        else if(obj.getItQty()>item.getSHI()){
+            obj.setULQty(obj.getItQty()-item.getSHI());
+        }else{
+            obj.setULQty(0);
+        }
 
+        if(invStatus==1){
+            obj.setItQty(BigDecimal.valueOf(obj.getItQty()).negate().doubleValue());
+            obj.setAmount(BigDecimal.valueOf(obj.getAmount()).negate().doubleValue());
+        }
 
-        context.GoBackWithItems();
+        if(obj.getUnitPrice()<item.getCostPrice()/item.getVolume()){
+            new AlertDialog.Builder(context).setTitle("Price Warning!")
+                    .setMessage("Price is lower than Cost. are you sure is this normal?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            context.setItemList(obj);
+                            context.GoBackWithItems();
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show();
+        }else{
+            context.setItemList(obj);
+            context.GoBackWithItems();
+        }
+
     }
 
     private double GenDisVal(CharSequence s) {
